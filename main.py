@@ -1562,7 +1562,6 @@ if __name__ == "__main__":
     )
 
     # --- Add handlers ---
-    # FIX: Add a global error handler to catch issues like the Conflict error
     application.add_error_handler(error_handler)
     
     application.add_handler(CommandHandler("start", start_command))
@@ -1582,3 +1581,4 @@ if __name__ == "__main__":
 
     logging.info("Starting Telegram Bot...")
     application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+
