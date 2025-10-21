@@ -1,0 +1,9 @@
+python-telegram-bot
+pyrogram
+tgcrypto
+Flask
+APScheduler
+gunicorn
+aiohttp
+pymongo
+wraps
