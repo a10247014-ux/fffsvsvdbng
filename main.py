@@ -49,7 +49,7 @@ OWNER_ID = int(os.environ.get("OWNER_ID", 7423552124))
 API_ID = int(os.environ.get("API_ID", 28190856))
 API_HASH = os.environ.get("API_HASH", "6b9b5309c2a211b526c6ddad6eabb521")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://CFNBEFBGWFB:hdhbedfefbegh@cluster0.obohcl3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://127.0.0.1:8080")
+WEB_APP_URL = os.environ.get("WEB_APP_URL", "https://fffsvsvdbng-5s55.onrender.com")
 BET_TAX_RATE = 0.02 # 2% tax
 
 # --- Database Setup (MongoDB) ---
@@ -690,9 +690,8 @@ admin_keyboard = ReplyKeyboardMarkup([
     [KeyboardButton("💎 تنظیم قیمت الماس"), KeyboardButton("💰 تنظیم موجودی اولیه")],
     [KeyboardButton("🚀 تنظیم هزینه سلف"), KeyboardButton("🎁 تنظیم پاداش دعوت")],
     [KeyboardButton("💳 تنظیم شماره کارت"), KeyboardButton("📢 تنظیم کانال اجباری")],
-    [KeyboardButton("✅/❌ قفل کانال"), KeyboardButton("🧾 تایید تراکنش‌ها")],
-    [KeyboardButton("➕ افزودن ادمین"), KeyboardButton("➖ حذف ادمین")],
-    [KeyboardButton("⬅️ بازگشت به منوی اصلی")]
+    [KeyboardButton("✅/❌ قفل کانال"), KeyboardButton("➕ افزودن ادمین")],
+    [KeyboardButton("➖ حذف ادمین"), KeyboardButton("⬅️ بازگشت به منوی اصلی")]
 ], resize_keyboard=True)
 # =======================================================
 #  بخش ۵: مدیریت دستورات کاربران
@@ -876,7 +875,7 @@ async def process_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
 async def process_session_string(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session_string = update.message.text
-    user_doc = get_user(user.id)
+    user_doc = get_user(user_id)
 
     if len(session_string) < 50 or not re.match(r"^[A-Za-z0-9\-_.]+$", session_string):
         await update.message.reply_text("❌ کد Session نامعتبر به نظر می‌رسد. لطفا دوباره تلاش کنید.")
@@ -934,10 +933,6 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
         set_setting('forced_channel_lock', not current_lock)
         status = "فعال" if not current_lock else "غیرفعال"
         await update.message.reply_text(f"✅ قفل عضویت در کانال اجباری {status} شد.")
-        return ADMIN_MENU
-    
-    elif choice == "🧾 تایید تراکنش‌ها":
-        await update.message.reply_text("این قابلیت از طریق دکمه‌های زیر رسیدها مدیریت می‌شود.")
         return ADMIN_MENU
         
     elif choice == "⬅️ بازگشت به منوی اصلی":
@@ -1530,7 +1525,7 @@ if __name__ == "__main__":
         entry_points=[MessageHandler(filters.Regex("^👑 پنل ادمین$"), admin_panel_entry)],
         states={
             ADMIN_MENU: [MessageHandler(filters.Regex("^💎 تنظیم قیمت الماس$|^💰 تنظیم موجودی اولیه$|^🚀 تنظیم هزینه سلف$|^🎁 تنظیم پاداش دعوت$|^💳 تنظیم شماره کارت$|^📢 تنظیم کانال اجباری$|^➕ افزودن ادمین$|^➖ حذف ادمین$"), process_admin_choice),
-                         MessageHandler(filters.Regex("^✅/❌ قفل کانال$|^🧾 تایید تراکنش‌ها$"), process_admin_choice),
+                         MessageHandler(filters.Regex("^✅/❌ قفل کانال$"), process_admin_choice),
                          MessageHandler(filters.Regex("^⬅️ بازگشت به منوی اصلی$"), process_admin_choice)],
             AWAIT_ADMIN_REPLY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_admin_reply)]
         },
@@ -1599,4 +1594,3 @@ if __name__ == "__main__":
 
     logging.info("Starting Telegram Bot...")
     application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
-
