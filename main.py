@@ -677,7 +677,6 @@ admin_keyboard = ReplyKeyboardMarkup([
     [KeyboardButton("💳 تنظیم شماره کارت"), KeyboardButton("📢 تنظیم کانال اجباری")],
     [KeyboardButton("✅/❌ قفل کانال"), KeyboardButton("🧾 تایید تراکنش‌ها")],
     [KeyboardButton("➕ افزودن ادمین"), KeyboardButton("➖ حذف ادمین")],
-    [KeyboardButton("➖ کسر موجودی کاربر")],
     [KeyboardButton("⬅️ بازگشت به منوی اصلی")]
 ], resize_keyboard=True)
 # =======================================================
@@ -917,7 +916,6 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
         "📢 تنظیم کانال اجباری": "آیدی عددی کانال اجباری را وارد کنید:",
         "➕ افزودن ادمین": "آیدی عددی کاربر برای افزودن به ادمین‌ها را وارد کنید:",
         "➖ حذف ادمین": "آیدی عددی ادمین برای حذف را وارد کنید:",
-        "➖ کسر موجودی کاربر": "آیدی عددی کاربر و مبلغ کسر را با یک فاصله وارد کنید (مثال: 12345 100):",
     }
     
     if choice in prompts:
@@ -990,29 +988,6 @@ async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE
                         {'$set': {'is_admin': False, 'balance': initial_balance}}
                     )
                     await update.message.reply_text(f"✅ کاربر {target_user_id} از لیست ادمین‌ها حذف شد و موجودی آن به {initial_balance} الماس بازنشانی شد.", reply_markup=admin_keyboard)
-        elif last_choice == "➖ کسر موجودی کاربر":
-            should_send_generic_success = False
-            parts = reply.split()
-            if len(parts) != 2: raise ValueError("فرمت ورودی اشتباه است.")
-            target_user_id = int(parts[0])
-            amount_to_deduct = int(parts[1])
-            if amount_to_deduct <= 0: raise ValueError("مبلغ باید مثبت باشد.")
-            
-            result = db.users.update_one(
-                {'user_id': target_user_id},
-                {'$inc': {'balance': -amount_to_deduct}}
-            )
-            if result.matched_count == 0:
-                await update.message.reply_text(f"❌ کاربری با آیدی {target_user_id} یافت نشد.", reply_markup=admin_keyboard)
-            else:
-                await update.message.reply_text(f"✅ مبلغ {amount_to_deduct} الماس با موفقیت از کاربر {target_user_id} کسر شد.", reply_markup=admin_keyboard)
-                try:
-                    await context.bot.send_message(
-                        chat_id=target_user_id,
-                        text=f"⚠️ مدیر سیستم مبلغ {amount_to_deduct} الماس از حساب شما کسر کرد."
-                    )
-                except Exception as e:
-                    logging.info(f"Could not notify user {target_user_id} about balance deduction: {e}")
 
         if should_send_generic_success:
             await update.message.reply_text("✅ تنظیمات با موفقیت ذخیره شد.", reply_markup=admin_keyboard)
@@ -1515,7 +1490,7 @@ if __name__ == "__main__":
     admin_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^👑 پنل ادمین$"), admin_panel_entry)],
         states={
-            ADMIN_MENU: [MessageHandler(filters.Regex("^💎 تنظیم قیمت الماس$|^💰 تنظیم موجودی اولیه$|^🚀 تنظیم هزینه سلف$|^🎁 تنظیم پاداش دعوت$|^💳 تنظیم شماره کارت$|^📢 تنظیم کانال اجباری$|^➕ افزودن ادمین$|^➖ حذف ادمین$|^➖ کسر موجودی کاربر$"), process_admin_choice),
+            ADMIN_MENU: [MessageHandler(filters.Regex("^💎 تنظیم قیمت الماس$|^💰 تنظیم موجودی اولیه$|^🚀 تنظیم هزینه سلف$|^🎁 تنظیم پاداش دعوت$|^💳 تنظیم شماره کارت$|^📢 تنظیم کانال اجباری$|^➕ افزودن ادمین$|^➖ حذف ادمین$"), process_admin_choice),
                          MessageHandler(filters.Regex("^✅/❌ قفل کانال$|^🧾 تایید تراکنش‌ها$"), process_admin_choice),
                          MessageHandler(filters.Regex("^⬅️ بازگشت به منوی اصلی$"), process_admin_choice)],
             AWAIT_ADMIN_REPLY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_admin_reply)]
