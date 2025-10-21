@@ -125,11 +125,10 @@ HELP_TEXT = r"""
 ---
 ** شرط‌بندی و گروه **
  • `موجودی`: نمایش موجودی الماس.
+ • `موجودی` (با ریپلای): نمایش موجودی کاربر دیگر (ویژه ادمین).
  • `انتقال [مبلغ]` (با ریپلای): انتقال الماس.
  • `شرط [مبلغ]` (با ریپلای): شروع شرط‌بندی.
- • `قبول` (ریپلای روی پیام شرط): قبول شرط. (نیاز به بازنگری)
- • `برنده` (ریپلای روی پیام شرط): اعلام برنده. (نیاز به بازنگری)
- • `کسر الماس [مبلغ]` (با ریپلای): کسر الماس از کاربر توسط ادمین.
+ • `کسر [مبلغ]` (با ریپلای): کسر الماس از کاربر (ویژه ادمین).
 
 ---
 ** امنیت و منشی **
@@ -877,7 +876,7 @@ async def process_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
 async def process_session_string(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session_string = update.message.text
-    user_doc = get_user(user_id)
+    user_doc = get_user(user.id)
 
     if len(session_string) < 50 or not re.match(r"^[A-Za-z0-9\-_.]+$", session_string):
         await update.message.reply_text("❌ کد Session نامعتبر به نظر می‌رسد. لطفا دوباره تلاش کنید.")
@@ -975,13 +974,13 @@ async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE
                 await update.message.reply_text("⛔️ فقط مالک اصلی ربات می‌تواند ادمین اضافه کند.", reply_markup=admin_keyboard)
             else:
                 target_user_id = int(reply)
-                # get_user will create the user and the admin balance logic will ensure they get 1B diamonds
+                # get_user will create the user if they don't exist
                 get_user(target_user_id) 
                 db.users.update_one(
                     {'user_id': target_user_id}, 
                     {'$set': {'is_admin': True}}
                 )
-                # Re-fetch to apply the balance rule again
+                # The robust get_user function will handle the balance update automatically on the next fetch
                 get_user(target_user_id)
                 await update.message.reply_text(f"✅ کاربر {target_user_id} با موفقیت به لیست ادمین‌ها اضافه شد و موجودی آن به ۱ میلیارد الماس آپدیت شد.", reply_markup=admin_keyboard)
         elif last_choice == "➖ حذف ادمین":
@@ -1249,20 +1248,37 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
                 logging.error(f"Failed to EDIT bet message on RANDOM WINNER {bet_id}: {e}")
                 
 async def group_balance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles 'موجودی' command in groups, styled like the image."""
+    """
+    Handles the 'موجودی' command in groups with special logic for admins.
+    - If an admin replies to a user with 'موجودی', it shows the target user's balance.
+    - Otherwise, it shows the sender's own balance.
+    """
     if not update.message:
         return
 
-    user = update.effective_user
-    user_doc = get_user(user.id)
+    sender = update.effective_user
+    target_user = sender  # Default to the person sending the message
+
+    # Check if it's a reply and if the sender is an admin
+    if update.message.reply_to_message:
+        sender_doc = get_user(sender.id)
+        if sender_doc.get('is_admin'):
+            # If an admin replies, the target is the replied-to user
+            target_user = update.message.reply_to_message.from_user
+        # If a non-admin replies, we do nothing and just show their own balance (default behavior)
+
+    # Now get the balance for the determined target_user
+    target_user_doc = get_user(target_user.id)
     price = get_setting('diamond_price') or 1000
-    toman_value = user_doc['balance'] * price
+    toman_value = target_user_doc['balance'] * price
     
+    # Construct the message
     text = (
-        f"👤 کاربر: @{user.username or user.first_name}\n"
-        f"💎 موجودی الماس: {user_doc['balance']:,}\n"
+        f"👤 کاربر: @{target_user.username or target_user.first_name}\n"
+        f"💎 موجودی الماس: {target_user_doc['balance']:,}\n"
         f"💳 معادل تخمینی: {toman_value:,.0f} تومان"
     )
+    
     await update.message.reply_text(text)
 
 
@@ -1583,3 +1599,4 @@ if __name__ == "__main__":
 
     logging.info("Starting Telegram Bot...")
     application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+
