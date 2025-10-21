@@ -1212,11 +1212,11 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
             
             opponent_username = user.username or user.first_name
 
-            # 2. Randomly select winner
+            # 2. Randomly select winner using a cryptographically secure method
             proposer_id = bet['proposer_id']
             opponent_id = user.id
             
-            winner_id = random.choice([proposer_id, opponent_id])
+            winner_id = secrets.choice([proposer_id, opponent_id])
             
             # 3. Calculate prize and tax
             total_pot = amount * 2
@@ -1396,13 +1396,11 @@ async def rip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sender = update.effective_user
     sender_doc = get_user(sender.id)
 
-    # Only admins can use this command
     if not sender_doc.get('is_admin'):
         return
 
     target_user = update.message.reply_to_message.from_user
     
-    # Admins cannot rip themselves or the owner
     if target_user.id == sender.id:
         await update.message.reply_text("شما نمی‌توانید از خودتان الماس کسر کنید.")
         return
@@ -1414,10 +1412,10 @@ async def rip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     amount_to_deduct = 100
 
     if target_doc['balance'] < amount_to_deduct:
-        await update.message.reply_text(f"کاربر {target_user.mention_html()} موجودی کافی برای کسر {amount_to_deduct} الماس را ندارد.", parse_mode=ParseMode.HTML)
+        await update.message.reply_text(f"کاربر @{target_user.username or target_user.first_name} موجودی کافی برای کسر {amount_to_deduct} الماس را ندارد.")
         return
 
-    # FIX: Atomically update the balance and get the updated document
+    # Atomically update the balance
     updated_target_doc = db.users.find_one_and_update(
         {'user_id': target_user.id},
         {'$inc': {'balance': -amount_to_deduct}},
@@ -1425,13 +1423,19 @@ async def rip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     if updated_target_doc:
-        remaining_balance = updated_target_doc['balance']
-        response_text = (
-            f"- کاربر: {target_user.mention_html()} (ID: `{target_user.id}`)\n"
-            f"- مقدار کسر شده: **{amount_to_deduct:,}** الماس 💎\n"
-            f"- موجودی باقی‌مانده: **{remaining_balance:,}** الماس 💰"
+        # Get current time in Tehran timezone for the receipt
+        tehran_time = datetime.now(TEHRAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S')
+
+        # Construct the new receipt message
+        receipt_text = (
+            f"❌ {amount_to_deduct:,} الماس از @{target_user.username or target_user.first_name} کسر شد.\n"
+            f"🧾 رسید کسر:\n"
+            f"📤 ادمین: @{sender.username or sender.first_name}\n"
+            f"📥 کاربر: @{target_user.username or target_user.first_name}\n"
+            f"💎 مقدار: {amount_to_deduct:,}\n"
+            f"⏰ {tehran_time}"
         )
-        await update.message.reply_html(f"✅ عملیات کسر با موفقیت انجام شد:\n\n{response_text}")
+        await update.message.reply_text(receipt_text)
     else:
         await update.message.reply_text("❌ خطایی در هنگام کسر موجودی رخ داد. کاربر یافت نشد.")
 
