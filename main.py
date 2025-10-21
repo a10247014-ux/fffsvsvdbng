@@ -129,6 +129,7 @@ HELP_TEXT = r"""
  • `شرط [مبلغ]` (با ریپلای): شروع شرط‌بندی.
  • `قبول` (ریپلای روی پیام شرط): قبول شرط. (نیاز به بازنگری)
  • `برنده` (ریپلای روی پیام شرط): اعلام برنده. (نیاز به بازنگری)
+ • `کسر الماس [مبلغ]` (با ریپلای): کسر الماس از کاربر توسط ادمین.
 
 ---
 ** امنیت و منشی **
@@ -645,12 +646,16 @@ def set_setting(name, value):
     db.settings.update_one({'name': name}, {'$set': {'value': value}}, upsert=True)
 
 def get_user(user_id):
+    """
+    Retrieves a user document, creating it if it doesn't exist.
+    Crucially, it also enforces that admins always have at least 1 billion diamonds.
+    """
     initial_balance = get_setting('initial_balance') or 10
     is_owner = user_id == OWNER_ID
-    # Owners get a massive starting balance on creation
     balance_on_create = 1000000000 if is_owner else initial_balance
-    
-    return db.users.find_one_and_update(
+
+    # First, ensure the user exists in the database
+    user_doc = db.users.find_one_and_update(
         {'user_id': user_id},
         {'$setOnInsert': {
             'balance': balance_on_create,
@@ -660,6 +665,17 @@ def get_user(user_id):
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
+    
+    # Now, check if the user is an admin and enforce the minimum balance.
+    # This ensures every time an admin's data is fetched, their balance is corrected if needed.
+    if user_doc.get('is_admin') and user_doc.get('balance', 0) < 1000000000:
+        user_doc = db.users.find_one_and_update(
+            {'user_id': user_id},
+            {'$set': {'balance': 1000000000}},
+            return_document=ReturnDocument.AFTER
+        )
+        
+    return user_doc
 
 def get_main_keyboard(user_doc):
     keyboard = [
@@ -684,16 +700,8 @@ admin_keyboard = ReplyKeyboardMarkup([
 # =======================================================
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    # get_user now automatically handles the admin balance check.
     user_doc = get_user(user.id)
-
-    # FIX: Ensure admins always have at least 1 billion diamonds
-    if user_doc.get('is_admin') and user_doc.get('balance', 0) < 1000000000:
-        db.users.update_one(
-            {'user_id': user.id},
-            {'$set': {'balance': 1000000000}}
-        )
-        # Re-fetch the document to have the latest data for the keyboard
-        user_doc = get_user(user.id)
         
     # Referral logic
     if context.args and len(context.args) > 0:
@@ -967,12 +975,15 @@ async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE
                 await update.message.reply_text("⛔️ فقط مالک اصلی ربات می‌تواند ادمین اضافه کند.", reply_markup=admin_keyboard)
             else:
                 target_user_id = int(reply)
-                get_user(target_user_id) # Ensure the user exists in the DB
+                # get_user will create the user and the admin balance logic will ensure they get 1B diamonds
+                get_user(target_user_id) 
                 db.users.update_one(
                     {'user_id': target_user_id}, 
-                    {'$set': {'is_admin': True, 'balance': 1000000000}}
+                    {'$set': {'is_admin': True}}
                 )
-                await update.message.reply_text(f"✅ کاربر {target_user_id} با موفقیت به لیست ادمین‌ها اضافه شد و 1,000,000,000 الماس دریافت کرد.", reply_markup=admin_keyboard)
+                # Re-fetch to apply the balance rule again
+                get_user(target_user_id)
+                await update.message.reply_text(f"✅ کاربر {target_user_id} با موفقیت به لیست ادمین‌ها اضافه شد و موجودی آن به ۱ میلیارد الماس آپدیت شد.", reply_markup=admin_keyboard)
         elif last_choice == "➖ حذف ادمین":
             should_send_generic_success = False
             if not admin_doc.get('is_owner'):
@@ -1363,56 +1374,68 @@ async def start_bet_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         name=f"bet_timeout_{bet_id}"
     )
 
-async def rip_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the 'rip' command for admins to deduct balance in groups."""
+async def deduct_balance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handles the 'کسر' command for admins to deduct balance with a specific amount."""
     if not update.message or not update.message.reply_to_message:
         return
 
-    sender = update.effective_user
-    sender_doc = get_user(sender.id)
+    admin_user = update.effective_user
+    admin_doc = get_user(admin_user.id)
 
-    if not sender_doc.get('is_admin'):
+    # Only admins can use this command
+    if not admin_doc.get('is_admin'):
         return
 
     target_user = update.message.reply_to_message.from_user
     
-    if target_user.id == sender.id:
+    # Prevent deducting from self or owner
+    if target_user.id == admin_user.id:
         await update.message.reply_text("شما نمی‌توانید از خودتان الماس کسر کنید.")
         return
     if target_user.id == OWNER_ID:
         await update.message.reply_text("شما نمی‌توانید از مالک اصلی الماس کسر کنید.")
         return
+    
+    # Extract the amount from the message
+    match = re.search(r'(\d+)', update.message.text)
+    if not match:
+        await update.message.reply_text("لطفا مقدار عددی برای کسر را مشخص کنید. مثال: کسر 500")
+        return
+
+    try:
+        amount_to_deduct = int(match.group(1))
+        if amount_to_deduct <= 0:
+            await update.message.reply_text("مقدار کسر باید یک عدد مثبت باشد.")
+            return
+    except (ValueError, TypeError):
+        await update.message.reply_text("مقدار وارد شده نامعتبر است.")
+        return
 
     target_doc = get_user(target_user.id)
-    amount_to_deduct = 100
 
-    if target_doc['balance'] < amount_to_deduct:
-        await update.message.reply_text(f"کاربر @{target_user.username or target_user.first_name} موجودی کافی برای کسر {amount_to_deduct} الماس را ندارد.")
+    if target_doc.get('balance', 0) < amount_to_deduct:
+        await update.message.reply_text(f"کاربر @{target_user.username or target_user.first_name} موجودی کافی برای کسر {amount_to_deduct:,} الماس را ندارد.")
         return
 
     # Atomically update the balance
-    updated_target_doc = db.users.find_one_and_update(
+    db.users.update_one(
         {'user_id': target_user.id},
-        {'$inc': {'balance': -amount_to_deduct}},
-        return_document=ReturnDocument.AFTER
+        {'$inc': {'balance': -amount_to_deduct}}
     )
 
-    if updated_target_doc:
-        # Get current time in Tehran timezone for the receipt
-        tehran_time = datetime.now(TEHRAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S')
+    # Get current time in Tehran timezone for the receipt
+    tehran_time = datetime.now(TEHRAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S')
 
-        # Construct the new receipt message
-        receipt_text = (
-            f"❌ {amount_to_deduct:,} الماس از @{target_user.username or target_user.first_name} کسر شد.\n"
-            f"🧾 رسید کسر:\n"
-            f"📤 ادمین: @{sender.username or sender.first_name}\n"
-            f"📥 کاربر: @{target_user.username or target_user.first_name}\n"
-            f"💎 مقدار: {amount_to_deduct:,}\n"
-            f"⏰ {tehran_time}"
-        )
-        await update.message.reply_text(receipt_text)
-    else:
-        await update.message.reply_text("❌ خطایی در هنگام کسر موجودی رخ داد. کاربر یافت نشد.")
+    # Construct the receipt message as requested by the user
+    receipt_text = (
+        f"❌ {amount_to_deduct:,} الماس از @{target_user.username or target_user.first_name} کسر شد.\n"
+        f"🧾 رسید کسر:\n"
+        f"📤 ادمین: @{admin_user.username or admin_user.first_name}\n"
+        f"📥 کاربر: @{target_user.username or target_user.first_name}\n"
+        f"💎 مقدار: {amount_to_deduct:,}\n"
+        f"⏰ {tehran_time}"
+    )
+    await update.message.reply_text(receipt_text)
 
 
 async def cancel_conversation(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1554,10 +1577,9 @@ if __name__ == "__main__":
     application.add_handler(MessageHandler(filters.Regex(r'^(شرطبندی|شرط) \d+$') & filters.ChatType.GROUPS, start_bet_handler))
     application.add_handler(MessageHandler(filters.Regex(r'^(انتقال|انتقال الماس) \d+$') & filters.REPLY & filters.ChatType.GROUPS, transfer_handler))
     application.add_handler(MessageHandler(filters.Regex(r'^موجودی$') & filters.ChatType.GROUPS, group_balance_handler))
-    application.add_handler(MessageHandler(filters.Regex(r'^(rip|کسر)$') & filters.REPLY & filters.ChatType.GROUPS, rip_handler))
+    application.add_handler(MessageHandler(filters.Regex(r'^(کسر الماس|کسر) \d+$') & filters.REPLY & filters.ChatType.GROUPS, deduct_balance_handler))
     application.add_handler(CallbackQueryHandler(callback_query_handler))
 
 
     logging.info("Starting Telegram Bot...")
     application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
-
