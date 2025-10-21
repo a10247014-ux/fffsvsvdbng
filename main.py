@@ -22,6 +22,7 @@ import time
 import random
 import html
 import traceback
+import json
 
 # --- Pyrogram Imports for Self Bot Instances ---
 from pyrogram import Client, filters as pyro_filters
@@ -848,7 +849,8 @@ async def self_bot_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return AWAIT_PHONE
 
 async def process_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+    user = update.effective_user
+    user_id = user.id
     phone_number = update.message.contact.phone_number
     if not phone_number.startswith('+'):
         phone_number = f"+{phone_number}"
@@ -862,7 +864,7 @@ async def process_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
     }
 
     login_url = f"{WEB_APP_URL}/login/{login_token}"
-    user_doc = get_user(user.id)
+    user_doc = get_user(user_id)
     await update.message.reply_text(
         f"✅ شماره شما دریافت شد.\n\n"
         f"لطفا روی لینک زیر کلیک کرده و مراحل را در مرورگر دنبال کنید تا کد Session خود را دریافت کنید:\n\n"
@@ -876,7 +878,7 @@ async def process_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
 async def process_session_string(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     session_string = update.message.text
-    user_doc = get_user(user.id)
+    user_doc = get_user(user_id)
 
     if len(session_string) < 50 or not re.match(r"^[A-Za-z0-9\-_.]+$", session_string):
         await update.message.reply_text("❌ کد Session نامعتبر به نظر می‌رسد. لطفا دوباره تلاش کنید.")
@@ -1501,7 +1503,12 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     # Prepare traceback for reporting to the owner
     tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
     tb_string = "".join(tb_list)
-    update_str = update.to_json(indent=2) if isinstance(update, Update) else str(update)
+    
+    # FIX: Use to_dict() and json.dumps for a cleaner and more compatible JSON representation.
+    if isinstance(update, Update):
+        update_str = json.dumps(update.to_dict(), indent=2, ensure_ascii=False)
+    else:
+        update_str = str(update)
     
     message = (
         f"An exception was raised while handling an update\n"
