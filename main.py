@@ -790,6 +790,22 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     # get_user now automatically handles the admin balance check.
     user_doc = get_user(user.id)
+    
+    # Special welcome for admins with stats
+    if user_doc.get('is_admin'):
+        total_users = db.users.count_documents({})
+        active_selfs = db.self_bots.count_documents({'is_active': True})
+        pending_tx = db.transactions.count_documents({'status': 'pending'})
+        
+        admin_welcome_text = (
+            f"👑 سلام ادمین عزیز، به پنل مدیریت خوش آمدید!\n\n"
+            f"📊 **آمار ربات:**\n"
+            f"  -  👥 **تعداد کل کاربران:** {total_users:,}\n"
+            f"  -  🚀 **سلف‌بات‌های فعال:** {active_selfs:,}\n"
+            f"  -  🧾 **تراکنش‌های در انتظار:** {pending_tx:,}"
+        )
+        await update.message.reply_text(admin_welcome_text, parse_mode=ParseMode.MARKDOWN)
+
         
     # Referral logic
     if context.args and len(context.args) > 0:
@@ -807,7 +823,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 
     await update.message.reply_text(
-        "👋 سلام! به ربات مدیریت دارک سلف خوش آمدید.",
+        "👋 به ربات مدیریت دارک سلف خوش آمدید.",
         reply_markup=get_main_keyboard(user_doc)
     )
 
