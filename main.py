@@ -727,9 +727,9 @@ async def membership_check_handler(update: Update, context: ContextTypes.DEFAULT
     if not get_setting("forced_channel_lock"):
         return
 
-    channel_id = get_setting("forced_channel_id")
-    if not channel_id:
-        logging.warning("Forced channel lock is ON but no channel ID is set in settings.")
+    channel_username = get_setting("forced_channel_link")
+    if not channel_username:
+        logging.warning("Forced channel lock is ON but no channel link/username is set in settings.")
         return # Failsafe
 
     # If this is the callback from the join button, handle it here
@@ -737,7 +737,7 @@ async def membership_check_handler(update: Update, context: ContextTypes.DEFAULT
         query = update.callback_query
         await query.answer()
         try:
-            member = await context.bot.get_chat_member(channel_id, query.from_user.id)
+            member = await context.bot.get_chat_member(channel_username, query.from_user.id)
             if member.status in ['member', 'administrator', 'creator']:
                 await query.message.delete()
                 await query.message.reply_text("✅ عضویت شما تایید شد. خوش آمدید!")
@@ -759,12 +759,12 @@ async def membership_check_handler(update: Update, context: ContextTypes.DEFAULT
 
     # For all other updates, check membership status
     try:
-        member = await context.bot.get_chat_member(channel_id, update.effective_user.id)
+        member = await context.bot.get_chat_member(channel_username, update.effective_user.id)
         if member.status in ['member', 'administrator', 'creator']:
             # User is a member, allow update to be processed by other handlers
             return
     except Exception as e:
-        logging.error(f"Failed to check membership for user {update.effective_user.id} in channel {channel_id}: {e}")
+        logging.error(f"Failed to check membership for user {update.effective_user.id} in channel {channel_username}: {e}")
         # Failsafe if bot can't check (e.g., not admin in channel)
         return
 
@@ -790,22 +790,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     # get_user now automatically handles the admin balance check.
     user_doc = get_user(user.id)
-    
-    # Special welcome for admins with stats
-    if user_doc.get('is_admin'):
-        total_users = db.users.count_documents({})
-        active_selfs = db.self_bots.count_documents({'is_active': True})
-        pending_tx = db.transactions.count_documents({'status': 'pending'})
-        
-        admin_welcome_text = (
-            f"👑 سلام ادمین عزیز، به پنل مدیریت خوش آمدید!\n\n"
-            f"📊 **آمار ربات:**\n"
-            f"  -  👥 **تعداد کل کاربران:** {total_users:,}\n"
-            f"  -  🚀 **سلف‌بات‌های فعال:** {active_selfs:,}\n"
-            f"  -  🧾 **تراکنش‌های در انتظار:** {pending_tx:,}"
-        )
-        await update.message.reply_text(admin_welcome_text, parse_mode=ParseMode.MARKDOWN)
-
         
     # Referral logic
     if context.args and len(context.args) > 0:
@@ -1029,7 +1013,7 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
         "🚀 تنظیم هزینه سلف": "هزینه ساعتی استفاده از سلف به الماس را وارد کنید:",
         "🎁 تنظیم پاداش دعوت": "پاداش هر دعوت موفق به الماس را وارد کنید:",
         "💳 تنظیم شماره کارت": "شماره کارت و نام صاحب حساب را در دو خط وارد کنید:",
-        "📢 تنظیم کانال اجباری": "آیدی عددی کانال (مانند -100...) و لینک عمومی آن (@username یا https://...) را در دو خط جداگانه وارد کنید:",
+        "📢 تنظیم کانال اجباری": "لینک عمومی کانال (مانند @username یا https://t.me/username) را وارد کنید:",
         "➕ افزودن ادمین": "آیدی عددی کاربر برای افزودن به ادمین‌ها را وارد کنید:",
         "➖ حذف ادمین": "آیدی عددی ادمین برای حذف را وارد کنید:",
     }
@@ -1053,7 +1037,7 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
 async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     last_choice = context.user_data.get('admin_choice')
-    reply = update.message.text
+    reply = update.message.text.strip()
     admin_doc = get_user(user_id)
     
     try:
@@ -1072,11 +1056,13 @@ async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE
             set_setting('card_number', parts[0].strip())
             set_setting('card_holder', parts[1].strip() if len(parts) > 1 else "")
         elif last_choice == "📢 تنظیم کانال اجباری":
-            parts = reply.split('\n')
-            if len(parts) < 2:
-                raise ValueError("لطفا هم آیدی عددی و هم لینک کانال را وارد کنید.")
-            set_setting('forced_channel_id', parts[0].strip())
-            set_setting('forced_channel_link', parts[1].strip())
+            # Ensure the username starts with @ for consistency
+            if not reply.startswith('@'):
+                if 't.me/' in reply:
+                    reply = '@' + reply.split('t.me/')[-1]
+                else:
+                    reply = '@' + reply
+            set_setting('forced_channel_link', reply)
         elif last_choice == "➕ افزودن ادمین":
             should_send_generic_success = False
             if not admin_doc.get('is_owner'):
