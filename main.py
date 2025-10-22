@@ -14,17 +14,12 @@ from telegram import (Update, ReplyKeyboardMarkup, KeyboardButton,
                       InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove)
 from telegram.constants import ParseMode
 from telegram.ext import (Application, CommandHandler, MessageHandler,
-                          ConversationHandler, filters, ContextTypes, CallbackQueryHandler,
-                          ApplicationHandlerStop, TypeHandler)
+                          ConversationHandler, filters, ContextTypes, CallbackQueryHandler)
 from zoneinfo import ZoneInfo
-from datetime import datetime, timezone
+from datetime import datetime
 from bson import ObjectId
 import time
-import random
-import html
-import traceback
-import json
-
+import random # <--- اضافه شد
 # --- Pyrogram Imports for Self Bot Instances ---
 from pyrogram import Client, filters as pyro_filters
 from pyrogram.handlers import MessageHandler as PyroMessageHandler
@@ -51,7 +46,7 @@ OWNER_ID = int(os.environ.get("OWNER_ID", 7423552124))
 API_ID = int(os.environ.get("API_ID", 28190856))
 API_HASH = os.environ.get("API_HASH", "6b9b5309c2a211b526c6ddad6eabb521")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://CFNBEFBGWFB:hdhbedfefbegh@cluster0.obohcl3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-WEB_APP_URL = os.environ.get("WEB_APP_URL")
+WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://127.0.0.1:8080")
 BET_TAX_RATE = 0.02 # 2% tax
 
 # --- Database Setup (MongoDB) ---
@@ -127,10 +122,10 @@ HELP_TEXT = r"""
 ---
 ** شرط‌بندی و گروه **
  • `موجودی`: نمایش موجودی الماس.
- • `موجودی` (با ریپلای): نمایش موجودی کاربر دیگر (ویژه ادمین).
  • `انتقال [مبلغ]` (با ریپلای): انتقال الماس.
  • `شرط [مبلغ]` (با ریپلای): شروع شرط‌بندی.
- • `کسر [مبلغ]` (با ریپلای): کسر الماس از کاربر (ویژه ادمین).
+ • `قبول` (ریپلای روی پیام شرط): قبول شرط. (نیاز به بازنگری)
+ • `برنده` (ریپلای روی پیام شرط): اعلام برنده. (نیاز به بازنگری)
 
 ---
 ** امنیت و منشی **
@@ -647,16 +642,12 @@ def set_setting(name, value):
     db.settings.update_one({'name': name}, {'$set': {'value': value}}, upsert=True)
 
 def get_user(user_id):
-    """
-    Retrieves a user document, creating it if it doesn't exist.
-    Crucially, it also enforces that admins always have at least 1 billion diamonds.
-    """
     initial_balance = get_setting('initial_balance') or 10
     is_owner = user_id == OWNER_ID
+    # Owners get a massive starting balance on creation
     balance_on_create = 1000000000 if is_owner else initial_balance
-
-    # First, ensure the user exists in the database
-    user_doc = db.users.find_one_and_update(
+    
+    return db.users.find_one_and_update(
         {'user_id': user_id},
         {'$setOnInsert': {
             'balance': balance_on_create,
@@ -666,17 +657,6 @@ def get_user(user_id):
         upsert=True,
         return_document=ReturnDocument.AFTER
     )
-    
-    # Now, check if the user is an admin and enforce the minimum balance.
-    # This ensures every time an admin's data is fetched, their balance is corrected if needed.
-    if user_doc.get('is_admin') and user_doc.get('balance', 0) < 1000000000:
-        user_doc = db.users.find_one_and_update(
-            {'user_id': user_id},
-            {'$set': {'balance': 1000000000}},
-            return_document=ReturnDocument.AFTER
-        )
-        
-    return user_doc
 
 def get_main_keyboard(user_doc):
     keyboard = [
@@ -692,164 +672,44 @@ admin_keyboard = ReplyKeyboardMarkup([
     [KeyboardButton("💎 تنظیم قیمت الماس"), KeyboardButton("💰 تنظیم موجودی اولیه")],
     [KeyboardButton("🚀 تنظیم هزینه سلف"), KeyboardButton("🎁 تنظیم پاداش دعوت")],
     [KeyboardButton("💳 تنظیم شماره کارت"), KeyboardButton("📢 تنظیم کانال اجباری")],
-    [KeyboardButton("✅/❌ قفل کانال"), KeyboardButton("➕ افزودن ادمین")],
-    [KeyboardButton("➖ حذف ادمین"), KeyboardButton("⬅️ بازگشت به منوی اصلی")]
+    [KeyboardButton("✅/❌ قفل کانال"), KeyboardButton("🧾 تایید تراکنش‌ها")],
+    [KeyboardButton("➕ افزودن ادمین"), KeyboardButton("➖ حذف ادمین")],
+    [KeyboardButton("➖ کسر موجودی کاربر")],
+    [KeyboardButton("⬅️ بازگشت به منوی اصلی")]
 ], resize_keyboard=True)
-
 # =======================================================
-#  بخش ۵: سیستم عضویت اجباری
-# =======================================================
-
-async def get_join_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup | None:
-    """Creates the keyboard for the forced join message."""
-    channel_link = get_setting("forced_channel_link")
-    if not channel_link:
-        return None
-    
-    # Ensure the link is a valid URL for the button
-    url_link = channel_link
-    if channel_link.startswith('@'):
-        url_link = f"https://t.me/{channel_link[1:]}"
-
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("عضویت در کانال", url=url_link)],
-        [InlineKeyboardButton("✅ بررسی عضویت", callback_data="check_join_membership")]
-    ])
-    return keyboard
-
-async def membership_check_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    A high-priority handler that checks channel membership before allowing any other handler to run.
-    """
-    if not update.effective_user:
-        return
-
-    # Don't block the owner
-    if update.effective_user.id == OWNER_ID:
-        return
-
-    # If the feature is disabled, don't do anything
-    if not get_setting("forced_channel_lock"):
-        return
-
-    channel_username = get_setting("forced_channel_link")
-    if not channel_username:
-        logging.warning("Forced channel lock is ON but no channel link/username is set in settings.")
-        return # Failsafe
-
-    # If this is the callback from the join button, handle it here
-    if update.callback_query and update.callback_query.data == "check_join_membership":
-        query = update.callback_query
-        await query.answer()
-        try:
-            member = await context.bot.get_chat_member(channel_username, query.from_user.id)
-            if member.status in ['member', 'administrator', 'creator']:
-                await query.message.delete()
-                await query.message.reply_text("✅ عضویت شما تایید شد. خوش آمدید!")
-                # Get user doc to show correct main keyboard
-                user_doc = get_user(query.from_user.id)
-                await context.bot.send_message(
-                    chat_id=query.from_user.id,
-                    text="حالا می‌توانید از امکانات ربات استفاده کنید.",
-                    reply_markup=get_main_keyboard(user_doc)
-                )
-            else:
-                await query.answer("❌ شما هنوز عضو کانال نشده‌اید.", show_alert=True)
-        except Exception as e:
-            logging.error(f"Error in check_join_callback: {e}")
-            await query.answer("خطایی در بررسی عضویت رخ داد. لطفا دوباره تلاش کنید.", show_alert=True)
-        finally:
-            # Always stop further processing for this specific callback
-            raise ApplicationHandlerStop
-
-    # For all other updates, check membership status
-    try:
-        member = await context.bot.get_chat_member(channel_username, update.effective_user.id)
-        if member.status in ['member', 'administrator', 'creator']:
-            # User is a member, allow update to be processed by other handlers
-            return
-    except Exception as e:
-        logging.error(f"Failed to check membership for user {update.effective_user.id} in channel {channel_username}: {e}")
-        # Notify the owner about the potential configuration error
-        try:
-            await context.bot.send_message(
-                chat_id=OWNER_ID,
-                text=f"⚠️ **خطا در بررسی عضویت اجباری** ⚠️\n\n"
-                     f"ربات نتوانست عضویت کاربر `{update.effective_user.id}` را در کانال `{channel_username}` بررسی کند.\n\n"
-                     f"**دلیل احتمالی:** ربات در کانال مورد نظر ادمین نیست.\n"
-                     f"**خطای اصلی:** `{e}`",
-                parse_mode=ParseMode.MARKDOWN
-            )
-        except Exception as notify_e:
-            logging.error(f"Failed to notify owner about membership check error: {notify_e}")
-        # Failsafe: Allow the user to proceed but notify the owner.
-        return
-
-    # User is NOT a member. Block them.
-    keyboard = await get_join_keyboard(context)
-    if keyboard and update.effective_message:
-        await update.effective_message.reply_text(
-            "برای استفاده از ربات، لطفا ابتدا در کانال ما عضو شوید و سپس دکمه بررسی را بزنید.",
-            reply_markup=keyboard
-        )
-    elif update.effective_message: # Fallback if no channel link is set
-         await update.effective_message.reply_text(
-            "برای استفاده از ربات، عضویت در کانال الزامی است. لطفا با ادمین تماس بگیرید."
-        )
-
-    # Stop processing this update for any other handlers
-    raise ApplicationHandlerStop
-
-# =======================================================
-#  بخش ۶: مدیریت دستورات کاربران
+#  بخش ۵: مدیریت دستورات کاربران
 # =======================================================
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    # get_user now automatically handles the admin balance check.
     user_doc = get_user(user.id)
-    
-    # Special welcome for admins with stats
-    if user_doc.get('is_admin'):
-        total_users = db.users.count_documents({})
-        active_selfs = db.self_bots.count_documents({'is_active': True})
-        pending_tx = db.transactions.count_documents({'status': 'pending'})
-        
-        admin_welcome_text = (
-            f"👑 سلام ادمین عزیز، به پنل مدیریت خوش آمدید!\n\n"
-            f"📊 **آمار ربات:**\n"
-            f"  -  👥 **تعداد کل کاربران:** {total_users:,}\n"
-            f"  -  🚀 **سلف‌بات‌های فعال:** {active_selfs:,}\n"
-            f"  -  🧾 **تراکنش‌های در انتظار:** {pending_tx:,}"
-        )
-        await update.message.reply_text(admin_welcome_text, parse_mode=ParseMode.MARKDOWN, reply_markup=get_main_keyboard(user_doc))
 
-    else:
-        # Referral logic
-        if context.args and len(context.args) > 0:
-            try:
-                referrer_id = int(context.args[0])
-                if referrer_id != user.id and not user_doc.get('referred_by'):
-                    db.users.update_one({'user_id': user.id}, {'$set': {'referred_by': referrer_id}})
-                    reward = get_setting('referral_reward') or 5
-                    db.users.update_one({'user_id': referrer_id}, {'$inc': {'balance': reward}})
-                    await context.bot.send_message(
-                        chat_id=referrer_id,
-                        text=f"🎁 تبریک! یک کاربر جدید از طریق لینک شما وارد ربات شد و شما {reward} الماس پاداش گرفتید."
-                    )
-            except (ValueError, TypeError):
-                pass
+    # Referral logic
+    if context.args and len(context.args) > 0:
+        try:
+            referrer_id = int(context.args[0])
+            if referrer_id != user.id and not user_doc.get('referred_by'):
+                db.users.update_one({'user_id': user.id}, {'$set': {'referred_by': referrer_id}})
+                reward = get_setting('referral_reward') or 5
+                db.users.update_one({'user_id': referrer_id}, {'$inc': {'balance': reward}})
+                await context.bot.send_message(
+                    chat_id=referrer_id,
+                    text=f"🎁 تبریک! یک کاربر جدید از طریق لینک شما وارد ربات شد و شما {reward} الماس پاداش گرفتید."
+                )
+        except (ValueError, TypeError):
+            pass
 
-        await update.message.reply_text(
-            "👋 به ربات مدیریت دارک سلف خوش آمدید.",
-            reply_markup=get_main_keyboard(user_doc)
-        )
+    await update.message.reply_text(
+        "👋 سلام! به ربات مدیریت دارک سلف خوش آمدید.",
+        reply_markup=get_main_keyboard(user_doc)
+    )
 
 async def show_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_doc = get_user(update.effective_user.id)
     price = get_setting('diamond_price') or 1000
     balance_toman = user_doc['balance'] * price
     await update.message.reply_text(
-        f"💎 موجودی شما: **{user_doc['balance']:,}** الماس\n"
+        f"💎 موجودی شما: **{user_doc['balance']}** الماس\n"
         f" معادل: `{balance_toman:,}` تومان",
         parse_mode=ParseMode.MARKDOWN
     )
@@ -929,7 +789,7 @@ async def process_deposit_receipt(update: Update, context: ContextTypes.DEFAULT_
         'amount': amount,
         'receipt_file_id': update.message.photo[-1].file_id,
         'status': 'pending',
-        'timestamp': datetime.now(timezone.utc)
+        'timestamp': datetime.utcnow()
     })
     
     caption = (f"🧾 درخواست افزایش موجودی جدید\n"
@@ -963,9 +823,6 @@ async def self_bot_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = features.get_management_keyboard(user_id)
         await update.message.reply_text("🚀 مدیریت دارک سلف:", reply_markup=keyboard)
     else:
-        if not WEB_APP_URL:
-            await update.message.reply_text("❌ سرویس لاگین سلف در حال حاضر توسط ادمین تنظیم نشده است.")
-            return ConversationHandler.END
         await update.message.reply_text(
             "برای فعالسازی سلف، لطفا شماره تلفن خود را با کد کشور ارسال کنید.",
             reply_markup=ReplyKeyboardMarkup([[KeyboardButton("📱 اشتراک گذاری شماره تلفن", request_contact=True)]], resize_keyboard=True, one_time_keyboard=True)
@@ -988,7 +845,7 @@ async def process_phone_number(update: Update, context: ContextTypes.DEFAULT_TYP
     }
 
     login_url = f"{WEB_APP_URL}/login/{login_token}"
-    user_doc = get_user(user_id)
+    user_doc = get_user(user.id)
     await update.message.reply_text(
         f"✅ شماره شما دریافت شد.\n\n"
         f"لطفا روی لینک زیر کلیک کرده و مراحل را در مرورگر دنبال کنید تا کد Session خود را دریافت کنید:\n\n"
@@ -1025,7 +882,7 @@ async def process_session_string(update: Update, context: ContextTypes.DEFAULT_T
         return AWAIT_SESSION
         
 # =======================================================
-#  بخش ۷: مدیریت دستورات ادمین
+#  بخش ۶: مدیریت دستورات ادمین
 # =======================================================
 async def admin_panel_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_doc = get_user(update.effective_user.id)
@@ -1046,9 +903,10 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
         "🚀 تنظیم هزینه سلف": "هزینه ساعتی استفاده از سلف به الماس را وارد کنید:",
         "🎁 تنظیم پاداش دعوت": "پاداش هر دعوت موفق به الماس را وارد کنید:",
         "💳 تنظیم شماره کارت": "شماره کارت و نام صاحب حساب را در دو خط وارد کنید:",
-        "📢 تنظیم کانال اجباری": "لینک عمومی کانال (مانند @username یا https://t.me/username) را وارد کنید:",
+        "📢 تنظیم کانال اجباری": "آیدی عددی کانال اجباری را وارد کنید:",
         "➕ افزودن ادمین": "آیدی عددی کاربر برای افزودن به ادمین‌ها را وارد کنید:",
         "➖ حذف ادمین": "آیدی عددی ادمین برای حذف را وارد کنید:",
+        "➖ کسر موجودی کاربر": "آیدی عددی کاربر و مبلغ کسر را با یک فاصله وارد کنید (مثال: 12345 100):",
     }
     
     if choice in prompts:
@@ -1061,6 +919,10 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
         status = "فعال" if not current_lock else "غیرفعال"
         await update.message.reply_text(f"✅ قفل عضویت در کانال اجباری {status} شد.")
         return ADMIN_MENU
+    
+    elif choice == "🧾 تایید تراکنش‌ها":
+        await update.message.reply_text("این قابلیت از طریق دکمه‌های زیر رسیدها مدیریت می‌شود.")
+        return ADMIN_MENU
         
     elif choice == "⬅️ بازگشت به منوی اصلی":
         user_doc = get_user(update.effective_user.id)
@@ -1070,12 +932,10 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
 async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     last_choice = context.user_data.get('admin_choice')
-    reply = update.message.text.strip()
+    reply = update.message.text
     admin_doc = get_user(user_id)
-    
+
     try:
-        should_send_generic_success = True
-        
         if last_choice == "💎 تنظیم قیمت الماس":
             set_setting('diamond_price', int(reply))
         elif last_choice == "💰 تنظیم موجودی اولیه":
@@ -1089,45 +949,41 @@ async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE
             set_setting('card_number', parts[0].strip())
             set_setting('card_holder', parts[1].strip() if len(parts) > 1 else "")
         elif last_choice == "📢 تنظیم کانال اجباری":
-            # Ensure the username starts with @ for consistency
-            if not reply.startswith('@'):
-                if 't.me/' in reply:
-                    reply = '@' + reply.split('t.me/')[-1]
-                else:
-                    reply = '@' + reply
-            set_setting('forced_channel_link', reply)
+            set_setting('forced_channel_id', int(reply))
         elif last_choice == "➕ افزودن ادمین":
-            should_send_generic_success = False
             if not admin_doc.get('is_owner'):
                 await update.message.reply_text("⛔️ فقط مالک اصلی ربات می‌تواند ادمین اضافه کند.", reply_markup=admin_keyboard)
             else:
-                target_user_id = int(reply)
-                get_user(target_user_id) 
-                db.users.update_one(
-                    {'user_id': target_user_id}, 
-                    {'$set': {'is_admin': True}}
-                )
-                get_user(target_user_id)
-                await update.message.reply_text(f"✅ کاربر {target_user_id} با موفقیت به لیست ادمین‌ها اضافه شد و موجودی آن به ۱ میلیارد الماس آپدیت شد.", reply_markup=admin_keyboard)
+                db.users.update_one({'user_id': int(reply)}, {'$set': {'is_admin': True}})
         elif last_choice == "➖ حذف ادمین":
-            should_send_generic_success = False
-            if not admin_doc.get('is_owner'):
-                await update.message.reply_text("⛔️ فقط مالک اصلی ربات می‌تواند ادمین حذف کند.", reply_markup=admin_keyboard)
-            else:
-                target_user_id = int(reply)
-                if target_user_id == OWNER_ID:
-                    await update.message.reply_text("❌ شما نمی‌توانید مالک اصلی را از ادمینی حذف کنید.", reply_markup=admin_keyboard)
-                else:
-                    initial_balance = get_setting('initial_balance') or 10
-                    db.users.update_one(
-                        {'user_id': target_user_id}, 
-                        {'$set': {'is_admin': False, 'balance': initial_balance}}
-                    )
-                    await update.message.reply_text(f"✅ کاربر {target_user_id} از لیست ادمین‌ها حذف شد و موجودی آن به {initial_balance} الماس بازنشانی شد.", reply_markup=admin_keyboard)
-
-        if should_send_generic_success:
-            await update.message.reply_text("✅ تنظیمات با موفقیت ذخیره شد.", reply_markup=admin_keyboard)
+                 if not admin_doc.get('is_owner'):
+                    await update.message.reply_text("⛔️ فقط مالک اصلی ربات می‌تواند ادمین حذف کند.", reply_markup=admin_keyboard)
+                 else:
+                     db.users.update_one({'user_id': int(reply)}, {'$set': {'is_admin': False}})
+        elif last_choice == "➖ کسر موجودی کاربر":
+            parts = reply.split()
+            if len(parts) != 2: raise ValueError("فرمت ورودی اشتباه است.")
+            target_user_id = int(parts[0])
+            amount_to_deduct = int(parts[1])
+            if amount_to_deduct <= 0: raise ValueError("مبلغ باید مثبت باشد.")
             
+            result = db.users.update_one(
+                {'user_id': target_user_id},
+                {'$inc': {'balance': -amount_to_deduct}}
+            )
+            if result.matched_count == 0:
+                await update.message.reply_text(f"❌ کاربری با آیدی {target_user_id} یافت نشد.", reply_markup=admin_keyboard)
+            else:
+                await update.message.reply_text(f"✅ مبلغ {amount_to_deduct} الماس با موفقیت از کاربر {target_user_id} کسر شد.", reply_markup=admin_keyboard)
+                try:
+                    await context.bot.send_message(
+                        chat_id=target_user_id,
+                        text=f"⚠️ مدیر سیستم مبلغ {amount_to_deduct} الماس از حساب شما کسر کرد."
+                    )
+                except Exception as e:
+                    logging.info(f"Could not notify user {target_user_id} about balance deduction: {e}")
+
+        await update.message.reply_text("✅ تنظیمات با موفقیت ذخیره شد.", reply_markup=admin_keyboard)
     except (ValueError, IndexError, TypeError) as e:
         logging.error(f"Admin reply error for choice '{last_choice}': {e}")
         await update.message.reply_text(f"❌ ورودی نامعتبر است. {e}", reply_markup=admin_keyboard)
@@ -1165,7 +1021,7 @@ async def process_admin_support_reply(update: Update, context: ContextTypes.DEFA
     return ADMIN_MENU
 
 # =======================================================
-#  بخش ۸: مدیریت Callback Query و پیام‌های عمومی
+#  بخش ۷: مدیریت Callback Query و پیام‌های عمومی
 # =======================================================
 async def cancel_bet_job(context: ContextTypes.DEFAULT_TYPE):
     """Job to cancel a bet if it's not joined within the time limit."""
@@ -1205,10 +1061,6 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
             tx = db.transactions.find_one({'_id': ObjectId(tx_id)})
             if not tx:
                 await query.edit_message_caption(caption=query.message.caption_html + "\n\n(تراکنش یافت نشد)", parse_mode=ParseMode.HTML)
-                return
-
-            if tx.get('status') != 'pending':
-                await query.answer("این تراکنش قبلا پردازش شده است.", show_alert=True)
                 return
 
             if data[1] == "approve":
@@ -1259,24 +1111,18 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
 
         # Cancel action
         if data[1] == "cancel":
-            if user.id != bet['proposer_id']:
+            if user.id == bet['proposer_id']:
+                # Remove the scheduled timeout job
+                current_jobs = context.job_queue.get_jobs_by_name(f"bet_timeout_{bet_id}")
+                for job in current_jobs:
+                    job.schedule_removal()
+                
+                db.bets.delete_one({'_id': ObjectId(bet_id)})
+                try:
+                    await query.edit_message_text(f"❌ شرط توسط @{bet['proposer_username']} لغو شد.")
+                except: pass
+            else:
                 await query.answer("شما شروع کننده این شرط نیستید.", show_alert=True)
-                return
-
-            if bet.get('status') != 'pending':
-                await query.answer("این شرط دیگر برای لغو در دسترس نیست (احتمالا کسی به آن پیوسته است).", show_alert=True)
-                return
-
-            # Remove the scheduled timeout job
-            current_jobs = context.job_queue.get_jobs_by_name(f"bet_timeout_{bet_id}")
-            for job in current_jobs:
-                job.schedule_removal()
-            
-            db.bets.delete_one({'_id': ObjectId(bet_id)})
-            try:
-                await query.edit_message_text(f"❌ شرط توسط @{bet['proposer_username']} لغو شد.")
-            except Exception as e:
-                logging.warning(f"Could not edit cancelled bet message {bet_id}: {e}")
             return
 
         # Join action (with AUTOMATIC RANDOM winner selection)
@@ -1284,27 +1130,16 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
             if user.id == bet['proposer_id']:
                 await query.answer("شما نمی‌توانید به شرط خودتان بپیوندید.", show_alert=True)
                 return
-                
-            updated_bet = db.bets.find_one_and_update(
-                {'_id': ObjectId(bet_id), 'status': 'pending'},
-                {'$set': {'status': 'active'}}
-            )
-
-            if not updated_bet:
-                await query.answer("متاسفانه کس دیگری زودتر به این شرط پیوست.", show_alert=True)
+            if bet['status'] != 'pending':
+                try:
+                    await query.edit_message_text("این شرط دیگر برای پیوستن در دسترس نیست.")
+                except: pass
                 return
                 
             joiner_doc = get_user(user.id)
             if joiner_doc['balance'] < bet['amount']:
-                db.bets.update_one({'_id': ObjectId(bet_id)}, {'$set': {'status': 'pending'}})
                 await query.answer("موجودی شما برای پیوستن به این شرط کافی نیست.", show_alert=True)
                 return
-
-            # FIX: Remove the timeout job as soon as the bet is joined
-            current_jobs = context.job_queue.get_jobs_by_name(f"bet_timeout_{bet_id}")
-            for job in current_jobs:
-                job.schedule_removal()
-                logging.info(f"Removed bet timeout job for successfully joined bet {bet_id}")
 
             # --- Winner Selection Animation ---
             try:
@@ -1323,23 +1158,20 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
             
             opponent_username = user.username or user.first_name
 
-            # 2. Randomly select winner using a cryptographically secure method
+            # 2. Randomly select winner
             proposer_id = bet['proposer_id']
             opponent_id = user.id
             
-            winner_id = secrets.choice([proposer_id, opponent_id])
+            winner_id = random.choice([proposer_id, opponent_id])
             
             # 3. Calculate prize and tax
             total_pot = amount * 2
             tax = round(total_pot * BET_TAX_RATE) 
             prize = total_pot - tax
             
-            # 4. Give prize to the winner and tax to the owner
+            # 4. Give prize to the winner
             db.users.update_one({'user_id': winner_id}, {'$inc': {'balance': prize}})
-            if tax > 0 and bet['proposer_id'] != OWNER_ID and user.id != OWNER_ID:
-                db.users.update_one({'user_id': OWNER_ID}, {'$inc': {'balance': tax}})
-                logging.info(f"Transferred {tax} diamond tax from bet {bet_id} to owner {OWNER_ID}")
-            
+
             # 5. Determine usernames for display
             if winner_id == proposer_id:
                 winner_username = bet['proposer_username']
@@ -1374,42 +1206,27 @@ async def callback_query_handler(update: Update, context: ContextTypes.DEFAULT_T
                 logging.error(f"Failed to EDIT bet message on RANDOM WINNER {bet_id}: {e}")
                 
 async def group_balance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Handles the 'موجودی' command in groups with special logic for admins.
-    - If an admin replies to a user with 'موجودی', it shows the target user's balance.
-    - Otherwise, it shows the sender's own balance.
-    """
+    """Handles 'موجودی' command in groups, styled like the image."""
+    # FIX: Check if the update is a valid message to prevent errors.
     if not update.message:
         return
 
-    sender = update.effective_user
-    target_user = sender  # Default to the person sending the message
-
-    # Check if it's a reply and if the sender is an admin
-    if update.message.reply_to_message:
-        sender_doc = get_user(sender.id)
-        if sender_doc.get('is_admin'):
-            # If an admin replies, the target is the replied-to user
-            target_user = update.message.reply_to_message.from_user
-        # If a non-admin replies, we do nothing and just show their own balance (default behavior)
-
-    # Now get the balance for the determined target_user
-    target_user_doc = get_user(target_user.id)
+    user = update.effective_user
+    user_doc = get_user(user.id)
     price = get_setting('diamond_price') or 1000
-    toman_value = target_user_doc['balance'] * price
+    toman_value = user_doc['balance'] * price
     
-    # Construct the message
     text = (
-        f"👤 کاربر: @{target_user.username or target_user.first_name}\n"
-        f"💎 موجودی الماس: {target_user_doc['balance']:,}\n"
+        f"👤 کاربر: @{user.username or user.first_name}\n"
+        f"💎 موجودی الماس: {user_doc['balance']}\n"
         f"💳 معادل تخمینی: {toman_value:,.0f} تومان"
     )
-    
     await update.message.reply_text(text)
 
 
 async def transfer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles diamond transfers in groups, styled like the image."""
+    # FIX: Check if the update is a valid message to prevent errors.
     if not update.message:
         return
         
@@ -1444,7 +1261,7 @@ async def transfer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"✅ انتقال موفق ✅\n\n"
             f"👤 از: @{sender.username or sender.first_name}\n"
             f"👥 به: @{receiver.username or receiver.first_name}\n"
-            f"💎 مبلغ: {amount:,} الماس"
+            f"💎 مبلغ: {amount} الماس"
         )
         await update.message.reply_text(text)
 
@@ -1457,6 +1274,7 @@ async def transfer_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_bet_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Starts a bet with inline buttons, styled like the image."""
+    # FIX: Check if the update is a valid message to prevent errors.
     if not update.message:
         return
 
@@ -1483,7 +1301,7 @@ async def start_bet_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         'amount': amount,
         'chat_id': update.effective_chat.id,
         'status': 'pending',
-        'created_at': datetime.now(timezone.utc)
+        'created_at': datetime.utcnow()
     })
     bet_id = str(bet.inserted_id)
 
@@ -1497,7 +1315,7 @@ async def start_bet_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     proposer_mention = f"@{proposer.username or proposer.first_name}"
     
     text = (
-        f"🎲 شرط‌بندی جدید به مبلغ {amount:,} الماس توسط {proposer_mention} شروع شد!\n\n"
+        f"🎲 شرط‌بندی جدید به مبلغ {amount} الماس توسط {proposer_mention} شروع شد!\n\n"
         f"شرکت کنندگان:\n"
         f"- {proposer_mention}"
     )
@@ -1516,69 +1334,6 @@ async def start_bet_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         name=f"bet_timeout_{bet_id}"
     )
 
-async def deduct_balance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handles the 'کسر' command for admins to deduct balance with a specific amount."""
-    if not update.message or not update.message.reply_to_message:
-        return
-
-    admin_user = update.effective_user
-    admin_doc = get_user(admin_user.id)
-
-    # Only admins can use this command
-    if not admin_doc.get('is_admin'):
-        return
-
-    target_user = update.message.reply_to_message.from_user
-    
-    # Prevent deducting from self or owner
-    if target_user.id == admin_user.id:
-        await update.message.reply_text("شما نمی‌توانید از خودتان الماس کسر کنید.")
-        return
-    if target_user.id == OWNER_ID:
-        await update.message.reply_text("شما نمی‌توانید از مالک اصلی الماس کسر کنید.")
-        return
-    
-    # Extract the amount from the message
-    match = re.search(r'(\d+)', update.message.text)
-    if not match:
-        await update.message.reply_text("لطفا مقدار عددی برای کسر را مشخص کنید. مثال: کسر 500")
-        return
-
-    try:
-        amount_to_deduct = int(match.group(1))
-        if amount_to_deduct <= 0:
-            await update.message.reply_text("مقدار کسر باید یک عدد مثبت باشد.")
-            return
-    except (ValueError, TypeError):
-        await update.message.reply_text("مقدار وارد شده نامعتبر است.")
-        return
-
-    target_doc = get_user(target_user.id)
-
-    if target_doc.get('balance', 0) < amount_to_deduct:
-        await update.message.reply_text(f"کاربر @{target_user.username or target_user.first_name} موجودی کافی برای کسر {amount_to_deduct:,} الماس را ندارد.")
-        return
-
-    # Atomically update the balance
-    db.users.update_one(
-        {'user_id': target_user.id},
-        {'$inc': {'balance': -amount_to_deduct}}
-    )
-
-    # Get current time in Tehran timezone for the receipt
-    tehran_time = datetime.now(TEHRAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S')
-
-    # Construct the receipt message as requested by the user
-    receipt_text = (
-        f"❌ {amount_to_deduct:,} الماس از @{target_user.username or target_user.first_name} کسر شد.\n"
-        f"🧾 رسید کسر:\n"
-        f"📤 ادمین: @{admin_user.username or admin_user.first_name}\n"
-        f"📥 کاربر: @{target_user.username or target_user.first_name}\n"
-        f"💎 مقدار: {amount_to_deduct:,}\n"
-        f"⏰ {tehran_time}"
-    )
-    await update.message.reply_text(receipt_text)
-
 
 async def cancel_conversation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_doc = get_user(update.effective_user.id)
@@ -1587,13 +1342,9 @@ async def cancel_conversation(update: Update, context: ContextTypes.DEFAULT_TYPE
     return ConversationHandler.END
 
 # =======================================================
-#  بخش ۹: تابع اصلی و اجرای ربات
+#  بخش ۸: تابع اصلی و اجرای ربات
 # =======================================================
 def run_flask():
-    if not WEB_APP_URL:
-        logging.warning("WEB_APP_URL environment variable is not set. Flask web app for self-bot login is disabled.")
-        return
-        
     port = int(os.environ.get("PORT", 10000))
     # For production, use a proper WSGI server like Gunicorn or Waitress.
     web_app.run(host='0.0.0.0', port=port)
@@ -1602,6 +1353,10 @@ async def post_init(application: Application):
     """Actions to run after the bot is initialized."""
     global BOT_EVENT_LOOP
     BOT_EVENT_LOOP = asyncio.get_running_loop()
+    
+    # Start Flask in a separate thread
+    flask_thread = Thread(target=run_flask, daemon=True)
+    flask_thread.start()
     
     # Load and start existing self-bots from the database
     for doc in db.self_bots.find({'is_active': True}):
@@ -1631,12 +1386,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     # Prepare traceback for reporting to the owner
     tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
     tb_string = "".join(tb_list)
-    
-    # FIX: Use to_dict() and json.dumps for a cleaner and more compatible JSON representation.
-    if isinstance(update, Update):
-        update_str = json.dumps(update.to_dict(), indent=2, ensure_ascii=False)
-    else:
-        update_str = str(update)
+    update_str = update.to_json() if isinstance(update, Update) else str(update)
     
     message = (
         f"An exception was raised while handling an update\n"
@@ -1656,19 +1406,12 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Failed to send error notification to owner: {e}")
 
 if __name__ == "__main__":
-    
-    # Start Flask in a separate thread only if the URL is configured
-    if WEB_APP_URL:
-        flask_thread = Thread(target=run_flask, daemon=True)
-        flask_thread.start()
-        logging.info(f"Flask web app started, configured for URL: {WEB_APP_URL}")
-
     # --- Conversation Handlers ---
     admin_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^👑 پنل ادمین$"), admin_panel_entry)],
         states={
-            ADMIN_MENU: [MessageHandler(filters.Regex("^💎 تنظیم قیمت الماس$|^💰 تنظیم موجودی اولیه$|^🚀 تنظیم هزینه سلف$|^🎁 تنظیم پاداش دعوت$|^💳 تنظیم شماره کارت$|^📢 تنظیم کانال اجباری$|^➕ افزودن ادمین$|^➖ حذف ادمین$"), process_admin_choice),
-                         MessageHandler(filters.Regex("^✅/❌ قفل کانال$"), process_admin_choice),
+            ADMIN_MENU: [MessageHandler(filters.Regex("^💎 تنظیم قیمت الماس$|^💰 تنظیم موجودی اولیه$|^🚀 تنظیم هزینه سلف$|^🎁 تنظیم پاداش دعوت$|^💳 تنظیم شماره کارت$|^📢 تنظیم کانال اجباری$|^➕ افزودن ادمین$|^➖ حذف ادمین$|^➖ کسر موجودی کاربر$"), process_admin_choice),
+                         MessageHandler(filters.Regex("^✅/❌ قفل کانال$|^🧾 تایید تراکنش‌ها$"), process_admin_choice),
                          MessageHandler(filters.Regex("^⬅️ بازگشت به منوی اصلی$"), process_admin_choice)],
             AWAIT_ADMIN_REPLY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_admin_reply)]
         },
@@ -1718,9 +1461,6 @@ if __name__ == "__main__":
     )
 
     # --- Add handlers ---
-    # The membership checker runs before all other handlers (priority -1)
-    application.add_handler(TypeHandler(Update, membership_check_handler), group=-1)
-    
     application.add_error_handler(error_handler)
     
     application.add_handler(CommandHandler("start", start_command))
@@ -1734,7 +1474,6 @@ if __name__ == "__main__":
     application.add_handler(MessageHandler(filters.Regex(r'^(شرطبندی|شرط) \d+$') & filters.ChatType.GROUPS, start_bet_handler))
     application.add_handler(MessageHandler(filters.Regex(r'^(انتقال|انتقال الماس) \d+$') & filters.REPLY & filters.ChatType.GROUPS, transfer_handler))
     application.add_handler(MessageHandler(filters.Regex(r'^موجودی$') & filters.ChatType.GROUPS, group_balance_handler))
-    application.add_handler(MessageHandler(filters.Regex(r'^(کسر الماس|کسر) \d+$') & filters.REPLY & filters.ChatType.GROUPS, deduct_balance_handler))
     application.add_handler(CallbackQueryHandler(callback_query_handler))
 
 
