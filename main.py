@@ -14,7 +14,8 @@ from telegram import (Update, ReplyKeyboardMarkup, KeyboardButton,
                       InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove)
 from telegram.constants import ParseMode
 from telegram.ext import (Application, CommandHandler, MessageHandler,
-                          ConversationHandler, filters, ContextTypes, CallbackQueryHandler)
+                          ConversationHandler, filters, ContextTypes, CallbackQueryHandler,
+                          ApplicationHandlerStop, TypeHandler)
 from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
 from bson import ObjectId
@@ -50,8 +51,8 @@ OWNER_ID = int(os.environ.get("OWNER_ID", 7423552124))
 API_ID = int(os.environ.get("API_ID", 28190856))
 API_HASH = os.environ.get("API_HASH", "6b9b5309c2a211b526c6ddad6eabb521")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://CFNBEFBGWFB:hdhbedfefbegh@cluster0.obohcl3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-# FIX: Set the user's public Render URL as the default value.
-WEB_APP_URL = os.environ.get("WEB_APP_URL", "https://fffsvsvdbng-5s55.onrender.com")
+# FIX: Rely solely on the environment variable for the web app URL.
+WEB_APP_URL = os.environ.get("WEB_APP_URL")
 BET_TAX_RATE = 0.02 # 2% tax
 
 # --- Database Setup (MongoDB) ---
@@ -695,8 +696,96 @@ admin_keyboard = ReplyKeyboardMarkup([
     [KeyboardButton("✅/❌ قفل کانال"), KeyboardButton("➕ افزودن ادمین")],
     [KeyboardButton("➖ حذف ادمین"), KeyboardButton("⬅️ بازگشت به منوی اصلی")]
 ], resize_keyboard=True)
+
 # =======================================================
-#  بخش ۵: مدیریت دستورات کاربران
+#  بخش ۵: سیستم عضویت اجباری
+# =======================================================
+
+async def get_join_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup | None:
+    """Creates the keyboard for the forced join message."""
+    channel_link = get_setting("forced_channel_link")
+    if not channel_link:
+        return None
+    
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("عضویت در کانال", url=channel_link)],
+        [InlineKeyboardButton("✅ بررسی عضویت", callback_data="check_join_membership")]
+    ])
+    return keyboard
+
+async def membership_check_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    A high-priority handler that checks channel membership before allowing any other handler to run.
+    """
+    if not update.effective_user:
+        return
+
+    # Don't block the owner
+    if update.effective_user.id == OWNER_ID:
+        return
+
+    # If the feature is disabled, don't do anything
+    if not get_setting("forced_channel_lock"):
+        return
+
+    channel_id = get_setting("forced_channel_id")
+    if not channel_id:
+        logging.warning("Forced channel lock is ON but no channel ID is set in settings.")
+        return # Failsafe
+
+    # If this is the callback from the join button, handle it here
+    if update.callback_query and update.callback_query.data == "check_join_membership":
+        query = update.callback_query
+        await query.answer()
+        try:
+            member = await context.bot.get_chat_member(channel_id, query.from_user.id)
+            if member.status in ['member', 'administrator', 'creator']:
+                await query.message.delete()
+                await query.message.reply_text("✅ عضویت شما تایید شد. خوش آمدید!")
+                # Get user doc to show correct main keyboard
+                user_doc = get_user(query.from_user.id)
+                await context.bot.send_message(
+                    chat_id=query.from_user.id,
+                    text="حالا می‌توانید از امکانات ربات استفاده کنید.",
+                    reply_markup=get_main_keyboard(user_doc)
+                )
+            else:
+                await query.answer("❌ شما هنوز عضو کانال نشده‌اید.", show_alert=True)
+        except Exception as e:
+            logging.error(f"Error in check_join_callback: {e}")
+            await query.answer("خطایی در بررسی عضویت رخ داد. لطفا دوباره تلاش کنید.", show_alert=True)
+        finally:
+            # Always stop further processing for this specific callback
+            raise ApplicationHandlerStop
+
+    # For all other updates, check membership status
+    try:
+        member = await context.bot.get_chat_member(channel_id, update.effective_user.id)
+        if member.status in ['member', 'administrator', 'creator']:
+            # User is a member, allow update to be processed by other handlers
+            return
+    except Exception as e:
+        logging.error(f"Failed to check membership for user {update.effective_user.id} in channel {channel_id}: {e}")
+        # Failsafe if bot can't check (e.g., not admin in channel)
+        return
+
+    # User is NOT a member. Block them.
+    keyboard = await get_join_keyboard(context)
+    if keyboard:
+        await update.effective_message.reply_text(
+            "برای استفاده از ربات، لطفا ابتدا در کانال ما عضو شوید و سپس دکمه بررسی را بزنید.",
+            reply_markup=keyboard
+        )
+    else: # Fallback if no channel link is set
+         await update.effective_message.reply_text(
+            "برای استفاده از ربات، عضویت در کانال الزامی است. لطفا با ادمین تماس بگیرید."
+        )
+
+    # Stop processing this update for any other handlers
+    raise ApplicationHandlerStop
+
+# =======================================================
+#  بخش ۶: مدیریت دستورات کاربران
 # =======================================================
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -901,7 +990,7 @@ async def process_session_string(update: Update, context: ContextTypes.DEFAULT_T
         return AWAIT_SESSION
         
 # =======================================================
-#  بخش ۶: مدیریت دستورات ادمین
+#  بخش ۷: مدیریت دستورات ادمین
 # =======================================================
 async def admin_panel_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_doc = get_user(update.effective_user.id)
@@ -922,7 +1011,7 @@ async def process_admin_choice(update: Update, context: ContextTypes.DEFAULT_TYP
         "🚀 تنظیم هزینه سلف": "هزینه ساعتی استفاده از سلف به الماس را وارد کنید:",
         "🎁 تنظیم پاداش دعوت": "پاداش هر دعوت موفق به الماس را وارد کنید:",
         "💳 تنظیم شماره کارت": "شماره کارت و نام صاحب حساب را در دو خط وارد کنید:",
-        "📢 تنظیم کانال اجباری": "آیدی عددی کانال اجباری را وارد کنید:",
+        "📢 تنظیم کانال اجباری": "آیدی عددی کانال (مانند -100...) و لینک عمومی آن (@username یا https://...) را در دو خط جداگانه وارد کنید:",
         "➕ افزودن ادمین": "آیدی عددی کاربر برای افزودن به ادمین‌ها را وارد کنید:",
         "➖ حذف ادمین": "آیدی عددی ادمین برای حذف را وارد کنید:",
     }
@@ -965,20 +1054,22 @@ async def process_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE
             set_setting('card_number', parts[0].strip())
             set_setting('card_holder', parts[1].strip() if len(parts) > 1 else "")
         elif last_choice == "📢 تنظیم کانال اجباری":
-            set_setting('forced_channel_id', int(reply))
+            parts = reply.split('\n')
+            if len(parts) < 2:
+                raise ValueError("لطفا هم آیدی عددی و هم لینک کانال را وارد کنید.")
+            set_setting('forced_channel_id', parts[0].strip())
+            set_setting('forced_channel_link', parts[1].strip())
         elif last_choice == "➕ افزودن ادمین":
             should_send_generic_success = False
             if not admin_doc.get('is_owner'):
                 await update.message.reply_text("⛔️ فقط مالک اصلی ربات می‌تواند ادمین اضافه کند.", reply_markup=admin_keyboard)
             else:
                 target_user_id = int(reply)
-                # get_user will create the user if they don't exist
                 get_user(target_user_id) 
                 db.users.update_one(
                     {'user_id': target_user_id}, 
                     {'$set': {'is_admin': True}}
                 )
-                # The robust get_user function will handle the balance update automatically on the next fetch
                 get_user(target_user_id)
                 await update.message.reply_text(f"✅ کاربر {target_user_id} با موفقیت به لیست ادمین‌ها اضافه شد و موجودی آن به ۱ میلیارد الماس آپدیت شد.", reply_markup=admin_keyboard)
         elif last_choice == "➖ حذف ادمین":
@@ -1037,7 +1128,7 @@ async def process_admin_support_reply(update: Update, context: ContextTypes.DEFA
     return ADMIN_MENU
 
 # =======================================================
-#  بخش ۷: مدیریت Callback Query و پیام‌های عمومی
+#  بخش ۸: مدیریت Callback Query و پیام‌های عمومی
 # =======================================================
 async def cancel_bet_job(context: ContextTypes.DEFAULT_TYPE):
     """Job to cancel a bet if it's not joined within the time limit."""
@@ -1459,10 +1550,14 @@ async def cancel_conversation(update: Update, context: ContextTypes.DEFAULT_TYPE
     return ConversationHandler.END
 
 # =======================================================
-#  بخش ۸: تابع اصلی و اجرای ربات
+#  بخش ۹: تابع اصلی و اجرای ربات
 # =======================================================
 def run_flask():
-    port = int(os.environ.get("PORT", 8080))
+    if not WEB_APP_URL:
+        logging.warning("WEB_APP_URL environment variable is not set. Flask web app for self-bot login is disabled.")
+        return
+        
+    port = int(os.environ.get("PORT", 10000))
     # For production, use a proper WSGI server like Gunicorn or Waitress.
     web_app.run(host='0.0.0.0', port=port)
 
@@ -1471,9 +1566,11 @@ async def post_init(application: Application):
     global BOT_EVENT_LOOP
     BOT_EVENT_LOOP = asyncio.get_running_loop()
     
-    # Start Flask in a separate thread
-    flask_thread = Thread(target=run_flask, daemon=True)
-    flask_thread.start()
+    # Start Flask in a separate thread only if the URL is configured
+    if WEB_APP_URL:
+        flask_thread = Thread(target=run_flask, daemon=True)
+        flask_thread.start()
+        logging.info(f"Flask web app started, configured for URL: {WEB_APP_URL}")
     
     # Load and start existing self-bots from the database
     for doc in db.self_bots.find({'is_active': True}):
@@ -1583,6 +1680,9 @@ if __name__ == "__main__":
     )
 
     # --- Add handlers ---
+    # The membership checker runs before all other handlers (priority -1)
+    application.add_handler(TypeHandler(Update, membership_check_handler), group=-1)
+    
     application.add_error_handler(error_handler)
     
     application.add_handler(CommandHandler("start", start_command))
