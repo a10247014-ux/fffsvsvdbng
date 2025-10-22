@@ -706,8 +706,13 @@ async def get_join_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboar
     if not channel_link:
         return None
     
+    # Ensure the link is a valid URL for the button
+    url_link = channel_link
+    if channel_link.startswith('@'):
+        url_link = f"https://t.me/{channel_link[1:]}"
+
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("عضویت در کانال", url=channel_link)],
+        [InlineKeyboardButton("عضویت در کانال", url=url_link)],
         [InlineKeyboardButton("✅ بررسی عضویت", callback_data="check_join_membership")]
     ])
     return keyboard
@@ -765,17 +770,29 @@ async def membership_check_handler(update: Update, context: ContextTypes.DEFAULT
             return
     except Exception as e:
         logging.error(f"Failed to check membership for user {update.effective_user.id} in channel {channel_username}: {e}")
-        # Failsafe if bot can't check (e.g., not admin in channel)
+        # Notify the owner about the potential configuration error
+        try:
+            await context.bot.send_message(
+                chat_id=OWNER_ID,
+                text=f"⚠️ **خطا در بررسی عضویت اجباری** ⚠️\n\n"
+                     f"ربات نتوانست عضویت کاربر `{update.effective_user.id}` را در کانال `{channel_username}` بررسی کند.\n\n"
+                     f"**دلیل احتمالی:** ربات در کانال مورد نظر ادمین نیست.\n"
+                     f"**خطای اصلی:** `{e}`",
+                parse_mode=ParseMode.MARKDOWN
+            )
+        except Exception as notify_e:
+            logging.error(f"Failed to notify owner about membership check error: {notify_e}")
+        # Failsafe: Allow the user to proceed but notify the owner.
         return
 
     # User is NOT a member. Block them.
     keyboard = await get_join_keyboard(context)
-    if keyboard:
+    if keyboard and update.effective_message:
         await update.effective_message.reply_text(
             "برای استفاده از ربات، لطفا ابتدا در کانال ما عضو شوید و سپس دکمه بررسی را بزنید.",
             reply_markup=keyboard
         )
-    else: # Fallback if no channel link is set
+    elif update.effective_message: # Fallback if no channel link is set
          await update.effective_message.reply_text(
             "برای استفاده از ربات، عضویت در کانال الزامی است. لطفا با ادمین تماس بگیرید."
         )
@@ -790,26 +807,42 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     # get_user now automatically handles the admin balance check.
     user_doc = get_user(user.id)
+    
+    # Special welcome for admins with stats
+    if user_doc.get('is_admin'):
+        total_users = db.users.count_documents({})
+        active_selfs = db.self_bots.count_documents({'is_active': True})
+        pending_tx = db.transactions.count_documents({'status': 'pending'})
         
-    # Referral logic
-    if context.args and len(context.args) > 0:
-        try:
-            referrer_id = int(context.args[0])
-            if referrer_id != user.id and not user_doc.get('referred_by'):
-                db.users.update_one({'user_id': user.id}, {'$set': {'referred_by': referrer_id}})
-                reward = get_setting('referral_reward') or 5
-                db.users.update_one({'user_id': referrer_id}, {'$inc': {'balance': reward}})
-                await context.bot.send_message(
-                    chat_id=referrer_id,
-                    text=f"🎁 تبریک! یک کاربر جدید از طریق لینک شما وارد ربات شد و شما {reward} الماس پاداش گرفتید."
-                )
-        except (ValueError, TypeError):
-            pass
+        admin_welcome_text = (
+            f"👑 سلام ادمین عزیز، به پنل مدیریت خوش آمدید!\n\n"
+            f"📊 **آمار ربات:**\n"
+            f"  -  👥 **تعداد کل کاربران:** {total_users:,}\n"
+            f"  -  🚀 **سلف‌بات‌های فعال:** {active_selfs:,}\n"
+            f"  -  🧾 **تراکنش‌های در انتظار:** {pending_tx:,}"
+        )
+        await update.message.reply_text(admin_welcome_text, parse_mode=ParseMode.MARKDOWN, reply_markup=get_main_keyboard(user_doc))
 
-    await update.message.reply_text(
-        "👋 به ربات مدیریت دارک سلف خوش آمدید.",
-        reply_markup=get_main_keyboard(user_doc)
-    )
+    else:
+        # Referral logic
+        if context.args and len(context.args) > 0:
+            try:
+                referrer_id = int(context.args[0])
+                if referrer_id != user.id and not user_doc.get('referred_by'):
+                    db.users.update_one({'user_id': user.id}, {'$set': {'referred_by': referrer_id}})
+                    reward = get_setting('referral_reward') or 5
+                    db.users.update_one({'user_id': referrer_id}, {'$inc': {'balance': reward}})
+                    await context.bot.send_message(
+                        chat_id=referrer_id,
+                        text=f"🎁 تبریک! یک کاربر جدید از طریق لینک شما وارد ربات شد و شما {reward} الماس پاداش گرفتید."
+                    )
+            except (ValueError, TypeError):
+                pass
+
+        await update.message.reply_text(
+            "👋 به ربات مدیریت دارک سلف خوش آمدید.",
+            reply_markup=get_main_keyboard(user_doc)
+        )
 
 async def show_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_doc = get_user(update.effective_user.id)
