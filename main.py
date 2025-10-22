@@ -51,7 +51,6 @@ OWNER_ID = int(os.environ.get("OWNER_ID", 7423552124))
 API_ID = int(os.environ.get("API_ID", 28190856))
 API_HASH = os.environ.get("API_HASH", "6b9b5309c2a211b526c6ddad6eabb521")
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://CFNBEFBGWFB:hdhbedfefbegh@cluster0.obohcl3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-# FIX: Rely solely on the environment variable for the web app URL.
 WEB_APP_URL = os.environ.get("WEB_APP_URL")
 BET_TAX_RATE = 0.02 # 2% tax
 
@@ -931,6 +930,9 @@ async def self_bot_entry(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = features.get_management_keyboard(user_id)
         await update.message.reply_text("🚀 مدیریت دارک سلف:", reply_markup=keyboard)
     else:
+        if not WEB_APP_URL:
+            await update.message.reply_text("❌ سرویس لاگین سلف در حال حاضر توسط ادمین تنظیم نشده است.")
+            return ConversationHandler.END
         await update.message.reply_text(
             "برای فعالسازی سلف، لطفا شماره تلفن خود را با کد کشور ارسال کنید.",
             reply_markup=ReplyKeyboardMarkup([[KeyboardButton("📱 اشتراک گذاری شماره تلفن", request_contact=True)]], resize_keyboard=True, one_time_keyboard=True)
@@ -1566,12 +1568,6 @@ async def post_init(application: Application):
     global BOT_EVENT_LOOP
     BOT_EVENT_LOOP = asyncio.get_running_loop()
     
-    # Start Flask in a separate thread only if the URL is configured
-    if WEB_APP_URL:
-        flask_thread = Thread(target=run_flask, daemon=True)
-        flask_thread.start()
-        logging.info(f"Flask web app started, configured for URL: {WEB_APP_URL}")
-    
     # Load and start existing self-bots from the database
     for doc in db.self_bots.find({'is_active': True}):
         logging.info(f"Auto-starting session for user {doc['user_id']} from database...")
@@ -1625,6 +1621,13 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Failed to send error notification to owner: {e}")
 
 if __name__ == "__main__":
+    
+    # Start Flask in a separate thread only if the URL is configured
+    if WEB_APP_URL:
+        flask_thread = Thread(target=run_flask, daemon=True)
+        flask_thread.start()
+        logging.info(f"Flask web app started, configured for URL: {WEB_APP_URL}")
+
     # --- Conversation Handlers ---
     admin_conv = ConversationHandler(
         entry_points=[MessageHandler(filters.Regex("^👑 پنل ادمین$"), admin_panel_entry)],
