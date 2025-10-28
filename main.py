@@ -928,9 +928,30 @@ async def copy_profile_controller(client, message):
     except MessageNotModified:
         pass
     except Exception as e:
-        logging.error(f"Copy Profile Controller: Error for user {user_id} processing command '{c...(truncated 40551 characters)...RDER)} وارد کنید.")
-                except ValueError:
-                    await message.edit_text("⚠️ شماره وارد شده نامعتبر است.")
+        logging.error(f"Copy Profile Controller: Error for user {user_id} processing command '{command}': {e}", exc_info=True)
+        try:
+            await message.edit_text("⚠️ خطایی در کپی پروفایل رخ داد.")
+        except Exception:
+            pass
+
+
+async def font_controller(client, message):
+    user_id = client.me.id
+    command = message.text.strip()
+    try:
+        if command == "فونت":
+            font_list = "\n".join([f"{i+1}. {FONT_DISPLAY_NAMES.get(key, key.capitalize())}" for i, key in enumerate(FONT_KEYS_ORDER)])
+            await message.edit_text(f"فونت‌های موجود:\n{font_list}\n\nبرای انتخاب: فونت <شماره>")
+        else:
+            match = re.match(r"^فونت (\d+)$", command)
+            if match:
+                index = int(match.group(1)) - 1
+                if 0 <= index < len(FONT_KEYS_ORDER):
+                    selected_style = FONT_KEYS_ORDER[index]
+                    USER_FONT_CHOICES[user_id] = selected_style
+                    await message.edit_text(f"✅ فونت به '{FONT_DISPLAY_NAMES.get(selected_style, selected_style.capitalize())}' تغییر کرد.")
+                else:
+                    await message.edit_text(f"⚠️ شماره نامعتبر. بین 1 تا {len(FONT_KEYS_ORDER)} وارد کنید.")
             # else: Command didn't match specific font number format (shouldn't happen)
 
     except FloodWait as e:
@@ -1252,7 +1273,7 @@ def login():
          current_step = 'GET_PASSWORD'
 
 
-    logging.info(f"Login request received received: action='{action}', phone_in_session='{phone}'")
+    logging.info(f"Login request received: action='{action}', phone_in_session='{phone}'")
 
     try:
         # Ensure asyncio loop is running in the background thread
@@ -1803,21 +1824,23 @@ async def delete_messages_controller(client, message):
 async def game_controller(client, message):
     user_id = client.me.id
     command = message.text.strip()
+    chat_id = message.chat.id
     try:
+        await message.delete()
         if command == "بولینگ":
-            await message.edit_dice(emoji="🎳")  # بدون value برای انیمیشن شروع
+            await client.send_dice(chat_id, emoji="🎳")
         elif command.startswith("تاس"):
             match = re.match(r"^تاس (\d+)$", command)
             if match:
                 value = int(match.group(1))
                 if 1 <= value <= 6:
-                    await message.edit_dice(emoji="🎲", value=value)
+                    await client.send_dice(chat_id, emoji="🎲", value=value)
                 else:
-                    await message.edit_text("⚠️ عدد باید بین 1 تا 6 باشد.")
+                    await client.send_message(chat_id, "⚠️ عدد باید بین 1 تا 6 باشد.")
             else:
-                await message.edit_dice(emoji="🎲")  # بدون value برای انیمیشن شروع
+                await client.send_dice(chat_id, emoji="🎲")
         else:
-            await message.edit_text("⚠️ دستور نامعتبر.")
+            await client.send_message(chat_id, "⚠️ دستور نامعتبر.")
     except Exception as e:
         logging.error(f"Game Controller: Error for user {user_id}: {e}")
-        await message.edit_text("⚠️ خطایی در بازی رخ داد.")
+        await client.send_message(chat_id, "⚠️ خطایی در بازی رخ داد.")
