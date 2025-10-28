@@ -112,7 +112,7 @@ FONT_STYLES = {
     "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
     "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':':' : '},  # Kanji numbers
     "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
-    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate shadow
+    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'𝟸',':':' : '},  # Approximate shadow
 }
 FONT_KEYS_ORDER = list(FONT_STYLES.keys())
 FONT_DISPLAY_NAMES = {
@@ -162,7 +162,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
-# --- DEFAULT ENEMY REPLIES (Updated) ---
+# --- DEFAULT ENEMY REPLIES (Updated by user) ---
 DEFAULT_ENEMY_REPLIES_LIST = [
     "کیرم تو رحم اجاره ای و خونی مالی مادرت",
     "دو میلیون شبی پول ویلا بدم تا مادرتو تو گوشه کناراش بگام و اب کوسشو بریزم کف خونه تا فردا صبح کارگرای افغانی برای نظافت اومدن با بوی اب کس مادرت بجقن و ابکیراشون نثار قبر مرده هات بشه",
@@ -1575,78 +1575,74 @@ async def delete_messages_controller(client, message):
     try:
         count = int(count_str) if count_str else 5
         if count < 1: count = 1
-        if count > 100: # Max 100 messages
-            count = 100
+        if count > 1000: # Max 1000 messages (arbitrary higher limit)
+            count = 1000
             # Send a temporary warning message
-            await client.send_message(message.chat.id, "⚠️ حداکثر تعداد حذف 100 پیام است.", reply_to_message_id=message.id)
+            await client.send_message(message.chat.id, "⚠️ حداکثر تعداد حذف ۱۰۰۰ پیام است.", reply_to_message_id=message.id)
     except ValueError:
          await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
          return
 
     chat_id = message.chat.id
-    message_ids_to_delete = []
-
+    
     try:
-        # Fetch 'count + 1' messages from "me" to include the command
-        async for msg in client.search_messages(chat_id, from_user="me", limit=count + 1):
-            message_ids_to_delete.append(msg.id)
+        # Delete command message separately first.
+        try:
+            await message.delete()
+        except Exception:
+            pass # Already deleted or no permission
 
-        deleted_count_actual = 0
+        message_ids_to_delete = []
+        total_deleted_count = 0
+        
+        async for msg in client.search_messages(chat_id, from_user="me", limit=count):
+            message_ids_to_delete.append(msg.id)
+            # Delete in chunks of 100 (Telegram limit)
+            if len(message_ids_to_delete) >= 100:
+                try:
+                    deleted_chunk_count = await client.delete_messages(chat_id, message_ids_to_delete)
+                    total_deleted_count += deleted_chunk_count
+                    message_ids_to_delete = [] # Reset chunk
+                    await asyncio.sleep(1) # Small delay to avoid flood
+                except FloodWait as e_del_chunk:
+                    logging.warning(f"Delete Msgs: Flood wait during chunk deletion for user {user_id}. Sleeping {e_del_chunk.value}s.")
+                    await asyncio.sleep(e_del_chunk.value + 1)
+                except Exception as e_del_chunk_err:
+                    logging.error(f"Delete Msgs: Error during chunk deletion: {e_del_chunk_err}")
+                    # Don't break, just log and continue trying
+                    message_ids_to_delete = [] # Clear faulty chunk
+
+        # Delete any remaining messages
         if len(message_ids_to_delete) > 0:
             try:
-                deleted_count_actual = await client.delete_messages(chat_id, message_ids_to_delete)
-                
-                feedback_count = deleted_count_actual
-                # Check if the original command message ID was part of the successfully deleted batch
-                # This assumes delete_messages returns the count of *actually* deleted messages
-                # and message.id was in the list sent for deletion.
-                if message.id in message_ids_to_delete:
-                     feedback_count = deleted_count_actual - 1
+                deleted_chunk_count = await client.delete_messages(chat_id, message_ids_to_delete)
+                total_deleted_count += deleted_chunk_count
+            except FloodWait as e_del_final:
+                logging.warning(f"Delete Msgs: Flood wait during final deletion for user {user_id}. Sleeping {e_del_final.value}s.")
+                await asyncio.sleep(e_del_final.value + 1)
+            except Exception as e_del_final_err:
+                 logging.error(f"Delete Msgs: Error during final deletion: {e_del_final_err}")
 
-                if feedback_count > 0:
-                    status_msg = await client.send_message(chat_id, f"✅ {feedback_count} پیام شما حذف شد.")
-                    await asyncio.sleep(3)
-                    await status_msg.delete()
-                elif deleted_count_actual == 1 and message.id in message_ids_to_delete:
-                    pass # Only command deleted
-                elif deleted_count_actual == 0:
-                     status_msg = await client.send_message(chat_id, "ℹ️ پیامی برای حذف یافت نشد (ممکن است قبلاً حذف شده باشند).")
-                     await asyncio.sleep(3)
-                     await status_msg.delete()
+        # Send feedback
+        if total_deleted_count > 0:
+            status_msg = await client.send_message(chat_id, f"✅ {total_deleted_count} پیام شما حذف شد.")
+            await asyncio.sleep(3)
+            await status_msg.delete()
+        else:
+             status_msg = await client.send_message(chat_id, "ℹ️ پیامی برای حذف یافت نشد (ممکن است قبلاً حذف شده باشند).")
+             await asyncio.sleep(3)
+             await status_msg.delete()
 
-            except MessageIdInvalid:
-                 logging.warning(f"Delete Msgs: Some message IDs were invalid for user {user_id}. Might have been deleted already.")
-                 try:
-                     status_msg = await client.send_message(chat_id, f"✅ تعدادی پیام حذف شد (ممکن است قبلاً حذف شده باشند).")
-                     await asyncio.sleep(3)
-                     await status_msg.delete()
-                 except Exception: pass # Failsafe
-            except FloodWait as e_del:
-                logging.warning(f"Delete Msgs: Flood wait during deletion for user {user_id}. Sleeping {e_del.value}s.")
-                await asyncio.sleep(e_del.value + 1)
-                try:
-                     await client.send_message(chat_id, f"⏳ Flood wait ({e_del.value}s) هنگام حذف پیام‌ها. ممکن است همه حذف نشده باشند.")
-                except Exception: pass
-            except Exception as e_del_batch:
-                 logging.error(f"Delete Msgs: Error during batch deletion for user {user_id}: {e_del_batch}", exc_info=True)
-                 try:
-                     await client.send_message(chat_id, "⚠️ خطایی در حذف دسته‌ای پیام‌ها رخ داد.")
-                 except Exception: pass
-
-        elif message.id: # Failsafe: if search returned nothing, at least delete command
-             try: await client.delete_messages(chat_id, [message.id])
-             except Exception: pass 
-
-    except FloodWait as e_hist: # This is now search_messages, not get_history
+    except FloodWait as e_hist: # This is for search_messages
         logging.warning(f"Delete Msgs: Flood wait searching messages for user {user_id}. Sleeping {e_hist.value}s.")
         await asyncio.sleep(e_hist.value + 1)
         try:
-            await message.reply_text(f"⏳ Flood wait ({e_hist.value}s) در جستجوی تاریخچه. لطفاً دوباره تلاش کنید.", quote=True)
+            await client.send_message(chat_id, f"⏳ Flood wait ({e_hist.value}s) در جستجوی تاریخچه. لطفاً دوباره تلاش کنید.")
         except Exception: pass
     except Exception as e_main:
         logging.error(f"Delete Msgs Controller: General error for user {user_id}: {e_main}", exc_info=True)
         try:
-            await message.reply_text("⚠️ خطای ناشناخته‌ای در پردازش دستور حذف رخ داد.", quote=True)
+            await client.send_message(chat_id, "⚠️ خطای ناشناخته‌ای در پردازش دستور حذف رخ داد.")
         except Exception: pass
 
 
@@ -1969,7 +1965,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(incoming_message_manager, filters.all & ~filters.me & ~filters.user(user_id) & ~filters.service), group=-3)
 
         # Group -1: Outgoing message modifications (bold, translate)
-        # *** MODIFIED: Removed ~filters.reply ***
+        # *** MODIFIED: Removed ~filters.reply *** (This comment was already in user's file)
         client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
 
         # Group 0: Command handlers (default group)
