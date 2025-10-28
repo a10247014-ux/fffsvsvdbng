@@ -80,7 +80,7 @@ FONT_STYLES = {
     "superscript":  {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',':':':'},
     "subscript":    {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'},
     "tibetan":      {'0':'༠','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩',':':' : '},
-    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'۵','6':'৬','7':'৭','8':'۸','9':'৯',':':' : '},
+    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯',':':' : '},
     "gujarati":     {'0':'૦','1':'૧','2':'૨','3':'૩','4':'૪','5':'૫','6':'૬','7':'૭','8':'૮','9':'૯',':':' : '},
     "mongolian":    {'0':'᠐','1':'᠑','2':'᠒','3':'᠓','4':'᠔','5':'᠕','6':'᠖','7':'᠗','8':'᠘','9':'᠙',':':' : '},
     "lao":          {'0':'໐','1':'໑','2':'໒','3':'໓','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':':' : '},
@@ -112,7 +112,7 @@ FONT_STYLES = {
     "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
     "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':':' : '},  # Kanji numbers
     "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
-    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'𝟸',':':' : '},  # Approximate shadow
+    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate shadow
 }
 FONT_KEYS_ORDER = list(FONT_STYLES.keys())
 FONT_DISPLAY_NAMES = {
@@ -162,21 +162,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
-# --- DEFAULT ENEMY REPLIES (Updated by user) ---
-DEFAULT_ENEMY_REPLIES_LIST = [
-    "کیرم تو رحم اجاره ای و خونی مالی مادرت",
-    "دو میلیون شبی پول ویلا بدم تا مادرتو تو گوشه کناراش بگام و اب کوسشو بریزم کف خونه تا فردا صبح کارگرای افغانی برای نظافت اومدن با بوی اب کس مادرت بجقن و ابکیراشون نثار قبر مرده هات بشه",
-    "احمق مادر کونی من کس مادرت گذاشتم تو بازم داری کسشر میگی",
-    "هی بیناموس کیرم بره تو کس ننت واس بابات نشآخ مادر کیری کیرم بره تو کس اجدادت کسکش بیناموس کس ول نسل شوتی ابجی کسده کیرم تو کس مادرت بیناموس کیری کیرم تو کس نسlt ابجی کونی کس نسل سگ ممبر کونی ابجی سگ ممبر سگ کونی کیرم تو کس ننت کیر تو کس مادرت کیر خاندان  تو کس نسlt مادر کونی ابجی کونی کیری ناموس ابجیتو گاییدم سگ حرومی خارکسه مادر کیری با کیر بزنم تو رحم مادرت ناموستو بگام لاشی کونی ابجی کس  خیابونی مادرخونی ننت کیرمو میماله تو میای کص میگی شاخ نشو ییا ببین شاخو کردم تو کون ابجی جندت کس ابجیتو پاره کردم تو شاخ میشی اوبی",
-    "کیرم تو کس سیاه مادرت خارکصده",
-    "حروم زاده باک کص ننت با ابکیرم پر میکنم",
-    "منبع اب ایرانو با اب کص مادرت تامین میکنم",
-    "خارکسته میخای مادرتو بگام بعد بیای ادعای شرف کنی کیرم تو شرف مادرت",
-    "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی",
-    "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی"
-]
-
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|حذف همه|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
+COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
 
 # --- Main Bot Functions ---
 def stylize_time(time_str: str, style: str) -> str:
@@ -1207,7 +1193,7 @@ async def help_controller(client, message):
 • `چینی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به چینی (`zh`).
 • `روسی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به روسی (`ru`).
 • `انگلیسی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به انگلیسی (`en`).
-• `بولد روشن` / `خاموش`: برجسته کردن (bold) خودکار تمام پیام‌های ارسالی (شامل ریپلای‌ها).
+• `بولد روشن` / `خاموش`: برجسته کردن (bold) خودکار تمام پیام‌های ارسالی.
 • `سین روشن` / `خاموش`: تیک دوم (خوانده شدن) خودکار پیام‌ها در چت شخصی (PV).
 
 **🔹 ساعت و فونت (نام پروفایل) 🔹**
@@ -1216,8 +1202,7 @@ async def help_controller(client, message):
 • `فونت [عدد]`: انتخاب فونت جدید برای نمایش ساعت (عدد از لیست بالا).
 
 **🔹 مدیریت پیام و کاربر 🔹**
-• `حذف [عدد]`: حذف X پیام آخر شما (به علاوه خود دستور). مثال: `حذف 10` (10 پیام + دستور حذف می‌شوند). بدون عدد، 5 پیام آخر حذف می‌شود.
-• `حذف همه`: حذف **تمام** پیام‌های شما از چت فعلی (با احتیاط فراوان استفاده شود!).
+• `حذف [عدد]`: حذف X پیام آخر شما در چت فعلی (شامل خود دستور نمی‌شود). مثال: `حذف 10`. بدون عدد، 5 پیام آخر حذف می‌شود.
 • `ذخیره` (ریپلای): ذخیره کردن پیام ریپلای شده در Saved Messages شما.
 • `تکرار [عدد] [ثانیه]` (ریپلای): تکرار پیام ریپلای شده X بار با فاصله Y ثانیه. فاصله ثانیه اختیاری است (پیش‌فرض بدون فاصله). مثال: `تکرار 5 2`.
 • `بلاک روشن` / `خاموش` (ریپلای): بلاک یا آنبلاک کردن کاربر ریپلای شده.
@@ -1528,45 +1513,10 @@ async def repeat_message_controller(client, message):
 
 async def delete_messages_controller(client, message):
     user_id = client.me.id
-    command_text = message.text.strip() # Get the full command text
-
-    # --- Handle "حذف همه" ---
-    if command_text == "حذف همه":
-        try:
-            await message.delete() # Delete the command message first
-            await client.delete_user_history(message.chat.id, user_id)
-            # Send confirmation
-            status_msg = await client.send_message(message.chat.id, f"✅ تمام پیام‌های شما از این چت در حال حذف شدن هستند.")
-            await asyncio.sleep(5)
-            await status_msg.delete()
-        except FloodWait as e_flood_all:
-            logging.warning(f"Delete All Msgs: Flood wait for user {user_id}. Sleeping {e_flood_all.value}s.")
-            await asyncio.sleep(e_flood_all.value + 1)
-            try:
-                 await client.send_message(message.chat.id, f"⏳ Flood wait ({e_flood_all.value}s) هنگام حذف همه پیام‌ها.")
-            except Exception: pass
-        except UserNotParticipant:
-             logging.warning(f"Delete All Msgs: User {user_id} not participant in chat {message.chat.id}.")
-             try:
-                 # Try editing the original message if delete failed
-                 await message.edit_text(f"⚠️ شما عضو این چت نیستید یا اجازه حذف پیام‌ها را ندارید.")
-             except Exception:
-                 try:
-                     # Fallback to sending new message
-                     await client.send_message(message.chat.id, f"⚠️ شما عضو این چت نیستید یا اجازه حذف پیام‌ها را ندارید.")
-                 except Exception: pass
-        except Exception as e_delete_all:
-            logging.error(f"Delete All Msgs: Error for user {user_id}: {e_delete_all}", exc_info=True)
-            try:
-                 await client.send_message(message.chat.id, "⚠️ خطایی در حذف همه پیام‌ها رخ داد.")
-            except Exception: pass
-        return # Stop further execution
-
-    # --- Handle "حذف [عدد]" ---
-    match = re.match(r"^حذف(?: (\d+))?$", command_text) # Check for the other pattern
+    match = re.match(r"^حذف(?: (\d+))?$", message.text)
     if not match:
         try:
-             await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `حذف`، `حذف 10` یا `حذف همه`")
+             await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `حذف` یا `حذف 10`")
         except Exception: pass
         return
 
@@ -1575,74 +1525,99 @@ async def delete_messages_controller(client, message):
     try:
         count = int(count_str) if count_str else 5
         if count < 1: count = 1
-        if count > 1000: # Max 1000 messages (arbitrary higher limit)
-            count = 1000
-            # Send a temporary warning message
-            await client.send_message(message.chat.id, "⚠️ حداکثر تعداد حذف ۱۰۰۰ پیام است.", reply_to_message_id=message.id)
+        # Add a reasonable upper limit
+        if count > 100: # Max 100 messages + command = 101
+            count = 100
+            await message.reply_text("⚠️ حداکثر تعداد حذف 100 پیام است.", quote=True) # Reply, don't edit original
     except ValueError:
          await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
          return
 
     chat_id = message.chat.id
-    
+    message_ids_to_delete = []
+    processed_count = 0
+    limit = count + 10 # Fetch a bit more to be sure we find enough user messages
+
     try:
-        # Delete command message separately first.
-        try:
-            await message.delete()
-        except Exception:
-            pass # Already deleted or no permission
+        # Include the command message ID itself for deletion
+        message_ids_to_delete.append(message.id)
 
-        message_ids_to_delete = []
-        total_deleted_count = 0
-        
-        async for msg in client.search_messages(chat_id, from_user="me", limit=count):
-            message_ids_to_delete.append(msg.id)
-            # Delete in chunks of 100 (Telegram limit)
-            if len(message_ids_to_delete) >= 100:
-                try:
-                    deleted_chunk_count = await client.delete_messages(chat_id, message_ids_to_delete)
-                    total_deleted_count += deleted_chunk_count
-                    message_ids_to_delete = [] # Reset chunk
-                    await asyncio.sleep(1) # Small delay to avoid flood
-                except FloodWait as e_del_chunk:
-                    logging.warning(f"Delete Msgs: Flood wait during chunk deletion for user {user_id}. Sleeping {e_del_chunk.value}s.")
-                    await asyncio.sleep(e_del_chunk.value + 1)
-                except Exception as e_del_chunk_err:
-                    logging.error(f"Delete Msgs: Error during chunk deletion: {e_del_chunk_err}")
-                    # Don't break, just log and continue trying
-                    message_ids_to_delete = [] # Clear faulty chunk
+        async for msg in client.get_chat_history(chat_id, limit=limit):
+            processed_count += 1
+            # Skip the command message itself if found again
+            if msg.id == message.id:
+                continue
+            # Check if it's user's message and we still need more
+            if msg.from_user and msg.from_user.id == user_id and len(message_ids_to_delete) <= count:
+                message_ids_to_delete.append(msg.id)
 
-        # Delete any remaining messages
+            # Stop fetching if we have enough messages or processed the limit
+            if len(message_ids_to_delete) > count or processed_count >= limit:
+                break
+
+        # Adjust the list to exactly `count + 1` (or fewer if less found)
+        # Keep the command message (first element) + the latest 'count' messages
+        if len(message_ids_to_delete) > count + 1:
+            message_ids_to_delete = message_ids_to_delete[:1] + message_ids_to_delete[-(count):]
+
+
+        deleted_count_actual = 0
         if len(message_ids_to_delete) > 0:
             try:
-                deleted_chunk_count = await client.delete_messages(chat_id, message_ids_to_delete)
-                total_deleted_count += deleted_chunk_count
-            except FloodWait as e_del_final:
-                logging.warning(f"Delete Msgs: Flood wait during final deletion for user {user_id}. Sleeping {e_del_final.value}s.")
-                await asyncio.sleep(e_del_final.value + 1)
-            except Exception as e_del_final_err:
-                 logging.error(f"Delete Msgs: Error during final deletion: {e_del_final_err}")
+                # delete_messages returns the count of successfully deleted messages
+                deleted_count_actual = await client.delete_messages(chat_id, message_ids_to_delete)
+                # Subtract 1 if the command message itself was counted
+                feedback_count = deleted_count_actual -1 if message.id in message_ids_to_delete else deleted_count_actual
 
-        # Send feedback
-        if total_deleted_count > 0:
-            status_msg = await client.send_message(chat_id, f"✅ {total_deleted_count} پیام شما حذف شد.")
-            await asyncio.sleep(3)
-            await status_msg.delete()
-        else:
-             status_msg = await client.send_message(chat_id, "ℹ️ پیامی برای حذف یافت نشد (ممکن است قبلاً حذف شده باشند).")
-             await asyncio.sleep(3)
-             await status_msg.delete()
+                if feedback_count > 0:
+                    status_msg = await client.send_message(chat_id, f"✅ {feedback_count} پیام شما حذف شد.")
+                    await asyncio.sleep(3)
+                    await status_msg.delete()
+                elif deleted_count_actual == 1 and message.id in message_ids_to_delete:
+                    # Only the command was deleted, no feedback needed
+                    pass
+                elif deleted_count_actual == 0:
+                     # This might happen if messages were deleted by someone else quickly
+                     status_msg = await client.send_message(chat_id, "ℹ️ پیامی برای حذف یافت نشد (ممکن است قبلاً حذف شده باشند).")
+                     await asyncio.sleep(3)
+                     await status_msg.delete()
 
-    except FloodWait as e_hist: # This is for search_messages
-        logging.warning(f"Delete Msgs: Flood wait searching messages for user {user_id}. Sleeping {e_hist.value}s.")
+            except MessageIdInvalid:
+                 logging.warning(f"Delete Msgs: Some message IDs were invalid for user {user_id}. Might have been deleted already.")
+                 # Try to send a generic feedback if deletion partially failed or IDs were bad
+                 try:
+                     status_msg = await client.send_message(chat_id, f"✅ تعدادی پیام حذف شد (ممکن است برخی قبلاً حذف شده باشند).")
+                     await asyncio.sleep(3)
+                     await status_msg.delete()
+                 except Exception: pass # Failsafe
+            except FloodWait as e_del:
+                logging.warning(f"Delete Msgs: Flood wait during deletion for user {user_id}. Sleeping {e_del.value}s.")
+                await asyncio.sleep(e_del.value + 1)
+                try:
+                     await client.send_message(chat_id, f"⏳ Flood wait ({e_del.value}s) هنگام حذف پیام‌ها. ممکن است همه حذف نشده باشند.")
+                except Exception: pass
+            except Exception as e_del_batch:
+                 logging.error(f"Delete Msgs: Error during batch deletion for user {user_id}: {e_del_batch}", exc_info=True)
+                 try:
+                     await client.send_message(chat_id, "⚠️ خطایی در حذف دسته‌ای پیام‌ها رخ داد.")
+                 except Exception: pass
+
+        # If somehow message_ids_to_delete is empty (e.g., only command was sent and no history found)
+        # This case is unlikely now that we add command ID first, but kept as failsafe.
+        elif message.id:
+             try: await client.delete_messages(chat_id, [message.id]) # Try deleting only the command
+             except Exception: pass # Ignore if it fails
+
+    except FloodWait as e_hist:
+        logging.warning(f"Delete Msgs: Flood wait getting history for user {user_id}. Sleeping {e_hist.value}s.")
         await asyncio.sleep(e_hist.value + 1)
         try:
-            await client.send_message(chat_id, f"⏳ Flood wait ({e_hist.value}s) در جستجوی تاریخچه. لطفاً دوباره تلاش کنید.")
+            await message.reply_text(f"⏳ Flood wait ({e_hist.value}s) در دریافت تاریخچه. لطفاً دوباره تلاش کنید.", quote=True)
         except Exception: pass
     except Exception as e_main:
         logging.error(f"Delete Msgs Controller: General error for user {user_id}: {e_main}", exc_info=True)
         try:
-            await client.send_message(chat_id, "⚠️ خطای ناشناخته‌ای در پردازش دستور حذف رخ داد.")
+            await message.reply_text("⚠️ خطای ناشناخته‌ای در پردازش دستور حذف رخ داد.", quote=True)
         except Exception: pass
 
 
@@ -1947,7 +1922,11 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         MUTED_USERS.setdefault(user_id, set())
         # ORIGINAL_PROFILE_DATA should not be setdefault, it's temporary during copy mode
         if user_id not in ORIGINAL_PROFILE_DATA: ORIGINAL_PROFILE_DATA[user_id] = {}
-        ENEMY_REPLIES.setdefault(user_id, DEFAULT_ENEMY_REPLIES_LIST.copy()) # Use the new default list
+        ENEMY_REPLIES.setdefault(user_id, [ # Default enemy replies if list is empty/new user
+            "کیرم تو رحم اجاره ای و خونی مالی مادرت",
+            # ... (other default replies) ...
+            "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی"
+        ])
         FRIEND_REPLIES.setdefault(user_id, []) # Default empty list
         ENEMY_LIST.setdefault(user_id, set())
         FRIEND_LIST.setdefault(user_id, set())
@@ -1965,8 +1944,9 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(incoming_message_manager, filters.all & ~filters.me & ~filters.user(user_id) & ~filters.service), group=-3)
 
         # Group -1: Outgoing message modifications (bold, translate)
-        # *** MODIFIED: Removed ~filters.reply *** (This comment was already in user's file)
-        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
+        # Ensure it doesn't process commands by checking regex again? Or rely on outgoing_message_modifier logic.
+        # Added ~filters.regex(COMMAND_REGEX) to be explicit
+        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.reply & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
 
         # Group 0: Command handlers (default group)
         cmd_filters = filters.me & filters.user(user_id) & filters.text
@@ -2000,8 +1980,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(copy_profile_controller, cmd_filters & filters.regex("^(کپی روشن|کپی خاموش)$"))) # Logic inside handles reply check
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
-        # *** MODIFIED: Updated regex to include "حذف همه" ***
-        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^(حذف(?: \d+)?|حذف همه)$")))
+        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^حذف(?: \d+)?$")))
         client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$")))
 
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
@@ -2588,3 +2567,4 @@ if __name__ == "__main__":
     logging.info("========================================")
     logging.info(" Application shutdown complete.        ")
     logging.info("========================================")
+
