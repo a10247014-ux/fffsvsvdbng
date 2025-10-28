@@ -162,7 +162,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|حذف همه|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
+COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
 
 # --- Main Bot Functions ---
 def stylize_time(time_str: str, style: str) -> str:
@@ -546,16 +546,16 @@ async def auto_seen_handler(client, message):
             if message.chat:
                 await client.read_chat_history(message.chat.id)
         except FloodWait as e:
-             logging.warning(f"AutoSeen: Flood wait marking chat {getattr(message, 'chat', {}).get('id', 'N/A')} read: {e.value}s")
+             logging.warning(f"AutoSeen: Flood wait marking chat {getattr(message.chat, 'id', 'N/A')} read: {e.value}s")
              await asyncio.sleep(e.value + 1)
         except PeerIdInvalid:
-            logging.warning(f"AutoSeen: PeerIdInvalid for chat {getattr(message, 'chat', {}).get('id', 'N/A')}. Cannot mark as read.")
+            logging.warning(f"AutoSeen: PeerIdInvalid for chat {getattr(message.chat, 'id', 'N/A')}. Cannot mark as read.")
         except AttributeError:
              logging.warning("AutoSeen: Message object missing chat attribute.") # Handle cases where message might be incomplete
         except Exception as e:
              # Avoid logging common errors if chat becomes inaccessible
              if "Could not find the input peer" not in str(e) and "PEER_ID_INVALID" not in str(e).upper():
-                 logging.warning(f"AutoSeen: Could not mark chat {getattr(message, 'chat', {}).get('id', 'N/A')} as read: {e}")
+                 logging.warning(f"AutoSeen: Could not mark chat {getattr(message.chat, 'id', 'N/A')} as read: {e}")
 
 
 async def translate_controller(client, message):
@@ -930,9 +930,743 @@ async def copy_profile_controller(client, message):
     except Exception as e:
         logging.error(f"Copy Profile Controller: Error for user {user_id} processing command '{command}': {e}", exc_info=True)
         try:
-            await message.edit_text("⚠️ خطایی در کپی پروفایل رخ داد.")
+            # Provide more specific error if possible
+            error_text = f"⚠️ خطایی در عملیات کپی پروفایل رخ داد: {type(e).__name__}"
+            await message.edit_text(error_text)
         except Exception:
-            pass
+            pass # Avoid error loops
+
+
+async def set_enemy_controller(client, message):
+    user_id = client.me.id
+    if message.reply_to_message and message.reply_to_message.from_user:
+        target_id = message.reply_to_message.from_user.id
+        enemies = ENEMY_LIST.setdefault(user_id, set())
+        if target_id not in enemies:
+             enemies.add(target_id)
+             await message.edit_text(f"✅ کاربر با آیدی `{target_id}` به لیست دشمن اضافه شد.")
+        else:
+            await message.edit_text(f"ℹ️ کاربر با آیدی `{target_id}` از قبل در لیست دشمن بود.")
+    else:
+        await message.edit_text("⚠️ برای افزودن به لیست دشمن، روی پیام کاربر مورد نظر ریپلای کنید.")
+
+
+async def delete_enemy_controller(client, message):
+    user_id = client.me.id
+    if message.reply_to_message and message.reply_to_message.from_user:
+        target_id = message.reply_to_message.from_user.id
+        enemies = ENEMY_LIST.get(user_id) # No setdefault needed here
+        if enemies and target_id in enemies:
+            enemies.remove(target_id)
+            await message.edit_text(f"✅ کاربر با آیدی `{target_id}` از لیست دشمن حذف شد.")
+            # Optional: Remove the set if it becomes empty
+            # if not enemies: del ENEMY_LIST[user_id]
+        else:
+            await message.edit_text(f"ℹ️ کاربر با آیدی `{target_id}` در لیست دشمن یافت نشد.")
+    else:
+        await message.edit_text("⚠️ برای حذف از لیست دشمن، روی پیام کاربر مورد نظر ریپلای کنید.")
+
+
+async def clear_enemy_list_controller(client, message):
+    user_id = client.me.id
+    if ENEMY_LIST.get(user_id): # Check if the list exists and is not empty
+        ENEMY_LIST[user_id] = set()
+        await message.edit_text("✅ لیست دشمن با موفقیت پاکسازی شد.")
+    else:
+        await message.edit_text("ℹ️ لیست دشمن از قبل خالی بود.")
+
+
+async def list_enemies_controller(client, message):
+    user_id = client.me.id
+    enemies = ENEMY_LIST.get(user_id, set())
+    if not enemies:
+        await message.edit_text("ℹ️ لیست دشمن خالی است.")
+    else:
+        # Try to get usernames or first names for better readability
+        list_items = []
+        for eid in enemies:
+            try:
+                # Fetch user info - might fail if user is inaccessible
+                user = await client.get_users(eid)
+                display_name = f"{user.first_name}" + (f" {user.last_name}" if user.last_name else "")
+                list_items.append(f"- {display_name} (`{eid}`)")
+            except Exception:
+                # Fallback to just ID if fetching fails
+                list_items.append(f"- User ID: `{eid}`")
+
+        list_text = "**📋 لیست دشمنان:**\n" + "\n".join(list_items)
+        # Handle potential message too long error
+        if len(list_text) > 4096:
+            list_text = list_text[:4090] + "\n[...]" # Truncate if too long
+        await message.edit_text(list_text)
+
+
+async def list_enemy_replies_controller(client, message):
+    user_id = client.me.id
+    replies = ENEMY_REPLIES.get(user_id, [])
+    if not replies:
+        await message.edit_text("ℹ️ لیست متن‌های پاسخ دشمن خالی است.")
+    else:
+        list_text = "**📋 لیست متن‌های دشمن:**\n" + "\n".join([f"{i+1}. `{reply}`" for i, reply in enumerate(replies)])
+        if len(list_text) > 4096:
+            list_text = list_text[:4090] + "\n[...]"
+        await message.edit_text(list_text)
+
+
+async def delete_enemy_reply_controller(client, message):
+    user_id = client.me.id
+    match = re.match(r"^حذف متن دشمن(?: (\d+))?$", message.text, re.IGNORECASE) # Added ignorecase
+    if match:
+        index_str = match.group(1)
+        replies = ENEMY_REPLIES.get(user_id) # Get list or None
+
+        if replies is None or not replies:
+             await message.edit_text("ℹ️ لیست متن دشمن خالی است، چیزی برای حذف وجود ندارد.")
+             return
+
+        try:
+            if index_str:
+                index = int(index_str) - 1 # User inputs 1-based index
+                if 0 <= index < len(replies):
+                    removed_reply = replies.pop(index) # Use pop to remove by index
+                    await message.edit_text(f"✅ متن شماره {index+1} (`{removed_reply}`) از لیست دشمن حذف شد.")
+                else:
+                    await message.edit_text(f"⚠️ شماره نامعتبر. لطفاً عددی بین 1 تا {len(replies)} وارد کنید.")
+            else:
+                # Delete all replies
+                ENEMY_REPLIES[user_id] = []
+                await message.edit_text("✅ تمام متن‌های پاسخ دشمن حذف شدند.")
+        except ValueError:
+             await message.edit_text("⚠️ شماره وارد شده نامعتبر است.")
+        except Exception as e:
+            logging.error(f"Delete Enemy Reply: Error for user {user_id}: {e}", exc_info=True)
+            await message.edit_text("⚠️ خطایی در حذف متن دشمن رخ داد.")
+    # else: Regex didn't match (should not happen with current handler setup)
+
+
+async def set_enemy_reply_controller(client, message):
+    user_id = client.me.id
+    # Use re.IGNORECASE for robustness
+    match = re.match(r"^تنظیم متن دشمن (.*)", message.text, re.DOTALL | re.IGNORECASE)
+    if match:
+        text = match.group(1).strip()
+        if text:
+            # Initialize the list if it doesn't exist for the user
+            if user_id not in ENEMY_REPLIES:
+                ENEMY_REPLIES[user_id] = []
+            ENEMY_REPLIES[user_id].append(text)
+            await message.edit_text(f"✅ متن جدید به لیست پاسخ دشمن اضافه شد (مورد {len(ENEMY_REPLIES[user_id])}).")
+        else:
+            await message.edit_text("⚠️ متن پاسخ نمی‌تواند خالی باشد.")
+    # else: Regex didn't match (should not happen with current handler setup)
+
+
+async def set_friend_controller(client, message):
+    user_id = client.me.id
+    if message.reply_to_message and message.reply_to_message.from_user:
+        target_id = message.reply_to_message.from_user.id
+        friends = FRIEND_LIST.setdefault(user_id, set())
+        if target_id not in friends:
+            friends.add(target_id)
+            await message.edit_text(f"✅ کاربر با آیدی `{target_id}` به لیست دوست اضافه شد.")
+        else:
+            await message.edit_text(f"ℹ️ کاربر با آیدی `{target_id}` از قبل در لیست دوست بود.")
+    else:
+        await message.edit_text("⚠️ برای افزودن به لیست دوست، روی پیام کاربر مورد نظر ریپلای کنید.")
+
+
+async def delete_friend_controller(client, message):
+    user_id = client.me.id
+    if message.reply_to_message and message.reply_to_message.from_user:
+        target_id = message.reply_to_message.from_user.id
+        friends = FRIEND_LIST.get(user_id)
+        if friends and target_id in friends:
+            friends.remove(target_id)
+            await message.edit_text(f"✅ کاربر با آیدی `{target_id}` از لیست دوست حذف شد.")
+        else:
+            await message.edit_text(f"ℹ️ کاربر با آیدی `{target_id}` در لیست دوست یافت نشد.")
+    else:
+        await message.edit_text("⚠️ برای حذف از لیست دوست، روی پیام کاربر مورد نظر ریپلای کنید.")
+
+
+async def clear_friend_list_controller(client, message):
+    user_id = client.me.id
+    if FRIEND_LIST.get(user_id):
+        FRIEND_LIST[user_id] = set()
+        await message.edit_text("✅ لیست دوست با موفقیت پاکسازی شد.")
+    else:
+        await message.edit_text("ℹ️ لیست دوست از قبل خالی بود.")
+
+
+async def list_friends_controller(client, message):
+    user_id = client.me.id
+    friends = FRIEND_LIST.get(user_id, set())
+    if not friends:
+        await message.edit_text("ℹ️ لیست دوست خالی است.")
+    else:
+        list_items = []
+        for fid in friends:
+            try:
+                user = await client.get_users(fid)
+                display_name = f"{user.first_name}" + (f" {user.last_name}" if user.last_name else "")
+                list_items.append(f"- {display_name} (`{fid}`)")
+            except Exception:
+                list_items.append(f"- User ID: `{fid}`")
+
+        list_text = "**🫂 لیست دوستان:**\n" + "\n".join(list_items)
+        if len(list_text) > 4096:
+            list_text = list_text[:4090] + "\n[...]"
+        await message.edit_text(list_text)
+
+
+async def list_friend_replies_controller(client, message):
+    user_id = client.me.id
+    replies = FRIEND_REPLIES.get(user_id, [])
+    if not replies:
+        await message.edit_text("ℹ️ لیست متن‌های پاسخ دوست خالی است.")
+    else:
+        list_text = "**💬 لیست متن‌های دوست:**\n" + "\n".join([f"{i+1}. `{reply}`" for i, reply in enumerate(replies)])
+        if len(list_text) > 4096:
+            list_text = list_text[:4090] + "\n[...]"
+        await message.edit_text(list_text)
+
+
+async def delete_friend_reply_controller(client, message):
+    user_id = client.me.id
+    match = re.match(r"^حذف متن دوست(?: (\d+))?$", message.text, re.IGNORECASE)
+    if match:
+        index_str = match.group(1)
+        replies = FRIEND_REPLIES.get(user_id)
+
+        if replies is None or not replies:
+             await message.edit_text("ℹ️ لیست متن دوست خالی است، چیزی برای حذف وجود ندارد.")
+             return
+
+        try:
+            if index_str:
+                index = int(index_str) - 1
+                if 0 <= index < len(replies):
+                    removed_reply = replies.pop(index)
+                    await message.edit_text(f"✅ متن شماره {index+1} (`{removed_reply}`) از لیست دوست حذف شد.")
+                else:
+                    await message.edit_text(f"⚠️ شماره نامعتبر. لطفاً عددی بین 1 تا {len(replies)} وارد کنید.")
+            else:
+                FRIEND_REPLIES[user_id] = []
+                await message.edit_text("✅ تمام متن‌های پاسخ دوست حذف شدند.")
+        except ValueError:
+             await message.edit_text("⚠️ شماره وارد شده نامعتبر است.")
+        except Exception as e:
+            logging.error(f"Delete Friend Reply: Error for user {user_id}: {e}", exc_info=True)
+            await message.edit_text("⚠️ خطایی در حذف متن دوست رخ داد.")
+
+
+async def set_friend_reply_controller(client, message):
+    user_id = client.me.id
+    match = re.match(r"^تنظیم متن دوست (.*)", message.text, re.DOTALL | re.IGNORECASE)
+    if match:
+        text = match.group(1).strip()
+        if text:
+            if user_id not in FRIEND_REPLIES:
+                FRIEND_REPLIES[user_id] = []
+            FRIEND_REPLIES[user_id].append(text)
+            await message.edit_text(f"✅ متن جدید به لیست پاسخ دوست اضافه شد (مورد {len(FRIEND_REPLIES[user_id])}).")
+        else:
+            await message.edit_text("⚠️ متن پاسخ نمی‌تواند خالی باشد.")
+
+
+async def help_controller(client, message):
+    # Using a raw string to avoid issues with backslashes and formatting
+    help_text_formatted = r"""
+**🖤 DARK SELF 🖤**
+
+**راهنمای کامل دستورات سلف بات**
+
+**🔹 وضعیت و قالب‌بندی 🔹**
+• `تایپ روشن` / `خاموش`: فعال‌سازی حالت "در حال تایپ" در همه چت‌ها.
+• `بازی روشن` / `خاموش`: فعال‌سازی حالت "در حال بازی" در همه چت‌ها.
+• `ضبط ویس روشن` / `خاموش`: فعال‌سازی حالت "در حال ضبط ویس".
+• `عکس روشن` / `خاموش`: فعال‌سازی حالت "ارسال عکس".
+• `گیف روشن` / `خاموش`: فعال‌سازی حالت "دیدن گیف".
+• `ترجمه` (ریپلای): ترجمه پیام ریپلای شده به فارسی.
+• `ترجمه [کد زبان]`: فعالسازی ترجمه خودکار پیام‌های ارسالی به زبان مقصد (مثال: `ترجمه en`).
+• `ترجمه خاموش`: غیرفعال کردن ترجمه خودکار پیام‌های ارسالی.
+• `چینی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به چینی (`zh`).
+• `روسی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به روسی (`ru`).
+• `انگلیسی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به انگلیسی (`en`).
+• `بولد روشن` / `خاموش`: برجسته کردن (bold) خودکار تمام پیام‌های ارسالی.
+• `سین روشن` / `خاموش`: تیک دوم (خوانده شدن) خودکار پیام‌ها در چت شخصی (PV).
+
+**🔹 ساعت و فونت (نام پروفایل) 🔹**
+• `ساعت روشن` / `خاموش`: نمایش یا حذف ساعت از انتهای نام پروفایل شما.
+• `فونت`: نمایش لیست فونت‌های موجود برای ساعت و نمونه آن‌ها.
+• `فونت [عدد]`: انتخاب فونت جدید برای نمایش ساعت (عدد از لیست بالا).
+
+**🔹 مدیریت پیام و کاربر 🔹**
+• `حذف [عدد]`: حذف X پیام آخر شما در چت فعلی (شامل خود دستور نمی‌شود). مثال: `حذف 10`. بدون عدد، 5 پیام آخر حذف می‌شود.
+• `ذخیره` (ریپلای): ذخیره کردن پیام ریپلای شده در Saved Messages شما.
+• `تکرار [عدد] [ثانیه]` (ریپلای): تکرار پیام ریپلای شده X بار با فاصله Y ثانیه. فاصله ثانیه اختیاری است (پیش‌فرض بدون فاصله). مثال: `تکرار 5 2`.
+• `بلاک روشن` / `خاموش` (ریپلای): بلاک یا آنبلاک کردن کاربر ریپلای شده.
+• `سکوت روشن` / `خاموش` (ریپلای): حذف خودکار تمام پیام‌های دریافتی از کاربر ریپلای شده **فقط در همین چت**.
+• `ریاکشن [ایموجی]` (ریپلای): واکنش خودکار با ایموجی دلخواه به تمام پیام‌های دریافتی از کاربر ریپلای شده در **تمام چت‌ها**.
+• `ریاکشن خاموش` (ریپلای): غیرفعال‌سازی واکنش خودکار برای کاربر ریپلای شده.
+
+**🔹 لیست دشمن (Enemy List) 🔹**
+• `دشمن روشن` / `خاموش`: فعال/غیرفعال کردن ارسال پاسخ خودکار به کاربران لیست دشمن.
+• `تنظیم دشمن` (ریپلای): اضافه کردن کاربر ریپلای شده به لیست دشمن.
+• `حذف دشمن` (ریپلای): حذف کاربر ریپلای شده از لیست دشمن.
+• `پاکسازی لیست دشمن`: حذف تمام کاربران از لیست دشمن.
+• `لیست دشمن`: نمایش لیست کاربران در لیست دشمن (همراه با نام و آیدی).
+• `تنظیم متن دشمن [متن]`: اضافه کردن یک متن جدید به لیست پاسخ‌های تصادفی برای دشمنان.
+• `لیست متن دشمن`: نمایش لیست متن‌های پاسخ دشمن با شماره.
+• `حذف متن دشمن [عدد]`: حذف متن شماره X از لیست پاسخ دشمن. بدون عدد، تمام متن‌ها حذف می‌شود.
+
+**🔹 لیست دوست (Friend List) 🔹**
+• `دوست روشن` / `خاموش`: فعال/غیرفعال کردن ارسال پاسخ خودکار به کاربران لیست دوست.
+• `تنظیم دوست` (ریپلای): اضافه کردن کاربر ریپلای شده به لیست دوست.
+• `حذف دوست` (ریپلای): حذف کاربر ریپلای شده از لیست دوست.
+• `پاکسازی لیست دوست`: حذف تمام کاربران از لیست دوست.
+• `لیست دوست`: نمایش لیست کاربران در لیست دوست (همراه با نام و آیدی).
+• `تنظیم متن دوست [متن]`: اضافه کردن یک متن جدید به لیست پاسخ‌های تصادفی برای دوستان.
+• `لیست متن دوست`: نمایش لیست متن‌های پاسخ دوست با شماره.
+• `حذف متن دوست [عدد]`: حذف متن شماره X از لیست پاسخ دوست. بدون عدد، تمام متن‌ها حذف می‌شود.
+
+**🔹 سرگرمی 🔹**
+• `تاس`: ارسال تاس شانسی (نتیجه 1 تا 6).
+• `تاس [عدد ۱-۶]`: (توجه: این دستور فقط تاس می‌فرستد و نمی‌تواند نتیجه را تعیین کند).
+• `بولینگ`: ارسال ایموجی بولینگ شانسی.
+
+**🔹 امنیت و منشی 🔹**
+• `پیوی قفل` / `باز`: فعال/غیرفعال کردن حذف خودکار تمام پیام‌های دریافتی در PV (چت شخصی).
+• `منشی روشن` / `خاموش`: فعال/غیرفعال کردن پاسخ خودکار در PV با متن پیش‌فرض یا سفارشی (فقط یک بار به هر کاربر در روز پاسخ می‌دهد).
+• `منشی متن [متن دلخواه]`: تنظیم متن سفارشی برای پاسخ خودکار منشی.
+• `منشی متن` (بدون متن): بازگرداندن متن منشی به حالت پیش‌فرض.
+• `انتی لوگین روشن` / `خاموش`: فعال/غیرفعال کردن خروج خودکار و اطلاع‌رسانی نشست‌های (sessions) جدید و غیرفعال در حساب تلگرام شما.
+• `کپی روشن` (ریپلای): کپی کردن نام، نام خانوادگی، بیو و عکس پروفایل کاربر ریپلای شده روی پروفایل شما (پروفایل فعلی شما ذخیره می‌شود).
+• `کپی خاموش`: بازگرداندن پروفایل اصلی شما که قبل از `کپی روشن` ذخیره شده بود.
+"""
+    try:
+        await message.edit_text(help_text_formatted, disable_web_page_preview=True)
+    except FloodWait as e:
+        await asyncio.sleep(e.value + 1)
+    except MessageNotModified:
+        pass
+    except Exception as e:
+        logging.error(f"Help Controller: Error editing help message: {e}", exc_info=True)
+
+
+async def block_unblock_controller(client, message):
+    user_id = client.me.id
+    command = message.text.strip()
+
+    if not message.reply_to_message or not message.reply_to_message.from_user:
+        try:
+             await message.edit_text("⚠️ برای بلاک/آنبلاک کردن، باید روی پیام کاربر مورد نظر ریپلای کنید.")
+        except Exception: pass
+        return
+
+    target_id = message.reply_to_message.from_user.id
+    target_info = f"کاربر با آیدی `{target_id}`" # Default info
+
+    try:
+        # Try to get user's name for feedback message
+        try:
+            target_user = await client.get_users(target_id)
+            target_info = f"{target_user.first_name}" + (f" {target_user.last_name}" if target_user.last_name else "") + f" (`{target_id}`)"
+        except Exception:
+            pass # Use default info if get_users fails
+
+        if command == "بلاک روشن":
+            await client.block_user(target_id)
+            await message.edit_text(f"✅ {target_info} با موفقیت بلاک شد.")
+        elif command == "بلاک خاموش":
+            await client.unblock_user(target_id)
+            await message.edit_text(f"✅ {target_info} با موفقیت آنبلاک شد.")
+
+    except FloodWait as e:
+        await asyncio.sleep(e.value + 1)
+    except Exception as e:
+        logging.error(f"Block/Unblock Controller: Error for user {user_id} targeting {target_id}: {e}", exc_info=True)
+        try:
+            await message.edit_text(f"⚠️ خطایی در بلاک/آنبلاک {target_info} رخ داد: {type(e).__name__}")
+        except Exception: pass
+
+
+async def mute_unmute_controller(client, message):
+    user_id = client.me.id
+    command = message.text.strip()
+
+    if not message.reply_to_message or not message.reply_to_message.from_user or not message.chat:
+        try:
+            await message.edit_text("⚠️ برای سکوت/لغو سکوت، باید روی پیام کاربر مورد نظر در چت مربوطه ریپلای کنید.")
+        except Exception: pass
+        return
+
+    sender_id = message.reply_to_message.from_user.id
+    chat_id = message.chat.id
+    muted_set = MUTED_USERS.setdefault(user_id, set())
+    key = (sender_id, chat_id)
+    target_info = f"کاربر `{sender_id}`" # Default info
+    chat_info = f"در چت `{chat_id}`"
+
+    try:
+        # Try to get user/chat names for feedback
+        try:
+            target_user = await client.get_users(sender_id)
+            target_info = f"{target_user.first_name}" + (f" {target_user.last_name}" if target_user.last_name else "") + f" (`{sender_id}`)"
+        except Exception: pass
+        try:
+            chat = await client.get_chat(chat_id)
+            chat_info = f"در چت \"{chat.title}\" (`{chat_id}`)" if chat.title else f"در چت `{chat_id}`"
+        except Exception: pass
+
+
+        if command == "سکوت روشن":
+            if key not in muted_set:
+                muted_set.add(key)
+                await message.edit_text(f"✅ {target_info} {chat_info} سکوت شد (پیام‌هایش حذف خواهند شد).")
+            else:
+                await message.edit_text(f"ℹ️ {target_info} {chat_info} از قبل سکوت شده بود.")
+        elif command == "سکوت خاموش":
+            if key in muted_set:
+                muted_set.remove(key)
+                await message.edit_text(f"✅ سکوت {target_info} {chat_info} لغو شد.")
+            else:
+                await message.edit_text(f"ℹ️ {target_info} {chat_info} سکوت نشده بود.")
+
+    except FloodWait as e:
+        await asyncio.sleep(e.value + 1)
+    except MessageNotModified:
+        pass
+    except Exception as e:
+        logging.error(f"Mute/Unmute Controller: Error for user {user_id}, target {sender_id}, chat {chat_id}: {e}", exc_info=True)
+        try:
+            await message.edit_text(f"⚠️ خطایی در عملیات سکوت برای {target_info} {chat_info} رخ داد.")
+        except Exception: pass
+
+
+async def auto_reaction_controller(client, message):
+    user_id = client.me.id
+    command = message.text.strip()
+
+    if not message.reply_to_message or not message.reply_to_message.from_user:
+        try:
+            await message.edit_text("⚠️ برای تنظیم/لغو واکنش خودکار، باید روی پیام کاربر مورد نظر ریپلای کنید.")
+        except Exception: pass
+        return
+
+    target_id = message.reply_to_message.from_user.id
+    reactions = AUTO_REACTION_TARGETS.setdefault(user_id, {})
+    target_info = f"کاربر `{target_id}`"
+
+    try:
+        # Try to get user name
+        try:
+            target_user = await client.get_users(target_id)
+            target_info = f"{target_user.first_name}" + (f" {target_user.last_name}" if target_user.last_name else "") + f" (`{target_id}`)"
+        except Exception: pass
+
+        if command == "ریاکشن خاموش":
+            if target_id in reactions:
+                removed_emoji = reactions.pop(target_id)
+                await message.edit_text(f"✅ واکنش خودکار ('{removed_emoji}') برای {target_info} غیرفعال شد.")
+                # Optional: Remove dict if empty
+                # if not reactions: del AUTO_REACTION_TARGETS[user_id]
+            else:
+                await message.edit_text(f"ℹ️ واکنشی برای {target_info} تنظیم نشده بود.")
+        else:
+            match = re.match(r"^ریاکشن (.*)", command)
+            if match:
+                emoji = match.group(1).strip()
+                # Basic emoji check (might not cover all custom/animated ones)
+                if emoji and len(emoji) <= 4: # Crude check for typical emoji length
+                    # Send a test reaction to see if it's valid BEFORE saving
+                    try:
+                        # Use reply_to_message_id for context, maybe react to the command itself temporarily
+                        await client.send_reaction(message.chat.id, message.id, emoji)
+                        # If successful, save it
+                        reactions[target_id] = emoji
+                        await message.edit_text(f"✅ واکنش خودکار با '{emoji}' برای {target_info} تنظیم شد.")
+                    except ReactionInvalid:
+                         await message.edit_text(f"⚠️ ایموجی '{emoji}' نامعتبر است و توسط تلگرام پذیرفته نشد.")
+                    except FloodWait as e_react_test:
+                         logging.warning(f"Auto Reaction Test: Flood wait for user {user_id}: {e_react_test.value}s")
+                         await asyncio.sleep(e_react_test.value + 1)
+                         await message.edit_text("⚠️ خطای Flood Wait هنگام تست ایموجی. لطفاً بعداً دوباره تلاش کنید.")
+                    except Exception as e_react_test:
+                         logging.error(f"Auto Reaction Test: Error testing emoji '{emoji}' for user {user_id}: {e_react_test}")
+                         await message.edit_text(f"⚠️ خطایی هنگام تست ایموجی '{emoji}' رخ داد. ممکن است نامعتبر باشد.")
+                else:
+                    await message.edit_text("⚠️ ایموجی ارائه شده نامعتبر یا خالی است.")
+            else:
+                # This part should ideally not be reached if the regex handler is specific enough
+                await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `ریاکشن 👍` یا `ریاکشن خاموش`")
+
+    except FloodWait as e:
+        await asyncio.sleep(e.value + 1)
+    except MessageNotModified:
+        pass
+    except Exception as e:
+        logging.error(f"Auto Reaction Controller: Error for user {user_id} targeting {target_id}: {e}", exc_info=True)
+        try:
+            await message.edit_text(f"⚠️ خطایی در تنظیم واکنش برای {target_info} رخ داد.")
+        except Exception: pass
+
+
+async def save_message_controller(client, message):
+    user_id = client.me.id
+    if message.reply_to_message:
+        try:
+            await message.reply_to_message.forward("me")
+            # Edit the original command message to confirm
+            await message.edit_text("✅ پیام با موفقیت در Saved Messages شما ذخیره شد.")
+            # Optionally delete the confirmation message after a delay
+            # await asyncio.sleep(3)
+            # await message.delete()
+        except FloodWait as e:
+            await asyncio.sleep(e.value + 1)
+            # Try to inform user about flood wait if editing failed
+            try:
+                await client.send_message(message.chat.id, f"⏳ Flood wait ({e.value}s) در ذخیره پیام. لطفاً صبر کنید.")
+            except Exception: pass
+        except Exception as e:
+            logging.error(f"Save Message Controller: Error for user {user_id}: {e}", exc_info=True)
+            try:
+                await message.edit_text(f"⚠️ خطایی در ذخیره پیام رخ داد: {type(e).__name__}")
+            except Exception: pass
+    else:
+        try:
+             await message.edit_text("⚠️ برای ذخیره کردن یک پیام، باید روی آن ریپلای کنید.")
+        except Exception: pass
+
+async def repeat_message_controller(client, message):
+    user_id = client.me.id
+    if not message.reply_to_message:
+        try:
+            await message.edit_text("⚠️ برای استفاده از دستور تکرار، باید روی پیام مورد نظر ریپلای کنید.")
+        except Exception: pass
+        return
+
+    match = re.match(r"^تکرار (\d+)(?: (\d+))?$", message.text) # Make second group optional non-capturing
+    if match:
+        try:
+            count = int(match.group(1))
+            interval_str = match.group(2)
+            interval = int(interval_str) if interval_str else 0
+
+            if count <= 0:
+                 await message.edit_text("⚠️ تعداد تکرار باید حداقل 1 باشد.")
+                 return
+            if interval < 0:
+                 await message.edit_text("⚠️ فاصله زمانی نمی‌تواند منفی باشد.")
+                 return
+            # Add a reasonable limit to prevent abuse/accidents
+            if count > 50: # Example limit
+                 await message.edit_text("⚠️ حداکثر تعداد تکرار مجاز 50 بار است.")
+                 return
+            if count * interval > 300: # Example total time limit (5 minutes)
+                 await message.edit_text("⚠️ مجموع زمان اجرای دستور تکرار بیش از حد طولانی است.")
+                 return
+
+
+            replied_msg = message.reply_to_message
+            chat_id = message.chat.id # Get chat_id before deleting message
+
+            # Delete the command message immediately
+            await message.delete()
+
+            sent_count = 0
+            for i in range(count):
+                try:
+                    await replied_msg.copy(chat_id)
+                    sent_count += 1
+                    if interval > 0 and i < count - 1: # Sleep only if interval>0 and not the last iteration
+                        await asyncio.sleep(interval)
+                except FloodWait as e_flood:
+                    logging.warning(f"Repeat Msg: Flood wait after sending {sent_count}/{count} for user {user_id}. Sleeping {e_flood.value}s.")
+                    await asyncio.sleep(e_flood.value + 2) # Add a buffer
+                    # Optional: break the loop if flood wait is too long or persistent
+                except Exception as e_copy:
+                    logging.error(f"Repeat Msg: Error copying message on iteration {i+1} for user {user_id}: {e_copy}")
+                    # Try to send an error message to the chat
+                    try:
+                         await client.send_message(chat_id, f"⚠️ خطایی در تکرار پیام رخ داد (تکرار {i+1}/{count}). متوقف شد.")
+                    except Exception: pass
+                    break # Stop repeating on error
+
+        except ValueError:
+            # This case should ideally not be reached due to regex, but as a fallback
+            await message.edit_text("⚠️ فرمت تعداد یا زمان نامعتبر است.")
+        except MessageIdInvalid:
+             logging.warning(f"Repeat Msg: Command message {message.id} already deleted.")
+        except Exception as e:
+            logging.error(f"Repeat Msg Controller: General error for user {user_id}: {e}", exc_info=True)
+            # We might not be able to edit the original message if it was deleted
+            try:
+                if message.chat: # Check if chat attribute exists
+                     await client.send_message(message.chat.id, "⚠️ خطای ناشناخته‌ای در پردازش دستور تکرار رخ داد.")
+            except Exception: pass
+    else:
+        try:
+             await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تکرار 5` یا `تکرار 3 10`")
+        except Exception: pass
+
+
+async def delete_messages_controller(client, message):
+    user_id = client.me.id
+    match = re.match(r"^حذف(?: (\d+))?$", message.text)
+    if not match:
+        try:
+             await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `حذف` یا `حذف 10`")
+        except Exception: pass
+        return
+
+    count_str = match.group(1)
+    # Default to 5, ensure count is at least 1
+    try:
+        count = int(count_str) if count_str else 5
+        if count < 1: count = 1
+        # Add a reasonable upper limit
+        if count > 100: # Max 100 messages + command = 101
+            count = 100
+            await message.reply_text("⚠️ حداکثر تعداد حذف 100 پیام است.", quote=True) # Reply, don't edit original
+    except ValueError:
+         await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
+         return
+
+    chat_id = message.chat.id
+    message_ids_to_delete = []
+    processed_count = 0
+    limit = count + 10 # Fetch a bit more to be sure we find enough user messages
+
+    try:
+        # Include the command message ID itself for deletion
+        message_ids_to_delete.append(message.id)
+
+        async for msg in client.get_chat_history(chat_id, limit=limit):
+            processed_count += 1
+            # Skip the command message itself if found again
+            if msg.id == message.id:
+                continue
+            # Check if it's user's message and we still need more
+            if msg.from_user and msg.from_user.id == user_id and len(message_ids_to_delete) <= count:
+                message_ids_to_delete.append(msg.id)
+
+            # Stop fetching if we have enough messages or processed the limit
+            if len(message_ids_to_delete) > count or processed_count >= limit:
+                break
+
+        # Adjust the list to exactly `count + 1` (or fewer if less found)
+        # Keep the command message (first element) + the latest 'count' messages
+        if len(message_ids_to_delete) > count + 1:
+            message_ids_to_delete = message_ids_to_delete[:1] + message_ids_to_delete[-(count):]
+
+
+        deleted_count_actual = 0
+        if len(message_ids_to_delete) > 0:
+            try:
+                # delete_messages returns the count of successfully deleted messages
+                deleted_count_actual = await client.delete_messages(chat_id, message_ids_to_delete)
+                # Subtract 1 if the command message itself was counted
+                feedback_count = deleted_count_actual -1 if message.id in message_ids_to_delete else deleted_count_actual
+
+                if feedback_count > 0:
+                    status_msg = await client.send_message(chat_id, f"✅ {feedback_count} پیام شما حذف شد.")
+                    await asyncio.sleep(3)
+                    await status_msg.delete()
+                elif deleted_count_actual == 1 and message.id in message_ids_to_delete:
+                    # Only the command was deleted, no feedback needed
+                    pass
+                elif deleted_count_actual == 0:
+                     # This might happen if messages were deleted by someone else quickly
+                     status_msg = await client.send_message(chat_id, "ℹ️ پیامی برای حذف یافت نشد (ممکن است قبلاً حذف شده باشند).")
+                     await asyncio.sleep(3)
+                     await status_msg.delete()
+
+            except MessageIdInvalid:
+                 logging.warning(f"Delete Msgs: Some message IDs were invalid for user {user_id}. Might have been deleted already.")
+                 # Try to send a generic feedback if deletion partially failed or IDs were bad
+                 try:
+                     status_msg = await client.send_message(chat_id, f"✅ تعدادی پیام حذف شد (ممکن است برخی قبلاً حذف شده باشند).")
+                     await asyncio.sleep(3)
+                     await status_msg.delete()
+                 except Exception: pass # Failsafe
+            except FloodWait as e_del:
+                logging.warning(f"Delete Msgs: Flood wait during deletion for user {user_id}. Sleeping {e_del.value}s.")
+                await asyncio.sleep(e_del.value + 1)
+                try:
+                     await client.send_message(chat_id, f"⏳ Flood wait ({e_del.value}s) هنگام حذف پیام‌ها. ممکن است همه حذف نشده باشند.")
+                except Exception: pass
+            except Exception as e_del_batch:
+                 logging.error(f"Delete Msgs: Error during batch deletion for user {user_id}: {e_del_batch}", exc_info=True)
+                 try:
+                     await client.send_message(chat_id, "⚠️ خطایی در حذف دسته‌ای پیام‌ها رخ داد.")
+                 except Exception: pass
+
+        # If somehow message_ids_to_delete is empty (e.g., only command was sent and no history found)
+        # This case is unlikely now that we add command ID first, but kept as failsafe.
+        elif message.id:
+             try: await client.delete_messages(chat_id, [message.id]) # Try deleting only the command
+             except Exception: pass # Ignore if it fails
+
+    except FloodWait as e_hist:
+        logging.warning(f"Delete Msgs: Flood wait getting history for user {user_id}. Sleeping {e_hist.value}s.")
+        await asyncio.sleep(e_hist.value + 1)
+        try:
+            await message.reply_text(f"⏳ Flood wait ({e_hist.value}s) در دریافت تاریخچه. لطفاً دوباره تلاش کنید.", quote=True)
+        except Exception: pass
+    except Exception as e_main:
+        logging.error(f"Delete Msgs Controller: General error for user {user_id}: {e_main}", exc_info=True)
+        try:
+            await message.reply_text("⚠️ خطای ناشناخته‌ای در پردازش دستور حذف رخ داد.", quote=True)
+        except Exception: pass
+
+
+async def game_controller(client, message):
+    user_id = client.me.id
+    command = message.text.strip().lower() # Use lower for case-insensitivity
+    chat_id = message.chat.id
+
+    try:
+        # Use elif for clarity and efficiency
+        if command == "تاس":
+            await client.send_dice(chat_id, emoji="🎲")
+            await message.delete() # Delete the command
+        elif command.startswith("تاس "):
+            match = re.match(r"^تاس (\d+)$", command)
+            if match:
+                num_str = match.group(1)
+                try:
+                    num = int(num_str)
+                    if 1 <= num <= 6:
+                        # As noted before, we cannot force a value. Send a normal dice.
+                        await client.send_dice(chat_id, emoji="🎲")
+                        await message.delete() # Delete the command
+                    else:
+                        await message.edit_text("⚠️ عدد تاس باید بین ۱ تا ۶ باشد.")
+                except ValueError:
+                     await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
+            else:
+                 # This case might be redundant if the main regex catches it, but safe to have
+                 await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تاس` یا `تاس [۱-۶]`")
+        elif command == "بولینگ":
+            await client.send_dice(chat_id, emoji="🎳")
+            await message.delete() # Delete the command
+        # else: Command matched the regex but wasn't handled (shouldn't happen)
+
+    except FloodWait as e:
+        logging.warning(f"Game Controller: Flood wait for user {user_id}: {e.value}s")
+        await asyncio.sleep(e.value + 1)
+    except MessageIdInvalid:
+         logging.warning(f"Game Controller: Command message {message.id} already deleted.")
+    except MessageNotModified:
+         pass # Ignore if edit fails because text is the same
+    except Exception as e:
+        logging.error(f"Game Controller: Error processing command '{command}' for user {user_id}: {e}", exc_info=True)
+        try:
+            # Try to edit if possible, otherwise just log
+            await message.edit_text("⚠️ خطایی در ارسال بازی رخ داد.")
+        except Exception:
+             logging.warning(f"Game Controller: Could not edit error message for command '{command}'.")
 
 
 async def font_controller(client, message):
@@ -940,18 +1674,74 @@ async def font_controller(client, message):
     command = message.text.strip()
     try:
         if command == "فونت":
-            font_list = "\n".join([f"{i+1}. {FONT_DISPLAY_NAMES.get(key, key.capitalize())}" for i, key in enumerate(FONT_KEYS_ORDER)])
-            await message.edit_text(f"فونت‌های موجود:\n{font_list}\n\nبرای انتخاب: فونت <شماره>")
-        else:
+            font_list_parts = []
+            current_part = "📜 **لیست فونت‌های موجود برای ساعت:**\n"
+            for i, key in enumerate(FONT_KEYS_ORDER):
+                 line = f"{i+1}. {FONT_DISPLAY_NAMES.get(key, key)}: {stylize_time('12:34', key)}\n"
+                 if len(current_part) + len(line) > 4090: # Leave margin for header/footer
+                     font_list_parts.append(current_part)
+                     current_part = line
+                 else:
+                     current_part += line
+            font_list_parts.append(current_part) # Add the last part
+
+            # Send the parts
+            for i, part in enumerate(font_list_parts):
+                 text_to_send = part
+                 if i == len(font_list_parts) - 1: # Add usage instruction to the last part
+                     text_to_send += "\nبرای انتخاب فونت: `فونت [عدد]`"
+                 # Edit the original message for the first part, send new messages for subsequent parts
+                 if i == 0:
+                     await message.edit_text(text_to_send)
+                 else:
+                     await client.send_message(message.chat.id, text_to_send)
+                     await asyncio.sleep(0.5) # Small delay between parts
+
+        else: # Handling "فونت [عدد]"
             match = re.match(r"^فونت (\d+)$", command)
             if match:
-                index = int(match.group(1)) - 1
-                if 0 <= index < len(FONT_KEYS_ORDER):
-                    selected_style = FONT_KEYS_ORDER[index]
-                    USER_FONT_CHOICES[user_id] = selected_style
-                    await message.edit_text(f"✅ فونت به '{FONT_DISPLAY_NAMES.get(selected_style, selected_style.capitalize())}' تغییر کرد.")
-                else:
-                    await message.edit_text(f"⚠️ شماره نامعتبر. بین 1 تا {len(FONT_KEYS_ORDER)} وارد کنید.")
+                index_str = match.group(1)
+                try:
+                    index = int(index_str) - 1 # User inputs 1-based index
+                    if 0 <= index < len(FONT_KEYS_ORDER):
+                        selected = FONT_KEYS_ORDER[index]
+                        current_choice = USER_FONT_CHOICES.get(user_id)
+
+                        if current_choice != selected:
+                            USER_FONT_CHOICES[user_id] = selected
+                            feedback_msg = f"✅ فونت ساعت به **{FONT_DISPLAY_NAMES.get(selected, selected)}** تغییر یافت."
+                            await message.edit_text(feedback_msg)
+
+                            # Immediately update profile name if clock is active and copy mode is off
+                            if CLOCK_STATUS.get(user_id, False) and not COPY_MODE_STATUS.get(user_id, False):
+                                try:
+                                    me = await client.get_me()
+                                    current_name = me.first_name or ""
+                                    # Use more robust regex to find base name, handling existing clock of any style
+                                    base_name_match = re.match(r"^(.*?)\s*[" + re.escape(ALL_CLOCK_CHARS) + r":\s]*$", current_name)
+                                    base_name = base_name_match.group(1).strip() if base_name_match else current_name.strip()
+
+                                    if not base_name: base_name = me.username or f"User_{user_id}" # Fallback base name
+
+                                    tehran_time = datetime.now(TEHRAN_TIMEZONE)
+                                    current_time_str = tehran_time.strftime("%H:%M")
+                                    stylized_time = stylize_time(current_time_str, selected)
+                                    new_name = f"{base_name} {stylized_time}"
+                                    # Limit name length according to Telegram limits (64 chars for first name)
+                                    await client.update_profile(first_name=new_name[:64])
+                                except FloodWait as e_update:
+                                     logging.warning(f"Font Controller: Flood wait updating profile for user {user_id}: {e_update.value}s")
+                                     await asyncio.sleep(e_update.value + 1)
+                                except Exception as e_update:
+                                     logging.error(f"Font Controller: Failed to update profile name immediately for user {user_id}: {e_update}")
+                                     # Optionally inform user if immediate update fails
+                                     # await message.reply_text("⚠️ فونت ذخیره شد، اما به‌روزرسانی نام پروفایل با خطا مواجه شد.", quote=True)
+                        else:
+                            await message.edit_text(f"ℹ️ فونت **{FONT_DISPLAY_NAMES.get(selected, selected)}** از قبل انتخاب شده بود.")
+                    else:
+                        await message.edit_text(f"⚠️ شماره فونت نامعتبر. لطفاً عددی بین 1 تا {len(FONT_KEYS_ORDER)} وارد کنید.")
+                except ValueError:
+                    await message.edit_text("⚠️ شماره وارد شده نامعتبر است.")
             # else: Command didn't match specific font number format (shouldn't happen)
 
     except FloodWait as e:
@@ -1190,7 +1980,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(copy_profile_controller, cmd_filters & filters.regex("^(کپی روشن|کپی خاموش)$"))) # Logic inside handles reply check
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
-        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^(حذف(?: \d+)?|حذف همه)$")))
+        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^حذف(?: \d+)?$")))
         client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$")))
 
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
@@ -1778,340 +2568,3 @@ if __name__ == "__main__":
     logging.info(" Application shutdown complete.        ")
     logging.info("========================================")
 
-async def delete_messages_controller(client, message):
-    user_id = client.me.id
-    chat_id = message.chat.id
-    command = message.text.strip()
-    try:
-        if command == "حذف همه":
-            # حذف تمام پیام‌های خود کاربر در این چت
-            message_ids = []
-            async for msg in client.get_chat_history(chat_id):
-                if msg.from_user and msg.from_user.id == user_id:
-                    message_ids.append(msg.id)
-                if len(message_ids) >= 100:  # حذف دسته‌ای برای جلوگیری از فلاد
-                    await client.delete_messages(chat_id, message_ids)
-                    message_ids = []
-                    await asyncio.sleep(1)  # جلوگیری از فلاد
-            if message_ids:
-                await client.delete_messages(chat_id, message_ids)
-            await message.edit_text("✅ تمام پیام‌های شما حذف شد.")
-        else:
-            match = re.match(r"^حذف (\d+)$", command)
-            if match:
-                num = int(match.group(1))
-                # حذف num پیام آخر خود کاربر
-                message_ids = []
-                count = 0
-                async for msg in client.get_chat_history(chat_id, limit=num * 2):  # دو برابر برای اطمینان
-                    if msg.from_user and msg.from_user.id == user_id:
-                        message_ids.append(msg.id)
-                        count += 1
-                        if count >= num:
-                            break
-                if message_ids:
-                    await client.delete_messages(chat_id, message_ids)
-                await message.edit_text(f"✅ {len(message_ids)} پیام حذف شد.")
-            else:
-                await message.edit_text("⚠️ دستور نامعتبر. مثال: حذف 100 یا حذف همه")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-        await message.edit_text(f"⚠️ فلاد ویت: {e.value} ثانیه صبر کنید.")
-    except Exception as e:
-        logging.error(f"Delete Messages: Error for user {user_id}: {e}")
-        await message.edit_text("⚠️ خطایی در حذف پیام‌ها رخ داد.")
-
-async def game_controller(client, message):
-    user_id = client.me.id
-    command = message.text.strip()
-    chat_id = message.chat.id
-    try:
-        await message.delete()
-        if command == "بولینگ":
-            await client.send_dice(chat_id, emoji="🎳")
-        elif command.startswith("تاس"):
-            match = re.match(r"^تاس (\d+)$", command)
-            if match:
-                value = int(match.group(1))
-                if 1 <= value <= 6:
-                    await client.send_dice(chat_id, emoji="🎲", value=value)
-                else:
-                    await client.send_message(chat_id, "⚠️ عدد باید بین 1 تا 6 باشد.")
-            else:
-                await client.send_dice(chat_id, emoji="🎲")
-        else:
-            await client.send_message(chat_id, "⚠️ دستور نامعتبر.")
-    except Exception as e:
-        logging.error(f"Game Controller: Error for user {user_id}: {e}")
-        await client.send_message(chat_id, "⚠️ خطایی در بازی رخ داد.")
-
-async def help_controller(client, message):
-    help_text = "لیست دستورات:\n" + "\n".join([
-        "ساعت روشن/خاموش",
-        "فونت [شماره]",
-        "منشی روشن/خاموش",
-        "منشی متن [متن]",
-        "انتی لوگین روشن/خاموش",
-        "پیوی قفل/باز",
-        "ذخیره (ریپلای)",
-        "تکرار [تعداد] [تاخیر] (ریپلای)",
-        "حذف [تعداد]/همه",
-        "دشمن روشن/خاموش",
-        "تنظیم دشمن (ریپلای)",
-        "حذف دشمن (ریپلای)",
-        "پاکسازی لیست دشمن",
-        "لیست دشمن",
-        "لیست متن دشمن",
-        "تنظیم متن دشمن [متن]",
-        "حذف متن دشمن [شماره]",
-        "دوست روشن/خاموش",
-        "تنظیم دوست (ریپلای)",
-        "حذف دوست (ریپلای)",
-        "پاکسازی لیست دوست",
-        "لیست دوست",
-        "لیست متن دوست",
-        "تنظیم متن دوست [متن]",
-        "حذف متن دوست [شماره]",
-        "بلاک روشن/خاموش (ریپلای)",
-        "سکوت روشن/خاموش (ریپلای)",
-        "ریاکشن [ایموجی]/خاموش (ریپلای)",
-        "کپی روشن/خاموش (ریپلای برای روشن)",
-        "تاس [1-6]",
-        "بولینگ",
-        "ترجمه [کد زبان]/خاموش",
-        "چینی/روسی/انگلیسی روشن/خاموش",
-        "بولد/سین/تایپ/بازی/ضبط ویس/عکس/گیف روشن/خاموش",
-        "ترجمه (ریپلای)"
-    ])
-    try:
-        await message.edit_text(help_text)
-    except Exception as e:
-        logging.error(f"Help Controller: Error for user {user_id}: {e}")
-
-async def set_enemy_controller(client, message):
-    user_id = client.me.id
-    if message.reply_to_message and message.reply_to_message.from_user:
-        target_id = message.reply_to_message.from_user.id
-        ENEMY_LIST.setdefault(user_id, set()).add(target_id)
-        await message.edit_text("✅ کاربر به لیست دشمن اضافه شد.")
-    else:
-        await message.edit_text("⚠️ روی پیام کاربر ریپلای کنید.")
-
-async def delete_enemy_controller(client, message):
-    user_id = client.me.id
-    if message.reply_to_message and message.reply_to_message.from_user:
-        target_id = message.reply_to_message.from_user.id
-        enemies = ENEMY_LIST.get(user_id, set())
-        if target_id in enemies:
-            enemies.remove(target_id)
-            await message.edit_text("✅ کاربر از لیست دشمن حذف شد.")
-        else:
-            await message.edit_text("ℹ️ کاربر در لیست دشمن نیست.")
-    else:
-        await message.edit_text("⚠️ روی پیام کاربر ریپلای کنید.")
-
-async def clear_enemy_list_controller(client, message):
-    user_id = client.me.id
-    ENEMY_LIST[user_id] = set()
-    await message.edit_text("✅ لیست دشمن پاکسازی شد.")
-
-async def list_enemies_controller(client, message):
-    user_id = client.me.id
-    enemies = ENEMY_LIST.get(user_id, set())
-    if enemies:
-        list_text = "\n".join([str(e) for e in enemies])
-        await message.edit_text(f"لیست دشمن:\n{list_text}")
-    else:
-        await message.edit_text("لیست دشمن خالی است.")
-
-async def list_enemy_replies_controller(client, message):
-    user_id = client.me.id
-    replies = ENEMY_REPLIES.get(user_id, [])
-    if replies:
-        list_text = "\n".join([f"{i+1}. {r}" for i, r in enumerate(replies)])
-        await message.edit_text(f"لیست متن دشمن:\n{list_text}")
-    else:
-        await message.edit_text("لیست متن دشمن خالی است.")
-
-async def delete_enemy_reply_controller(client, message):
-    user_id = client.me.id
-    command = message.text.strip()
-    match = re.match(r"^حذف متن دشمن (\d+)$", command)
-    if match:
-        index = int(match.group(1)) - 1
-        replies = ENEMY_REPLIES.get(user_id, [])
-        if 0 <= index < len(replies):
-            del replies[index]
-            await message.edit_text("✅ متن حذف شد.")
-        else:
-            await message.edit_text("⚠️ شماره نامعتبر.")
-    else:
-        await message.edit_text("⚠️ شماره متن را وارد کنید. مثال: حذف متن دشمن 1")
-
-async def set_enemy_reply_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^تنظیم متن دشمن (.*)", message.text, re.DOTALL)
-    if match:
-        text = match.group(1).strip()
-        ENEMY_REPLIES.setdefault(user_id, []).append(text)
-        await message.edit_text("✅ متن دشمن تنظیم شد.")
-    else:
-        await message.edit_text("⚠️ متن را وارد کنید.")
-
-# Similar for friend
-async def set_friend_controller(client, message):
-    user_id = client.me.id
-    if message.reply_to_message and message.reply_to_message.from_user:
-        target_id = message.reply_to_message.from_user.id
-        FRIEND_LIST.setdefault(user_id, set()).add(target_id)
-        await message.edit_text("✅ کاربر به لیست دوست اضافه شد.")
-    else:
-        await message.edit_text("⚠️ روی پیام کاربر ریپلای کنید.")
-
-async def delete_friend_controller(client, message):
-    user_id = client.me.id
-    if message.reply_to_message and message.reply_to_message.from_user:
-        target_id = message.reply_to_message.from_user.id
-        friends = FRIEND_LIST.get(user_id, set())
-        if target_id in friends:
-            friends.remove(target_id)
-            await message.edit_text("✅ کاربر از لیست دوست حذف شد.")
-        else:
-            await message.edit_text("ℹ️ کاربر در لیست دوست نیست.")
-    else:
-        await message.edit_text("⚠️ روی پیام کاربر ریپلای کنید.")
-
-async def clear_friend_list_controller(client, message):
-    user_id = client.me.id
-    FRIEND_LIST[user_id] = set()
-    await message.edit_text("✅ لیست دوست پاکسازی شد.")
-
-async def list_friends_controller(client, message):
-    user_id = client.me.id
-    friends = FRIEND_LIST.get(user_id, set())
-    if friends:
-        list_text = "\n".join([str(f) for f in friends])
-        await message.edit_text(f"لیست دوست:\n{list_text}")
-    else:
-        await message.edit_text("لیست دوست خالی است.")
-
-async def list_friend_replies_controller(client, message):
-    user_id = client.me.id
-    replies = FRIEND_REPLIES.get(user_id, [])
-    if replies:
-        list_text = "\n".join([f"{i+1}. {r}" for i, r in enumerate(replies)])
-        await message.edit_text(f"لیست متن دوست:\n{list_text}")
-    else:
-        await message.edit_text("لیست متن دوست خالی است.")
-
-async def delete_friend_reply_controller(client, message):
-    user_id = client.me.id
-    command = message.text.strip()
-    match = re.match(r"^حذف متن دوست (\d+)$", command)
-    if match:
-        index = int(match.group(1)) - 1
-        replies = FRIEND_REPLIES.get(user_id, [])
-        if 0 <= index < len(replies):
-            del replies[index]
-            await message.edit_text("✅ متن حذف شد.")
-        else:
-            await message.edit_text("⚠️ شماره نامعتبر.")
-    else:
-        await message.edit_text("⚠️ شماره متن را وارد کنید. مثال: حذف متن دوست 1")
-
-async def set_friend_reply_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^تنظیم متن دوست (.*)", message.text, re.DOTALL)
-    if match:
-        text = match.group(1).strip()
-        FRIEND_REPLIES.setdefault(user_id, []).append(text)
-        await message.edit_text("✅ متن دوست تنظیم شد.")
-    else:
-        await message.edit_text("⚠️ متن را وارد کنید.")
-
-async def block_unblock_controller(client, message):
-    command = message.text.strip()
-    if not message.reply_to_message or not message.reply_to_message.from_user:
-        await message.edit_text("⚠️ روی پیام کاربر ریپلای کنید.")
-        return
-    target_id = message.reply_to_message.from_user.id
-    try:
-        if command == "بلاک روشن":
-            await client.block_user(target_id)
-            await message.edit_text("✅ کاربر بلاک شد.")
-        elif command == "بلاک خاموش":
-            await client.unblock_user(target_id)
-            await message.edit_text("✅ کاربر آنبلاک شد.")
-    except Exception as e:
-        logging.error(f"Block Controller: Error: {e}")
-        await message.edit_text("⚠️ خطایی رخ داد.")
-
-async def mute_unmute_controller(client, message):
-    user_id = client.me.id
-    command = message.text.strip()
-    if not message.reply_to_message or not message.reply_to_message.from_user:
-        await message.edit_text("⚠️ روی پیام کاربر ریپلای کنید.")
-        return
-    sender_id = message.reply_to_message.from_user.id
-    chat_id = message.chat.id
-    muted = MUTED_USERS.setdefault(user_id, set())
-    if command == "سکوت روشن":
-        muted.add((sender_id, chat_id))
-        await message.edit_text("✅ کاربر سکوت شد.")
-    elif command == "سکوت خاموش":
-        muted.discard((sender_id, chat_id))
-        await message.edit_text("✅ سکوت کاربر برداشته شد.")
-
-async def auto_reaction_controller(client, message):
-    user_id = client.me.id
-    command = message.text.strip()
-    if not message.reply_to_message or not message.reply_to_message.from_user:
-        await message.edit_text("⚠️ روی پیام کاربر ریپلای کنید.")
-        return
-    target_id = message.reply_to_message.from_user.id
-    if command == "ریاکشن خاموش":
-        AUTO_REACTION_TARGETS.setdefault(user_id, {}).pop(target_id, None)
-        await message.edit_text("✅ واکنش خودکار خاموش شد.")
-    else:
-        match = re.match(r"^ریاکشن (.*)$", command)
-        if match:
-            emoji = match.group(1).strip()
-            AUTO_REACTION_TARGETS.setdefault(user_id, {})[target_id] = emoji
-            await message.edit_text(f"✅ واکنش خودکار به {emoji} تنظیم شد.")
-        else:
-            await message.edit_text("⚠️ ایموجی را وارد کنید. مثال: ریاکشن ❤️")
-
-async def save_message_controller(client, message):
-    if not message.reply_to_message:
-        await message.edit_text("⚠️ روی پیام ریپلای کنید.")
-        return
-    try:
-        await message.reply_to_message.forward("me")
-        await message.edit_text("✅ پیام ذخیره شد در Saved Messages.")
-    except Exception as e:
-        logging.error(f"Save Message: Error: {e}")
-        await message.edit_text("⚠️ خطایی رخ داد.")
-
-async def repeat_message_controller(client, message):
-    if not message.reply_to_message:
-        await message.edit_text("⚠️ روی پیام ریپلای کنید.")
-        return
-    command = message.text.strip()
-    match = re.match(r"^تکرار (\d+)(?: (\d+))?$", command)
-    if match:
-        times = int(match.group(1))
-        delay = int(match.group(2) or 0)
-        try:
-            for _ in range(times):
-                await message.reply_to_message.copy(message.chat.id)
-                if delay:
-                    await asyncio.sleep(delay)
-            await message.edit_text(f"✅ پیام {times} بار تکرار شد.")
-        except FloodWait as e:
-            await asyncio.sleep(e.value + 1)
-            await message.edit_text(f"⚠️ فلاد ویت: {e.value} ثانیه صبر کنید.")
-        except Exception as e:
-            logging.error(f"Repeat Message: Error: {e}")
-            await message.edit_text("⚠️ خطایی رخ داد.")
-    else:
-        await message.edit_text("⚠️ فرمت: تکرار <تعداد> [تاخیر]")
