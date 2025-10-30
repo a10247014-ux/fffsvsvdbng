@@ -9,17 +9,7 @@ from urllib.parse import quote
 from pyrogram import Client, filters
 from pyrogram.handlers import MessageHandler
 from pyrogram.enums import ChatType, ChatAction, UserStatus
-from pyrogram.errors import (
-    FloodWait, SessionPasswordNeeded, PhoneCodeInvalid,
-    PasswordHashInvalid, PhoneNumberInvalid, PhoneCodeExpired, UserDeactivated, AuthKeyUnregistered,
-    ReactionInvalid, MessageIdInvalid, MessageNotModified, PeerIdInvalid, UserNotParticipant
-)
-try:
-    from pyrogram.raw import functions
-except ImportError:
-    logging.warning("Could not import 'pyrogram.raw.functions'. Anti-login feature might not work.")
-    functions = None
-
+from pyrogram.errors import 
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from flask import Flask, request, render_template_string, redirect, session, url_for
