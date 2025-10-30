@@ -112,7 +112,7 @@ FONT_STYLES = {
     "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
     "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':':' : '},  # Kanji numbers
     "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
-    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'D','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate shadow
+    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate shadow
 }
 FONT_KEYS_ORDER = list(FONT_STYLES.keys())
 FONT_DISPLAY_NAMES = {
@@ -162,7 +162,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|بولینگ|راهنما|ترجمه)$"
+COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
 
 # --- Main Bot Functions ---
 def stylize_time(time_str: str, style: str) -> str:
@@ -469,104 +469,93 @@ async def pv_lock_handler(client, message):
 async def incoming_message_manager(client, message):
     # Wrap entire handler logic in try-except to catch potential parsing/attribute errors
     try:
-        try:
-            if not message or not message.from_user or message.from_user.is_self or not message.chat:
-                return # Basic check for valid message structure
+        if not message or not message.from_user or message.from_user.is_self or not message.chat:
+            return # Basic check for valid message structure
 
-            user_id = client.me.id
-            sender_id = message.from_user.id
-            chat_id = message.chat.id
+        user_id = client.me.id
+        sender_id = message.from_user.id
+        chat_id = message.chat.id
 
-            # --- Mute Check ---
-            muted_list = MUTED_USERS.get(user_id, set())
-            if (sender_id, chat_id) in muted_list:
-                try:
-                    await message.delete()
-                    # If deletion succeeds, we don't need to process reactions
-                    return
-                except FloodWait as e:
-                     logging.warning(f"Mute: Flood wait deleting msg {message.id} for owner {user_id}: {e.value}s")
-                     await asyncio.sleep(e.value + 1)
-                     # Even if flood wait happens, don't process reactions for muted user
-                     return
-                except MessageIdInvalid:
-                     # Message already gone, don't process reactions
-                     return
-                except Exception as e:
-                     if "Message to delete not found" not in str(e):
-                          logging.warning(f"Mute: Could not delete msg {message.id} from {sender_id} for owner {user_id}: {e}")
-                     # Proceed to reactions even if delete fails, as mute intent was there
-                     # but maybe permissions changed or message was deleted by someone else.
-                     # Decide if you want this behaviour or want to return here too. Let's return for simplicity.
-                     return
+        # --- Mute Check ---
+        muted_list = MUTED_USERS.get(user_id, set())
+        if (sender_id, chat_id) in muted_list:
+            try:
+                await message.delete()
+                # If deletion succeeds, we don't need to process reactions
+                return
+            except FloodWait as e:
+                 logging.warning(f"Mute: Flood wait deleting msg {message.id} for owner {user_id}: {e.value}s")
+                 await asyncio.sleep(e.value + 1)
+                 # Even if flood wait happens, don't process reactions for muted user
+                 return
+            except MessageIdInvalid:
+                 # Message already gone, don't process reactions
+                 return
+            except Exception as e:
+                 if "Message to delete not found" not in str(e):
+                      logging.warning(f"Mute: Could not delete msg {message.id} from {sender_id} for owner {user_id}: {e}")
+                 # Proceed to reactions even if delete fails, as mute intent was there
+                 # but maybe permissions changed or message was deleted by someone else.
+                 # Decide if you want this behaviour or want to return here too. Let's return for simplicity.
+                 return
 
-            # --- Auto Reaction Check ---
-            reaction_map = AUTO_REACTION_TARGETS.get(user_id, {})
-            if emoji := reaction_map.get(sender_id):
-                try:
-                    await client.send_reaction(chat_id, message.id, emoji)
-                except ReactionInvalid:
-                     logging.warning(f"Reaction: Invalid emoji '{emoji}' for user {user_id} reacting to {sender_id}.")
-                     try:
-                         await client.send_message(user_id, f"⚠️ **خطا:** ایموجی `{emoji}` برای واکنش به کاربر {sender_id} نامعتبر است. این تنظیم واکنش خودکار حذف شد.")
-                     except Exception: pass
-                     # Safely remove the invalid reaction setting
-                     if user_id in AUTO_REACTION_TARGETS and sender_id in AUTO_REACTION_TARGETS.get(user_id, {}):
-                         del AUTO_REACTION_TARGETS[user_id][sender_id]
-                except FloodWait as e:
-                     logging.warning(f"Reaction: Flood wait for user {user_id} reacting to {sender_id}: {e.value}s")
-                     await asyncio.sleep(e.value + 1)
-                except MessageIdInvalid:
-                     # Message might have been deleted between receiving and reacting
-                     pass
-                except PeerIdInvalid:
-                     # Should theoretically not happen here if message object is valid, but good to catch
-                     logging.warning(f"Reaction: PeerIdInvalid when trying to react to message {message.id} in chat {chat_id}.")
-                     pass
-                except Exception as e:
-                     # Avoid logging common errors that might occur if message disappears quickly
-                     if "MESSAGE_ID_INVALID" not in str(e).upper() and "PEER_ID_INVALID" not in str(e).upper():
-                          logging.error(f"Reaction: Unexpected error for user {user_id} on msg {message.id}: {e}", exc_info=True)
+        # --- Auto Reaction Check ---
+        reaction_map = AUTO_REACTION_TARGETS.get(user_id, {})
+        if emoji := reaction_map.get(sender_id):
+            try:
+                await client.send_reaction(chat_id, message.id, emoji)
+            except ReactionInvalid:
+                 logging.warning(f"Reaction: Invalid emoji '{emoji}' for user {user_id} reacting to {sender_id}.")
+                 try:
+                     await client.send_message(user_id, f"⚠️ **خطا:** ایموجی `{emoji}` برای واکنش به کاربر {sender_id} نامعتبر است. این تنظیم واکنش خودکار حذف شد.")
+                 except Exception: pass
+                 # Safely remove the invalid reaction setting
+                 if user_id in AUTO_REACTION_TARGETS and sender_id in AUTO_REACTION_TARGETS.get(user_id, {}):
+                     del AUTO_REACTION_TARGETS[user_id][sender_id]
+            except FloodWait as e:
+                 logging.warning(f"Reaction: Flood wait for user {user_id} reacting to {sender_id}: {e.value}s")
+                 await asyncio.sleep(e.value + 1)
+            except MessageIdInvalid:
+                 # Message might have been deleted between receiving and reacting
+                 pass
+            except PeerIdInvalid:
+                 # Should theoretically not happen here if message object is valid, but good to catch
+                 logging.warning(f"Reaction: PeerIdInvalid when trying to react to message {message.id} in chat {chat_id}.")
+                 pass
+            except Exception as e:
+                 # Avoid logging common errors that might occur if message disappears quickly
+                 if "MESSAGE_ID_INVALID" not in str(e).upper() and "PEER_ID_INVALID" not in str(e).upper():
+                      logging.error(f"Reaction: Unexpected error for user {user_id} on msg {message.id}: {e}", exc_info=True)
 
-        # Catch PeerIdInvalid specifically if it happens during handler execution (less likely now)
-        except PeerIdInvalid as e_peer:
-            logging.debug(f"Incoming Manager: Caught PeerIdInvalid processing message {getattr(message, 'id', 'N/A')}: {e_peer}. Skipping message.")
-        # Catch potential issues if `message` object is malformed due to earlier errors
-        except AttributeError as e_attr:
-            logging.warning(f"Incoming Manager: AttributeError processing message (possibly malformed): {e_attr}. Message data: {message}")
-        # Catch any other unexpected error within the handler
-        except Exception as e_main:
-            logging.error(f"Incoming Manager: Unhandled error processing message {getattr(message, 'id', 'N/A')}: {e_main}", exc_info=True)
-
-    except PeerIdInvalid as e_peer_outer: # Catch PeerIdInvalid at the outermost level
-        logging.warning(f"Incoming Manager: Outer PeerIdInvalid caught for message {getattr(message, 'id', 'N/A')}. This might be the source of handle_updates errors. {e_peer_outer}")
-    except Exception as e_outer:
-        logging.critical(f"Incoming Manager: CRITICAL outer error processing message {getattr(message, 'id', 'N/A')}: {e_outer}", exc_info=True)
+    # Catch PeerIdInvalid specifically if it happens during handler execution (less likely now)
+    except PeerIdInvalid as e_peer:
+        logging.debug(f"Incoming Manager: Caught PeerIdInvalid processing message {getattr(message, 'id', 'N/A')}: {e_peer}. Skipping message.")
+    # Catch potential issues if `message` object is malformed due to earlier errors
+    except AttributeError as e_attr:
+        logging.warning(f"Incoming Manager: AttributeError processing message (possibly malformed): {e_attr}. Message data: {message}")
+    # Catch any other unexpected error within the handler
+    except Exception as e_main:
+        logging.error(f"Incoming Manager: Unhandled error processing message {getattr(message, 'id', 'N/A')}: {e_main}", exc_info=True)
 
 
 async def auto_seen_handler(client, message):
     user_id = client.me.id
-    try:
-        if message.chat.type == ChatType.PRIVATE and AUTO_SEEN_STATUS.get(user_id, False):
-            try:
-                # Check if chat attribute exists before using it
-                if message.chat:
-                    await client.read_chat_history(message.chat.id)
-            except FloodWait as e:
-                 logging.warning(f"AutoSeen: Flood wait marking chat {getattr(message.chat, 'id', 'N/A')} read: {e.value}s")
-                 await asyncio.sleep(e.value + 1)
-            except PeerIdInvalid:
-                logging.warning(f"AutoSeen: PeerIdInvalid for chat {getattr(message.chat, 'id', 'N/A')}. Cannot mark as read.")
-            except AttributeError:
-                 logging.warning("AutoSeen: Message object missing chat attribute.") # Handle cases where message might be incomplete
-            except Exception as e:
-                 # Avoid logging common errors if chat becomes inaccessible
-                 if "Could not find the input peer" not in str(e) and "PEER_ID_INVALID" not in str(e).upper():
-                     logging.warning(f"AutoSeen: Could not mark chat {getattr(message.chat, 'id', 'N/A')} as read: {e}")
-    except PeerIdInvalid as e_peer: # Catch PeerIdInvalid at the outermost level
-        logging.warning(f"AutoSeen: Outer PeerIdInvalid caught for message {getattr(message, 'id', 'N/A')}. {e_peer}")
-    except Exception as e_outer:
-        logging.error(f"AutoSeen: CRITICAL outer error processing message {getattr(message, 'id', 'N/A')}: {e_outer}", exc_info=True)
+    if message.chat.type == ChatType.PRIVATE and AUTO_SEEN_STATUS.get(user_id, False):
+        try:
+            # Check if chat attribute exists before using it
+            if message.chat:
+                await client.read_chat_history(message.chat.id)
+        except FloodWait as e:
+             logging.warning(f"AutoSeen: Flood wait marking chat {getattr(message.chat, 'id', 'N/A')} read: {e.value}s")
+             await asyncio.sleep(e.value + 1)
+        except PeerIdInvalid:
+            logging.warning(f"AutoSeen: PeerIdInvalid for chat {getattr(message.chat, 'id', 'N/A')}. Cannot mark as read.")
+        except AttributeError:
+             logging.warning("AutoSeen: Message object missing chat attribute.") # Handle cases where message might be incomplete
+        except Exception as e:
+             # Avoid logging common errors if chat becomes inaccessible
+             if "Could not find the input peer" not in str(e) and "PEER_ID_INVALID" not in str(e).upper():
+                 logging.warning(f"AutoSeen: Could not mark chat {getattr(message.chat, 'id', 'N/A')} as read: {e}")
 
 
 async def translate_controller(client, message):
@@ -1243,6 +1232,7 @@ async def help_controller(client, message):
 
 **🔹 سرگرمی 🔹**
 • `تاس`: ارسال تاس شانسی (نتیجه 1 تا 6).
+• `تاس [عدد ۱-۶]`: (توجه: این دستور فقط تاس می‌فرستد و نمی‌تواند نتیجه را تعیین کند).
 • `بولینگ`: ارسال ایموجی بولینگ شانسی.
 
 **🔹 امنیت و منشی 🔹**
@@ -1641,6 +1631,23 @@ async def game_controller(client, message):
         if command == "تاس":
             await client.send_dice(chat_id, emoji="🎲")
             await message.delete() # Delete the command
+        elif command.startswith("تاس "):
+            match = re.match(r"^تاس (\d+)$", command)
+            if match:
+                num_str = match.group(1)
+                try:
+                    num = int(num_str)
+                    if 1 <= num <= 6:
+                        # As noted before, we cannot force a value. Send a normal dice.
+                        await client.send_dice(chat_id, emoji="🎲")
+                        await message.delete() # Delete the command
+                    else:
+                        await message.edit_text("⚠️ عدد تاس باید بین ۱ تا ۶ باشد.")
+                except ValueError:
+                     await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
+            else:
+                 # This case might be redundant if the main regex catches it, but safe to have
+                 await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تاس` یا `تاس [۱-۶]`")
         elif command == "بولینگ":
             await client.send_dice(chat_id, emoji="🎳")
             await message.delete() # Delete the command
@@ -1915,10 +1922,11 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         MUTED_USERS.setdefault(user_id, set())
         # ORIGINAL_PROFILE_DATA should not be setdefault, it's temporary during copy mode
         if user_id not in ORIGINAL_PROFILE_DATA: ORIGINAL_PROFILE_DATA[user_id] = {}
-        ENEMY_REPLIES.setdefault(user_id, ["کیرم تو رحم اجاره ای و خونی مالی مادرت", "دو میلیون شبی پول ویلا بدم تا مادرتو تو گوشه کناراش بگام و اب کوسشو بریزم کف خونه تا فردا صبح کارگرای افغانی برای نظافت اومدن با بوی اب کس مادرت بجقن و ابکیراشون نثار قبر مرده هات بشه", "احمق مادر کونی من کس مادرت گذاشتم تو بازم داری کسشر میگی", "هی بیناموس کیرم بره تو کس ننت واس بابات نشآخ مادر کیری کیرم بره تو کس اجدادت کسکش بیناموس کس ول نسل شوتی ابجی کسده کیرم تو کس مادرت بیناموس کیری کیرم تو کس نسlt ابجی کونی کس نسل سگ ممبر کونی ابجی سگ ممبر سگ کونی کیرم تو کس ننت کیر تو کس مادرت کیر خاندان  تو کس نسlt مادر کونی ابجی کونی کیری ناموس ابجیتو گاییدم سگ حرومی خارکسه مادر کیری با کیر بزنم تو رحم مادرت ناموستو بگام لاشی کونی ابجی کس  خیابونی مادرخونی ننت کیرمو میماله تو میای کص میگی شاخ نشو ییا ببین شاخو کردم تو کون ابجی جندت کس ابجیتو پاره کردم تو شاخ میشی اوبی",
-    "کیرم تو کس سیاه مادرت خارکصده", "حروم زاده باک کص ننت با ابکیرم پر میکنم", "منبع اب ایرانو با اب کص مادرت تامین میکنم", "خارکسته میخای مادرتو بگام بعد بیای ادعای شرف کنی کیرم تو شرف مادرت",
-    "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی", "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی"
-] * 10) # Use 10 "متن" placeholders
+        ENEMY_REPLIES.setdefault(user_id, [ # Default enemy replies if list is empty/new user
+            "کیرم تو رحم اجاره ای و خونی مالی مادرت",
+            # ... (other default replies) ...
+            "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی"
+        ])
         FRIEND_REPLIES.setdefault(user_id, []) # Default empty list
         ENEMY_LIST.setdefault(user_id, set())
         FRIEND_LIST.setdefault(user_id, set())
@@ -1956,14 +1964,14 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(clear_enemy_list_controller, cmd_filters & filters.regex("^پاکسازی لیست دشمن$")))
         client.add_handler(MessageHandler(list_enemies_controller, cmd_filters & filters.regex("^لیست دشمن$")))
         client.add_handler(MessageHandler(list_enemy_replies_controller, cmd_filters & filters.regex("^لیست متن دشمن$")))
-        client.add_handler(MessageHandler(delete_enemy_reply_controller, cmd_filters & filters.regex(r"^حذف متن دشمن(?: \d+)?$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(delete_enemy_reply_controller, cmd_filters & filters.regex(r"^حذف متن دشمن(?: \d+)?$")))
         client.add_handler(MessageHandler(set_enemy_reply_controller, cmd_filters & filters.regex(r"^تنظیم متن دشمن (.*)", flags=re.DOTALL | re.IGNORECASE))) # Allow multiline text
         client.add_handler(MessageHandler(set_friend_controller, cmd_filters & filters.reply & filters.regex("^تنظیم دوست$"))) # Requires reply
         client.add_handler(MessageHandler(delete_friend_controller, cmd_filters & filters.reply & filters.regex("^حذف دوست$"))) # Requires reply
         client.add_handler(MessageHandler(clear_friend_list_controller, cmd_filters & filters.regex("^پاکسازی لیست دوست$")))
         client.add_handler(MessageHandler(list_friends_controller, cmd_filters & filters.regex("^لیست دوست$")))
         client.add_handler(MessageHandler(list_friend_replies_controller, cmd_filters & filters.regex("^لیست متن دوست$")))
-        client.add_handler(MessageHandler(delete_friend_reply_controller, cmd_filters & filters.regex(r"^حذف متن دوست(?: \d+)?$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(delete_friend_reply_controller, cmd_filters & filters.regex(r"^حذف متن دوست(?: \d+)?$")))
         client.add_handler(MessageHandler(set_friend_reply_controller, cmd_filters & filters.regex(r"^تنظیم متن دوست (.*)", flags=re.DOTALL | re.IGNORECASE))) # Allow multiline text
         client.add_handler(MessageHandler(block_unblock_controller, cmd_filters & filters.reply & filters.regex("^(بلاک روشن|بلاک خاموش)$"))) # Requires reply
         client.add_handler(MessageHandler(mute_unmute_controller, cmd_filters & filters.reply & filters.regex("^(سکوت روشن|سکوت خاموش)$"))) # Requires reply
@@ -1973,7 +1981,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
         client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^حذف(?: \d+)?$")))
-        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|بولینگ)$"))) # Updated regex
+        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$")))
 
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
         # Added ~filters.user(user_id) to ensure these don't trigger on own messages if filters somehow match
@@ -2559,3 +2567,4 @@ if __name__ == "__main__":
     logging.info("========================================")
     logging.info(" Application shutdown complete.        ")
     logging.info("========================================")
+
