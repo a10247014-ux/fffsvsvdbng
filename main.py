@@ -1,4 +1,13 @@
-import asyncio
+    try:
+        from self import delete_all_messages_controller
+    except Exception:
+        delete_all_messages_controller = None
+    ```
+  - هنگام ثبت هندلرها:
+    ```python
+    if delete_all_messages_controller is not None:
+        client.add_handler(MessageHandler(delete_all_messages_controller, cmd_filters & filters.regex(r"^حذف همه$")))
+import asyncio 
 import os
 import logging
 import re
