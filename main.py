@@ -162,7 +162,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
+COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|حذف همه|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
 
 # --- Main Bot Functions ---
 def stylize_time(time_str: str, style: str) -> str:
@@ -410,6 +410,8 @@ async def enemy_handler(client, message):
         return
 
     reply_text = random.choice(replies)
+    if BOLD_MODE_STATUS.get(user_id, False) and not reply_text.startswith(("**", "__")):
+        reply_text = f"**{reply_text}**"
     try:
         await message.reply_text(reply_text, quote=True)
     except FloodWait as e:
@@ -424,6 +426,8 @@ async def friend_handler(client, message):
         return
 
     reply_text = random.choice(replies)
+    if BOLD_MODE_STATUS.get(user_id, False) and not reply_text.startswith(("**", "__")):
+        reply_text = f"**{reply_text}**"
     try:
         await message.reply_text(reply_text, quote=True)
     except FloodWait as e:
@@ -1536,7 +1540,7 @@ async def delete_messages_controller(client, message):
     chat_id = message.chat.id
     message_ids_to_delete = []
     processed_count = 0
-    limit = count + 10 # Fetch a bit more to be sure we find enough user messages
+    limit = max(count * 2, count + 50) # Fetch extra to avoid shortfalls
 
     try:
         # Include the command message ID itself for deletion
@@ -1548,7 +1552,7 @@ async def delete_messages_controller(client, message):
             if msg.id == message.id:
                 continue
             # Check if it's user's message and we still need more
-            if msg.from_user and msg.from_user.id == user_id and len(message_ids_to_delete) <= count:
+            if msg.from_user and msg.from_user.id == user_id and len(message_ids_to_delete) < (count + 1):
                 message_ids_to_delete.append(msg.id)
 
             # Stop fetching if we have enough messages or processed the limit
@@ -1564,8 +1568,20 @@ async def delete_messages_controller(client, message):
         deleted_count_actual = 0
         if len(message_ids_to_delete) > 0:
             try:
-                # delete_messages returns the count of successfully deleted messages
-                deleted_count_actual = await client.delete_messages(chat_id, message_ids_to_delete)
+                # Delete in chunks of up to 100 to be safe
+                deleted_total = 0
+                for i in range(0, len(message_ids_to_delete), 100):
+                    chunk = message_ids_to_delete[i:i+100]
+                    res = await client.delete_messages(chat_id, chunk)
+                    # res may be count or list depending on API; normalize to int
+                    if isinstance(res, int):
+                        deleted_total += res
+                    elif isinstance(res, list):
+                        deleted_total += len(res)
+                    else:
+                        # Assume full chunk deleted
+                        deleted_total += len(chunk)
+                deleted_count_actual = deleted_total
                 # Subtract 1 if the command message itself was counted
                 feedback_count = deleted_count_actual -1 if message.id in message_ids_to_delete else deleted_count_actual
 
@@ -1629,7 +1645,12 @@ async def game_controller(client, message):
     try:
         # Use elif for clarity and efficiency
         if command == "تاس":
-            await client.send_dice(chat_id, emoji="🎲")
+            m = await client.send_dice(chat_id, emoji="🎲")
+            try:
+                if getattr(m, "dice", None) and getattr(m.dice, "value", None) == 6:
+                    await client.send_message("me", "🎲 عدد ۶ آمد.")
+            except Exception:
+                pass
             await message.delete() # Delete the command
         elif command.startswith("تاس "):
             match = re.match(r"^تاس (\d+)$", command)
@@ -1639,7 +1660,12 @@ async def game_controller(client, message):
                     num = int(num_str)
                     if 1 <= num <= 6:
                         # As noted before, we cannot force a value. Send a normal dice.
-                        await client.send_dice(chat_id, emoji="🎲")
+                        m = await client.send_dice(chat_id, emoji="🎲")
+                        try:
+                            if getattr(m, "dice", None) and getattr(m.dice, "value", None) == 6:
+                                await client.send_message("me", f"🎲 تاس: {m.dice.value}")
+                        except Exception:
+                            pass
                         await message.delete() # Delete the command
                     else:
                         await message.edit_text("⚠️ عدد تاس باید بین ۱ تا ۶ باشد.")
@@ -1649,7 +1675,12 @@ async def game_controller(client, message):
                  # This case might be redundant if the main regex catches it, but safe to have
                  await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تاس` یا `تاس [۱-۶]`")
         elif command == "بولینگ":
-            await client.send_dice(chat_id, emoji="🎳")
+            m = await client.send_dice(chat_id, emoji="🎳")
+            try:
+                if getattr(m, "dice", None) and getattr(m.dice, "value", None) == 6:
+                    await client.send_message("me", f"🎳 بولینگ: {m.dice.value}")
+            except Exception:
+                pass
             await message.delete() # Delete the command
         # else: Command matched the regex but wasn't handled (shouldn't happen)
 
@@ -1924,7 +1955,14 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         if user_id not in ORIGINAL_PROFILE_DATA: ORIGINAL_PROFILE_DATA[user_id] = {}
         ENEMY_REPLIES.setdefault(user_id, [ # Default enemy replies if list is empty/new user
             "کیرم تو رحم اجاره ای و خونی مالی مادرت",
-            # ... (other default replies) ...
+            "دو میلیون شبی پول ویلا بدم تا مادرتو تو گوشه کناراش بگام و اب کوسشو بریزم کف خونه تا فردا صبح کارگرای افغانی برای نظافت اومدن با بوی اب کس مادرت بجقن و ابکیراشون نثار قبر مرده هات بشه",
+            "احمق مادر کونی من کس مادرت گذاشتم تو بازم داری کسشر میگی",
+            "هی بیناموس کیرم بره تو کس ننت واس بابات نشآخ مادر کیری کیرم بره تو کس اجدادت کسکش بیناموس کس ول نسل شوتی ابجی کسده کیرم تو کس مادرت بیناموس کیری کیرم تو کس نسlt ابجی کونی کس نسل سگ ممبر کونی ابجی سگ ممبر سگ کونی کیرم تو کس ننت کیر تو کس مادرت کیر خاندان  تو کس نسlt مادر کونی ابجی کونی کیری ناموس ابجیتو گاییدم سگ حرومی خارکسه مادر کیری با کیر بزنم تو رحم مادرت ناموستو بگام لاشی کونی ابجی کس  خیابونی مادرخونی ننت کیرمو میماله تو میای کص میگی شاخ نشو ییا ببین شاخو کردم تو کون ابجی جندت کس ابجیتو پاره کردم تو شاخ میشی اوبی",
+            "کیرم تو کس سیاه مادرت خارکصده",
+            "حروم زاده باک کص ننت با ابکیرم پر میکنم",
+            "منبع اب ایرانو با اب کص مادرت تامین میکنم",
+            "خارکسته میخای مادرتو بگام بعد بیای ادعای شرف کنی کیرم تو شرف مادرت",
+            "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی",
             "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی"
         ])
         FRIEND_REPLIES.setdefault(user_id, []) # Default empty list
@@ -1946,7 +1984,8 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         # Group -1: Outgoing message modifications (bold, translate)
         # Ensure it doesn't process commands by checking regex again? Or rely on outgoing_message_modifier logic.
         # Added ~filters.regex(COMMAND_REGEX) to be explicit
-        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.reply & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
+        # Allow replies to be modified too (so replied messages can be bolded)
+        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
 
         # Group 0: Command handlers (default group)
         cmd_filters = filters.me & filters.user(user_id) & filters.text
@@ -1981,6 +2020,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
         client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^حذف(?: \d+)?$")))
+        client.add_handler(MessageHandler(delete_all_messages_controller, cmd_filters & filters.regex(r"^حذف همه$")))
         client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$")))
 
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
