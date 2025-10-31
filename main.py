@@ -1,3 +1,5 @@
+[file name]: TG-TD2S-Converter_Log.(17-10-2025(07_53_24)).log
+[file content begin]
 import asyncio
 import os
 import logging
@@ -62,57 +64,57 @@ app_flask.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
 
 # --- Clock Font Dictionaries ---
 FONT_STYLES = {
-    "cursive":      {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
-    "stylized":     {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
-    "doublestruck": {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
-    "monospace":    {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':':':'},
-    "normal":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':':':'},
-    "circled":      {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':':'∶'},
-    "fullwidth":    {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'６','7':'７','8':'۸','9':'９',':':'：'},
-    "sans_normal":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':'∶'},
-    "negative_circled": {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':':'∶'},
-    "parenthesized": {'0':'🄀','1':'⑴','2':'⑵','3':'⑶','4':'⑷','5':'⑸','6':'⑹','7':'⑺','8':'⑻','9':'⑼',':':'∶'},
-    "dot":          {'0':'🄀','1':'⒈','2':'⒉','3':'⒊','4':'⒋','5':'⒌','6':'⒍','7':'⒎','8':'⒏','9':'⒐',':':'∶'},
-    "thai":         {'0':'๐','1':'๑','2':'๒','3':'๓','4':'๔','5':'๕','6':'๖','7':'๗','8':'๘','9':'๙',':':' : '},
-    "devanagari":   {'0':'०','1':'१','2':'२','3':'३','4':'४','5':'५','6':'६','7':'७','8':'८','9':'९',':':' : '},
-    "arabic_indic": {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩',':':' : '},
-    "keycap":       {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
-    "superscript":  {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',':':':'},
-    "subscript":    {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'},
-    "tibetan":      {'0':'༠','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩',':':' : '},
-    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'۷','8':'۸','9':'۹',':':' : '},
-    "gujarati":     {'0':'૦','1':'૧','2':'૨','3':'૩','4':'૪','5':'૫','6':'૬','7':'૭','8':'૮','9':'૯',':':' : '},
-    "mongolian":    {'0':'᠐','1':'᠑','2':'᠒','3':'᠓','4':'᠔','5':'᠕','6':'᠖','7':'᠗','8':'᠘','9':'᠙',':':' : '},
-    "lao":          {'0':'໐','1':'໑','2':'໒','3':'໓','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':':' : '},
-    "fraktur":      {'0':'𝔃','1':'𝔄','2':'𝔅','3':'𝔆','4':'𝔇','5':'𝔈','6':'𝔉','7':'𝔊','8':'𝔋','9':'𝔌',':':':'},
-    "bold_fraktur": {'0':'𝖀','1':'𝖁','2':'𝖂','3':'𝖃','4':'𝖄','5':'𝖅','6':'𝖆','7':'𝖇','8':'𝖈','9':'𝖉',':':':'},
-    "script":       {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':':'},
-    "bold_script":  {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
-    "squared":      {'0':'🄀','1':'🄁','2':'🄂','3':'🄃','4':'🄄','5':'🄅','6':'🄆','7':'🄇','8':'🄈','9':'🄉',':':'∶'},
-    "negative_squared": {'0':'🅀','1':'🅁','2':'🅂','3':'🅃','4':'🅄','5':'🅅','6':'🅆','7':'🅇','8':'🅈','9':'🅉',':':'∶'},
-    "roman":        {'0':'⓪','1':'Ⅰ','2':'Ⅱ','3':'Ⅲ','4':'Ⅳ','5':'Ⅴ','6':'Ⅵ','7':'Ⅶ','8':'Ⅷ','9':'Ⅸ',':':':'},
-    "small_caps":   {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'},
-    "oldstyle":     {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
-    "inverted":     {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':':':'},
-    "mirror":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'9','7':'7','8':'8','9':'6',':':':'},
-    "strike":       {'0':'0̶','1':'1̶','2':'2̶','3':'3̶','4':'4̶','5':'5̶','6':'6̶','7':'7̶','8':'8̶','9':'9̶',':':':'},
-    "bubble":       {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':':'∶'},
-    "fancy1":       {'0':'０','1':'１','2':'２','3':'۳','4':'４','5':'５','6':'６','7':'۷','8':'８','9':'９',':':'：'},
-    "fancy2":       {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
-    "fancy3":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
-    "fancy4":       {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':':'∶'},
+    "cursive":      {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
+    "stylized":     {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':'},
+    "doublestruck": {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':'},
+    "monospace":    {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':'},
+    "normal":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':'},
+    "circled":      {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':'},
+    "fullwidth":    {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'۶','7':'７','8':'８','9':'９',':'},
+    "sans_normal":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':'},
+    "negative_circled": {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':'},
+    "parenthesized": {'0':'🄀','1':'⑴','2':'⑵','3':'⑶','4':'⑷','5':'⑸','6':'⑹','7':'⑺','8':'⑻','9':'⑼',':'},
+    "dot":          {'0':'🄀','1':'⒈','2':'⒉','3':'⒊','4':'⒋','5':'⒌','6':'⒍','7':'⒎','8':'⒏','9':'⒐',':'},
+    "thai":         {'0':'๐','1':'๑','2':'๒','3':'๓','4':'๔','5':'๕','6':'๖','7':'๗','8':'๘','9':'๙',':'},
+    "devanagari":   {'0':'०','1':'१','2':'२','3':'३','4':'४','5':'५','6':'६','7':'७','8':'८','9':'९',':'},
+    "arabic_indic": {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩',':'},
+    "keycap":       {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':'},
+    "superscript":  {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',':'},
+    "subscript":    {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':'},
+    "tibetan":      {'0':'༠','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩',':'},
+    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'۷','8':'۸','9':'۹',':'},
+    "gujarati":     {'0':'૦','1':'૧','2':'૨','3':'૩','4':'૪','5':'૫','6':'૬','7':'૭','8':'૮','9':'૯',':'},
+    "mongolian":    {'0':'᠐','1':'᠑','2':'᠒','3':'᠓','4':'᠔','5':'᠕','6':'᠖','7':'᠗','8':'᠘','9':'᠙',':'},
+    "lao":          {'0':'໐','1':'໑','2':'໒','3':'໓','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':'},
+    "fraktur":      {'0':'𝔃','1':'𝔄','2':'𝔅','3':'𝔆','4':'𝔇','5':'𝔈','6':'𝔉','7':'𝔊','8':'𝔋','9':'𝔌',':'},
+    "bold_fraktur": {'0':'𝖀','1':'𝖁','2':'𝖂','3':'𝖃','4':'𝖄','5':'𝖅','6':'𝖆','7':'𝖇','8':'𝖈','9':'𝖉',':'},
+    "script":       {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':'},
+    "bold_script":  {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
+    "squared":      {'0':'🄀','1':'🄁','2':'🄂','3':'🄃','4':'🄄','5':'🄅','6':'🄆','7':'🄇','8':'🄈','9':'🄉',':'},
+    "negative_squared": {'0':'🅀','1':'🅁','2':'🅂','3':'🅃','4':'🅄','5':'🅅','6':'🅆','7':'🅇','8':'🅈','9':'🅉',':'},
+    "roman":        {'0':'⓪','1':'Ⅰ','2':'Ⅱ','3':'Ⅲ','4':'Ⅳ','5':'Ⅴ','6':'Ⅵ','7':'Ⅶ','8':'Ⅷ','9':'Ⅸ',':'},
+    "small_caps":   {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':'},
+    "oldstyle":     {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
+    "inverted":     {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':'},
+    "mirror":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'9','7':'7','8':'8','9':'6',':'},
+    "strike":       {'0':'0̶','1':'1̶','2':'2̶','3':'3̶','4':'4̶','5':'5̶','6':'6̶','7':'7̶','8':'8̶','9':'9̶',':'},
+    "bubble":       {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':'},
+    "fancy1":       {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'۵','6':'６','7':'۷','8':'８','9':'９',':'},
+    "fancy2":       {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':'},
+    "fancy3":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
+    "fancy4":       {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':'},
     # Additional cool fonts
-    "ethiopic":     {'0':'፩','1':'፪','2':'፫','3':'፬','4':'፭','5':'፮','6':'፯','7':'፰','8':'፱','9':'፲',':':' : '},  # Approximate
-    "gothic":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},  # Bold variant
-    "runic":        {'0':'ᛟ','1':'ᛁ','2':'ᛒ','3':'ᛏ','4':'ᚠ','5':'ᚢ','6':'ᛋ','7':'ᚷ','8':'ᚺ','9':'ᛉ',':':' : '},  # Approximate runic
-    "math_bold":    {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
-    "math_italic":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':':'},
-    "math_sans":    {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
-    "math_monospace": {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':':':'},
-    "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
-    "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':':' : '},  # Kanji numbers
-    "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
-    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate shadow
+    "ethiopic":     {'0':'፩','1':'፪','2':'፫','3':'፬','4':'፭','5':'፮','6':'፯','7':'፰','8':'፱','9':'፲',':'},
+    "gothic":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
+    "runic":        {'0':'ᛟ','1':'ᛁ','2':'ᛒ','3':'ᛏ','4':'ᚠ','5':'ᚢ','6':'ᛋ','7':'ᚷ','8':'ᚺ','9':'ᛉ',':'},
+    "math_bold":    {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
+    "math_italic":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':'},
+    "math_sans":    {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':'},
+    "math_monospace": {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':'},
+    "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':'},
+    "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':'},
+    "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':'},
+    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':'},
 }
 FONT_KEYS_ORDER = list(FONT_STYLES.keys())
 FONT_DISPLAY_NAMES = {
@@ -162,7 +164,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
+COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|بولینگ|راهنما|ترجمه)$"
 
 # --- Main Bot Functions ---
 def stylize_time(time_str: str, style: str) -> str:
@@ -1214,9 +1216,8 @@ async def help_controller(client, message):
 • `حذف متن دوست [عدد]`: حذف متن شماره X از لیست پاسخ دوست. بدون عدد، تمام متن‌ها حذف می‌شود.
 
 **🔹 سرگرمی 🔹**
-• `تاس`: ارسال تاس شانسی (تا 6 ادامه می‌دهد).
-• `تاس [عدد ۱-۶]`: ارسال تاس تا موقعی که عدد مورد نظر نیاید.
-• `بولینگ`: ارسال بولینگ شانسی (تا استرایک ادامه می‌دهد).
+• `تاس`: ارسال تاس شانسی (یک بار).
+• `بولینگ`: ارسال بولینگ شانسی (یک بار).
 
 **🔹 امنیت و منشی 🔹**
 • `پیوی قفل` / `باز`: فعال/غیرفعال کردن حذف خودکار تمام پیام‌های دریافتی در PV (چت شخصی).
@@ -1572,12 +1573,12 @@ async def game_controller(client, message):
 
     try:
         if command == "تاس":
-            # تاس ساده - فقط یکبار ارسال
+            # تاس معمولی - فقط یک بار
             await client.send_dice(chat_id, emoji="🎲")
             await message.delete()
-            
+                
         elif command == "بولینگ":
-            # بولینگ ساده - فقط یکبار ارسال
+            # بولینگ - فقط یک بار
             await client.send_dice(chat_id, emoji="🎳")
             await message.delete()
 
@@ -1949,214 +1950,376 @@ HTML_TEMPLATE = """
 <!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>سلف بات تلگرام</title><style>@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');body{font-family:'Vazirmatn',sans-serif;background-color:#f0f2f5;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box;}.container{background:white;padding:30px 40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);text-align:center;width:100%;max-width:480px;}h1{color:#333;margin-bottom:20px;font-size:1.5em;}p{color:#666;line-height:1.6;}form{display:flex;flex-direction:column;gap:15px;margin-top:20px;}input[type="tel"],input[type="text"],input[type="password"]{padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;text-align:left;direction:ltr;}button{padding:12px;background-color:#007bff;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:background-color .2s;}.error{color:#d93025;margin-top:15px;font-weight:bold;}label{font-weight:bold;color:#555;display:block;margin-bottom:5px;text-align:right;}.font-options{border:1px solid #ddd;border-radius:8px;overflow:hidden;max-height: 200px; overflow-y: auto; text-align: right;}.font-option{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer;}.font-option:last-child{border-bottom:none;}.font-option input[type="radio"]{margin-left:15px; flex-shrink: 0;}.font-option label{display:flex;justify-content:space-between;align-items:center;width:100%;font-weight:normal;cursor:pointer;}.font-option .preview{font-size:1.2em;font-weight:bold;direction:ltr;color:#0056b3; margin-right: 10px; white-space: nowrap;}.success{color:#1e8e3e;}.checkbox-option{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:10px;padding:8px;background-color:#f8f9fa;border-radius:8px;}.checkbox-option label{margin-bottom:0;font-weight:normal;cursor:pointer;color:#444;}</style></head><body><div class="container">
 {% if step == 'GET_PHONE' %}<h1>ورود به سلف بات</h1><p>شماره و تنظیمات خود را انتخاب کنید تا ربات فعال شود.</p>{% if error_message %}<p class="error">{{ error_message }}</p>{% endif %}<form action="{{ url_for('login') }}" method="post"><input type="hidden" name="action" value="phone"><div><label for="phone">شماره تلفن (با کد کشور)</label><input type="tel" id="phone" name="phone_number" placeholder="+989123456789" required autofocus></div><div><label>استایل فونت ساعت</label><div class="font-options">{% for name, data in font_previews.items() %}<div class="font-option" onclick="document.getElementById('font-{{ data.style }}').checked = true;"><input type="radio" name="font_style" value="{{ data.style }}" id="font-{{ data.style }}" {% if loop.first %}checked{% endif %}><label for="font-{{ data.style }}"><span>{{ name }}</span><span class="preview">{{ data.preview }}</span></label></div>{% endfor %}</div></div><div class="checkbox-option"><input type="checkbox" id="disable_clock" name="disable_clock"><label for="disable_clock">فعال‌سازی بدون ساعت</label></div><button type="submit">ارسال کد تایید</button></form>
 {% elif step == 'GET_CODE' %}<h1>کد تایید</h1><p>کدی به تلگرام شما با شماره <strong>{{ phone_number }}</strong> ارسال شد.</p>{% if error_message %}<p class="error">{{ error_message }}</p>{% endif %}<form action="{{ url_for('login') }}" method="post"><input type="hidden" name="action" value="code"><input type="text" name="code" placeholder="کد تایید" required><button type="submit">تایید کد</button></form>
-{% elif step == 'GET_PASSWORD' %}<h1>رمز دو مرحله‌ای</h1><p>حساب شما نیاز به رمز تایید دو مرحله‌ای دارد.</p>{% if error_message %}<p class="error">{{ error_message }}</p>{% endif %}<form action="{{ url_for('login') }}" method="post"><input type="hidden" name="action" value="password"><input type="password" name="password" placeholder="رمز عبور" required><button type="submit">تایید رمز</button></form>
-{% elif step == 'SUCCESS' %}<h1 class="success">✅ ورود موفق</h1><p>ربات برای شماره <strong>{{ phone_number }}</strong> فعال شد.</p><p>می‌توانید این صفحه را ببندید.</p>{% endif %}</div></body></html>
+{% elif step == 'GET_PASSWORD' %}<h1>رمز دو مرحله‌ای</h1><p>حساب شما نیاز به رمز تایید دو مرحله‌ای دارد.</p>{% if error_message %}<p class="error">{{ error_message }}</p>{% endif %}<form action="{{ url_for('login') }}" method="post"><input type="hidden" name="action" value="password"><input type="password" name="password" placeholder="رمز عبور دو مرحله ای" required><button type="submit">ورود</button></form>
+{% elif step == 'SHOW_SUCCESS' %}<h1>✅ ربات فعال شد!</h1><p>ربات با موفقیت فعال شد. برای دسترسی به قابلیت‌ها، در تلگرام پیام `راهنما` را ارسال کنید.</p><form action="{{ url_for('home') }}" method="get" style="margin-top: 20px;"><button type="submit">خروج و ورود حساب جدید</button></form>{% endif %}</div></body></html>
 """
 
-@app_flask.route('/', methods=['GET', 'POST'])
+def get_font_previews():
+    sample_time = "12:34"
+    return { FONT_DISPLAY_NAMES.get(key, key.capitalize()): {"style": key, "preview": stylize_time(sample_time, key)} for key in FONT_KEYS_ORDER }
+
+async def cleanup_client(phone):
+     """Safely disconnects and removes a temporary client."""
+     if client := ACTIVE_CLIENTS.pop(phone, None):
+         if client.is_connected:
+             try:
+                 logging.debug(f"Disconnecting temporary client for {phone}...")
+                 await client.disconnect()
+                 logging.debug(f"Temporary client for {phone} disconnected.")
+             except Exception as e:
+                 logging.warning(f"Error disconnecting temporary client {phone}: {e}")
+     else:
+         logging.debug(f"No active temporary client found for {phone} during cleanup.")
+
+@app_flask.route('/')
+def home():
+    # Clear session potentially related to a previous login attempt
+    session.clear()
+    logging.info("Session cleared, rendering GET_PHONE page.")
+    return render_template_string(HTML_TEMPLATE, step='GET_PHONE', font_previews=get_font_previews())
+
+@app_flask.route('/login', methods=['POST'])
 def login():
-    session.setdefault('step', 'GET_PHONE')
-    error_message = None
+    action = request.form.get('action')
+    phone = session.get('phone_number') # Get phone from session if available
+    error_msg = None
+    # Determine current step based on action or session state
+    current_step = 'GET_PHONE' # Default
+    if action == 'code' or session.get('phone_code_hash'):
+         current_step = 'GET_CODE'
+    if action == 'password': # Should only be reached after SessionPasswordNeeded
+         current_step = 'GET_PASSWORD'
 
-    if request.method == 'POST':
-        action = request.form.get('action')
+    logging.info(f"Login request received: action='{action}', phone_in_session='{phone}'")
+
+    try:
+        # Ensure asyncio loop is running in the background thread
+        if not EVENT_LOOP or not EVENT_LOOP.is_running():
+             # This is a critical error, maybe restart is needed
+             raise RuntimeError("Asyncio event loop is not running.")
+
+        # --- Phone Number Submission ---
         if action == 'phone':
-            phone_number = request.form.get('phone_number')
+            current_step = 'GET_PHONE' # Explicitly set step for clarity
+            phone_num_input = request.form.get('phone_number')
             font_style = request.form.get('font_style', 'stylized')
-            disable_clock = bool(request.form.get('disable_clock'))
-            if phone_number:
-                session['phone_number'] = phone_number
-                session['font_style'] = font_style
-                session['disable_clock'] = disable_clock
-                try:
-                    client = Client(f"session_{phone_number}", api_id=API_ID, api_hash=API_HASH)
-                    await client.connect()
-                    sent_code_info = await client.send_code(phone_number)
-                    session['phone_code_hash'] = sent_code_info.phone_code_hash
-                    session['step'] = 'GET_CODE'
-                    await client.disconnect()
-                except PhoneNumberInvalid:
-                    error_message = "⚠️ شماره تلفن نامعتبر است."
-                except FloodWait as e:
-                    error_message = f"⚠️ لطفاً {e.value} ثانیه صبر کنید و دوباره تلاش کنید."
-                except Exception as e:
-                    logging.error(f"Error sending code for {phone_number}: {e}")
-                    error_message = "⚠️ خطایی در ارسال کد رخ داد."
-            else:
-                error_message = "⚠️ لطفاً شماره تلفن را وارد کنید."
+            disable_clock = 'disable_clock' in request.form
 
+            # Validate phone number format
+            if not phone_num_input or not re.match(r"^\+?\d{10,15}$", phone_num_input):
+                 raise ValueError("فرمت شماره تلفن نامعتبر است. لطفاً با کد کشور وارد کنید (مثال: +98...).")
+
+            # Clean phone number (e.g., ensure it starts with +)
+            if not phone_num_input.startswith('+'):
+                # Basic assumption: add '+' if missing (might need country-specific logic)
+                logging.warning(f"Adding '+' to phone number {phone_num_input}")
+                phone_num_input = "+" + phone_num_input
+
+            # Store validated info in session
+            session['phone_number'] = phone_num_input
+            session['font_style'] = font_style
+            session['disable_clock'] = disable_clock
+            logging.info(f"Phone number {phone_num_input} received. Requesting code...")
+
+            # Run send_code_task in the event loop and wait for result
+            future = asyncio.run_coroutine_threadsafe(send_code_task(phone_num_input), EVENT_LOOP)
+            future.result(timeout=45) # Wait up to 45 seconds
+
+            logging.info(f"Code request sent for {phone_num_input}. Rendering GET_CODE page.")
+            return render_template_string(HTML_TEMPLATE, step='GET_CODE', phone_number=phone_num_input)
+
+        # --- Code Submission ---
         elif action == 'code':
-            phone_number = session.get('phone_number')
-            phone_code_hash = session.get('phone_code_hash')
-            code = request.form.get('code')
-            font_style = session.get('font_style', 'stylized')
-            disable_clock = session.get('disable_clock', False)
-            if phone_number and phone_code_hash and code:
-                try:
-                    client = Client(f"session_{phone_number}", api_id=API_ID, api_hash=API_HASH)
-                    await client.connect()
-                    try:
-                        await client.sign_in(phone_number, phone_code_hash, code)
-                        session['step'] = 'SUCCESS'
-                    except SessionPasswordNeeded:
-                        session['step'] = 'GET_PASSWORD'
-                    except PhoneCodeInvalid:
-                        error_message = "⚠️ کد تایید نامعتبر است."
-                    except PhoneCodeExpired:
-                        error_message = "⚠️ کد تایید منقضی شده است. لطفاً دوباره تلاش کنید."
-                        session['step'] = 'GET_PHONE'
-                    except FloodWait as e:
-                        error_message = f"⚠️ لطفاً {e.value} ثانیه صبر کنید و دوباره تلاش کنید."
-                    except Exception as e:
-                        logging.error(f"Error signing in with code for {phone_number}: {e}")
-                        error_message = "⚠️ خطایی در ورود با کد رخ داد."
-                    finally:
-                        await client.disconnect()
-                except Exception as e:
-                    logging.error(f"Error during sign-in process for {phone_number}: {e}")
-                    error_message = "⚠️ خطایی در فرآیند ورود رخ داد."
+            current_step = 'GET_CODE' # Set for error handling context
+            code_input = request.form.get('code')
+            phone = session.get('phone_number') # Re-fetch from session
 
+            # Assert necessary info is present
+            if not phone or not code_input or 'phone_code_hash' not in session:
+                 logging.error("Session data missing for code submission (phone, code, or hash).")
+                 raise AssertionError("اطلاعات ورود (session) نامعتبر یا منقضی شده است. لطفاً از ابتدا شروع کنید.")
+
+            logging.info(f"Code received for {phone}. Attempting sign in...")
+            # Run sign_in_task and wait
+            future = asyncio.run_coroutine_threadsafe(sign_in_task(phone, code_input), EVENT_LOOP)
+            next_step = future.result(timeout=45)
+
+            if next_step == 'GET_PASSWORD':
+                logging.info(f"Password required for {phone}. Rendering GET_PASSWORD page.")
+                return render_template_string(HTML_TEMPLATE, step='GET_PASSWORD', phone_number=phone)
+            elif next_step == 'SUCCESS':
+                logging.info(f"Sign in successful for {phone}. Rendering SHOW_SUCCESS page.")
+                return render_template_string(HTML_TEMPLATE, step='SHOW_SUCCESS')
             else:
-                error_message = "⚠️ اطلاعات جلسه نامعتبر است. لطفاً دوباره تلاش کنید."
-                session['step'] = 'GET_PHONE'
+                 # Should not happen if sign_in_task returns correctly
+                 logging.error(f"Unexpected result from sign_in_task for {phone}: {next_step}")
+                 raise Exception("مرحله ورود نامشخص پس از تایید کد.")
 
+        # --- Password Submission ---
         elif action == 'password':
-            phone_number = session.get('phone_number')
-            password = request.form.get('password')
-            font_style = session.get('font_style', 'stylized')
-            disable_clock = session.get('disable_clock', False)
-            if phone_number and password:
-                try:
-                    client = Client(f"session_{phone_number}", api_id=API_ID, api_hash=API_HASH)
-                    await client.connect()
-                    try:
-                        await client.check_password(password)
-                        session['step'] = 'SUCCESS'
-                    except PasswordHashInvalid:
-                        error_message = "⚠️ رمز عبور اشتباه است."
-                    except FloodWait as e:
-                        error_message = f"⚠️ لطفاً {e.value} ثانیه صبر کنید و دوباره تلاش کنید."
-                    except Exception as e:
-                        logging.error(f"Error checking password for {phone_number}: {e}")
-                        error_message = "⚠️ خطایی در بررسی رمز عبور رخ داد."
-                    finally:
-                        await client.disconnect()
-                except Exception as e:
-                    logging.error(f"Error during password check for {phone_number}: {e}")
-                    error_message = "⚠️ خطایی در فرآیند ورود رخ داد."
+            current_step = 'GET_PASSWORD' # Set for error handling context
+            password_input = request.form.get('password')
+            phone = session.get('phone_number') # Re-fetch from session
+
+            if not phone or not password_input:
+                 logging.error("Session data missing for password submission (phone or password).")
+                 raise AssertionError("اطلاعات ورود (session) نامعتبر یا منقضی شده است. لطفاً از ابتدا شروع کنید.")
+
+            logging.info(f"Password received for {phone}. Checking password...")
+            # Run check_password_task and wait
+            future = asyncio.run_coroutine_threadsafe(check_password_task(phone, password_input), EVENT_LOOP)
+            result = future.result(timeout=45)
+
+            if result == 'SUCCESS':
+                logging.info(f"Password check successful for {phone}. Rendering SHOW_SUCCESS page.")
+                return render_template_string(HTML_TEMPLATE, step='SHOW_SUCCESS')
             else:
-                error_message = "⚠️ اطلاعات جلسه نامعتبر است. لطفاً دوباره تلاش کنید."
-                session['step'] = 'GET_PHONE'
+                 # Should not happen if check_password_task returns correctly
+                 logging.error(f"Unexpected result from check_password_task for {phone}: {result}")
+                 raise Exception("خطای نامشخص پس از بررسی رمز عبور.")
 
-        if session.get('step') == 'SUCCESS':
-            phone_number = session.get('phone_number')
-            font_style = session.get('font_style', 'stylized')
-            disable_clock = session.get('disable_clock', False)
+        # --- Invalid Action ---
+        else:
+            logging.warning(f"Invalid action received in login POST: {action}")
+            error_msg = "عملیات درخواستی نامعتبر است."
+            current_step = 'GET_PHONE' # Reset to start
+            session.clear() # Clear potentially inconsistent session
+
+    # --- Exception Handling ---
+    except (TimeoutError, asyncio.TimeoutError):
+        error_msg = "پاسخی از سرور تلگرام دریافت نشد. لطفاً از اتصال اینترنت خود مطمئن شوید و دوباره تلاش کنید (Timeout)."
+        logging.warning(f"Timeout occurred during login action '{action}' for phone {phone}.")
+        # Decide step based on where timeout likely occurred
+        if action == 'phone': current_step = 'GET_PHONE'; session.clear()
+        elif action == 'code': current_step = 'GET_CODE'
+        elif action == 'password': current_step = 'GET_PASSWORD'
+        else: current_step = 'GET_PHONE'; session.clear()
+
+    except (PhoneNumberInvalid, ValueError) as e: # Catch specific validation errors
+         error_msg = str(e) # Use the error message directly (e.g., from ValueError)
+         logging.warning(f"Validation Error during login action '{action}' for phone {phone}: {e}")
+         current_step = 'GET_PHONE' # Go back to phone input
+         session.clear() # Clear session on phone error
+
+    except (PhoneCodeInvalid, PasswordHashInvalid) as e:
+         error_msg = "کد تایید یا رمز عبور وارد شده اشتباه است. لطفاً دوباره بررسی کنید."
+         logging.warning(f"Invalid code/password during login action '{action}' for phone {phone}: {e}")
+         # Stay on the same step (code or password) to let user retry
+         if action == 'code': current_step = 'GET_CODE'
+         elif action == 'password': current_step = 'GET_PASSWORD'
+         else: current_step = 'GET_PHONE'; session.clear() # Fallback
+
+    except (PhoneCodeExpired, SessionPasswordNeeded, UserDeactivated, AuthKeyUnregistered) as e:
+         # These might require restarting the process
+         error_msg = f"خطا: {type(e).__name__}. لطفاً فرآیند ورود را از ابتدا شروع کنید."
+         logging.warning(f"Session-related error during login action '{action}' for phone {phone}: {e}")
+         current_step = 'GET_PHONE' # Force restart
+         session.clear() # Clear session completely
+
+    except Exception as e:
+        error_msg = f"خطای غیرمنتظره‌ای رخ داد: {type(e).__name__}. لطفاً دوباره تلاش کنید."
+        logging.error(f"Unexpected error during login action '{action}' for phone {phone}: {e}", exc_info=True)
+        # Decide step: if we were in the middle (code/password), stay there, otherwise go to phone
+        if action == 'phone': current_step = 'GET_PHONE'; session.clear()
+        elif action == 'code': current_step = 'GET_CODE'
+        elif action == 'password': current_step = 'GET_PASSWORD'
+        else: current_step = 'GET_PHONE'; session.clear()
+
+    # --- Render Error Page ---
+    logging.info(f"Rendering page for step '{current_step}' with error: {error_msg}")
+    # Ensure font_previews is available for GET_PHONE step
+    if current_step == 'GET_PHONE':
+         return render_template_string(HTML_TEMPLATE, step=current_step, error_message=error_msg, font_previews=get_font_previews())
+    else:
+         return render_template_string(HTML_TEMPLATE, step=current_step, error_message=error_msg, phone_number=phone or "نامشخص")
+
+# --- Async Tasks for Flask ---
+async def send_code_task(phone_number: str):
+    logging.info(f"Starting send_code_task for {phone_number}...")
+    client = None
+    try:
+        # Generate a safe client name
+        safe_phone_name = re.sub(r'\W+', '', phone_number)
+        client_name = f"temp_client_{safe_phone_name}_{int(time.time())}" # Add timestamp for uniqueness
+        client = Client(client_name, api_id=API_ID, api_hash=API_HASH, in_memory=True)
+        await client.connect()
+
+        sent_code_info = await client.send_code(phone_number)
+        # Store necessary data in session (thread-safe? careful with flask session)
+        session['phone_code_hash'] = sent_code_info.phone_code_hash
+        # Store the client instance temporarily to use for sign-in
+        ACTIVE_CLIENTS[phone_number] = client
+        logging.info(f"send_code_task: Code sent successfully for {phone_number}.")
+        return # Success, no return value needed
+
+    except FloodWait as e_flood:
+        logging.warning(f"send_code_task: Flood wait for {phone_number}: {e_flood.value}s")
+        # Cleanup client if flood wait happens during send_code
+        if client: await cleanup_client(phone_number)
+        raise # Re-raise to be handled by Flask route
+    except Exception as e:
+        logging.error(f"send_code_task FAILED for {phone_number}: {e}", exc_info=True)
+        # Ensure client is cleaned up on failure
+        if client: await cleanup_client(phone_number)
+        raise # Re-raise to be handled by Flask route
+
+async def sign_in_task(phone_number: str, code: str):
+    logging.info(f"Starting sign_in_task for {phone_number}...")
+    client = ACTIVE_CLIENTS.get(phone_number)
+    if not client:
+        logging.error(f"sign_in_task: No active client found for {phone_number}.")
+        raise RuntimeError("Client session expired. Please start over.")
+
+    try:
+        phone_code_hash = session.get('phone_code_hash')
+        if not phone_code_hash:
+            logging.error(f"sign_in_task: No phone_code_hash in session for {phone_number}.")
+            raise AssertionError("Session data missing (phone_code_hash).")
+
+        await client.sign_in(phone_number, phone_code_hash, code)
+        logging.info(f"sign_in_task: Sign in successful for {phone_number}.")
+        # Sign-in successful, proceed to get session string and start bot
+        session_string = await client.export_session_string()
+        font_style = session.get('font_style', 'stylized')
+        disable_clock = session.get('disable_clock', False)
+
+        # Save session to database
+        if sessions_collection is not None:
             try:
-                client = Client(f"session_{phone_number}", api_id=API_ID, api_hash=API_HASH)
-                await client.connect()
-                session_string = await client.export_session_string()
-                await client.disconnect()
+                sessions_collection.update_one(
+                    {'phone_number': phone_number},
+                    {'$set': {
+                        'session_string': session_string,
+                        'font_style': font_style,
+                        'disable_clock': disable_clock,
+                        'last_updated': datetime.now(TEHRAN_TIMEZONE)
+                    }},
+                    upsert=True
+                )
+                logging.info(f"Session for {phone_number} saved to database.")
+            except Exception as db_err:
+                logging.error(f"Could not save session for {phone_number} to database: {db_err}")
 
-                if sessions_collection is not None:
-                    try:
-                        sessions_collection.update_one(
-                            {'phone_number': phone_number},
-                            {'$set': {
-                                'session_string': session_string,
-                                'font_style': font_style,
-                                'disable_clock': disable_clock,
-                                'last_updated': datetime.now(TEHRAN_TIMEZONE)
-                            }},
-                            upsert=True
-                        )
-                        logging.info(f"Session saved to DB for {phone_number}.")
-                    except Exception as db_err:
-                         logging.error(f"DB Error saving session for {phone_number}: {db_err}")
-                else:
-                    logging.info(f"Session for {phone_number} generated but DB not available.")
+        # Schedule the bot instance to start
+        asyncio.create_task(start_bot_instance(session_string, phone_number, font_style, disable_clock))
+        logging.info(f"Bot start scheduled for {phone_number}.")
 
-                asyncio.run_coroutine_threadsafe(start_bot_instance(session_string, phone_number, font_style, disable_clock), EVENT_LOOP)
-                logging.info(f"Bot instance start triggered for {phone_number}.")
+        # Clear temporary data from session and client dict
+        session.pop('phone_code_hash', None)
+        await cleanup_client(phone_number) # This disconnects and removes the temp client
 
-            except Exception as e:
-                logging.error(f"Error generating session string for {phone_number}: {e}")
-                error_message = "⚠️ خطایی در فعال‌سازی ربات رخ داد."
-                session['step'] = 'GET_PHONE'
+        return 'SUCCESS'
 
-    step = session.get('step', 'GET_PHONE')
-    font_previews = {FONT_DISPLAY_NAMES.get(style, style): {'style': style, 'preview': stylize_time('12:34', style)} for style in FONT_KEYS_ORDER[:20]}  # Limit previews to 20 fonts
-    return render_template_string(HTML_TEMPLATE, step=step, error_message=error_message, font_previews=font_previews, phone_number=session.get('phone_number'))
+    except SessionPasswordNeeded:
+        logging.info(f"sign_in_task: 2FA password required for {phone_number}.")
+        # Keep the client active for password check
+        return 'GET_PASSWORD'
+    except (PhoneCodeInvalid, PhoneCodeExpired) as e:
+        logging.warning(f"sign_in_task: Invalid/expired code for {phone_number}: {e}")
+        # Cleanup client on code error? Maybe keep it for retry? Let's cleanup to be safe.
+        await cleanup_client(phone_number)
+        session.pop('phone_code_hash', None) # Clear the hash as it's likely invalid now
+        raise # Re-raise specific exception
+    except Exception as e:
+        logging.error(f"sign_in_task FAILED for {phone_number}: {e}", exc_info=True)
+        await cleanup_client(phone_number) # Ensure cleanup on any other error
+        session.pop('phone_code_hash', None)
+        raise # Re-raise
 
-def run_flask():
-    app_flask.run(host='0.0.0.0', port=5000, debug=False)
+async def check_password_task(phone_number: str, password: str):
+    logging.info(f"Starting check_password_task for {phone_number}...")
+    client = ACTIVE_CLIENTS.get(phone_number)
+    if not client:
+        logging.error(f"check_password_task: No active client found for {phone_number}.")
+        raise RuntimeError("Client session expired. Please start over.")
 
-async def load_saved_sessions():
+    try:
+        await client.check_password(password)
+        logging.info(f"check_password_task: Password correct for {phone_number}.")
+        # Password correct, proceed similar to successful sign-in
+        session_string = await client.export_session_string()
+        font_style = session.get('font_style', 'stylized')
+        disable_clock = session.get('disable_clock', False)
+
+        if sessions_collection is not None:
+            try:
+                sessions_collection.update_one(
+                    {'phone_number': phone_number},
+                    {'$set': {
+                        'session_string': session_string,
+                        'font_style': font_style,
+                        'disable_clock': disable_clock,
+                        'last_updated': datetime.now(TEHRAN_TIMEZONE)
+                    }},
+                    upsert=True
+                )
+                logging.info(f"Session (with 2FA) for {phone_number} saved to database.")
+            except Exception as db_err:
+                logging.error(f"Could not save session (with 2FA) for {phone_number} to database: {db_err}")
+
+        asyncio.create_task(start_bot_instance(session_string, phone_number, font_style, disable_clock))
+        logging.info(f"Bot start scheduled for {phone_number} (after 2FA).")
+
+        await cleanup_client(phone_number)
+        return 'SUCCESS'
+
+    except PasswordHashInvalid as e:
+        logging.warning(f"check_password_task: Invalid password for {phone_number}: {e}")
+        # Keep client for retry? Let's cleanup to force restart for security.
+        await cleanup_client(phone_number)
+        raise # Re-raise specific exception
+    except Exception as e:
+        logging.error(f"check_password_task FAILED for {phone_number}: {e}", exc_info=True)
+        await cleanup_client(phone_number)
+        raise # Re-raise
+
+# --- Main Application Startup ---
+async def main():
+    global EVENT_LOOP
+    EVENT_LOOP = asyncio.get_running_loop()
+
+    # Load existing sessions from database and start bots
     if sessions_collection is not None:
         try:
-            saved_sessions = sessions_collection.find({})
+            saved_sessions = list(sessions_collection.find({}))
+            logging.info(f"Found {len(saved_sessions)} saved session(s) in database.")
             for session_doc in saved_sessions:
                 phone = session_doc.get('phone_number')
-                session_string = session_doc.get('session_string')
-                font_style = session_doc.get('font_style', 'stylized')
-                disable_clock = session_doc.get('disable_clock', False)
-                if phone and session_string:
-                    logging.info(f"Loading saved session for {phone}...")
-                    await start_bot_instance(session_string, phone, font_style, disable_clock)
-                    await asyncio.sleep(3)  # Delay between starting sessions
-        except Exception as e:
-            logging.error(f"Error loading saved sessions: {e}", exc_info=True)
+                session_str = session_doc.get('session_string')
+                font = session_doc.get('font_style', 'stylized')
+                disable_clk = session_doc.get('disable_clock', False)
+                if phone and session_str:
+                    logging.info(f"Starting bot instance for saved session: {phone}")
+                    # Use create_task to start them concurrently
+                    asyncio.create_task(start_bot_instance(session_str, phone, font, disable_clk))
+                else:
+                    logging.warning(f"Invalid session document found (missing phone or session_string): {session_doc.get('_id')}")
+            # Small delay to let all instances start reporting
+            await asyncio.sleep(3)
+        except Exception as e_db_load:
+            logging.error(f"Could not load sessions from database: {e_db_load}")
 
-async def clear_secretary_replied_users_daily():
-    while True:
-        now_tehran = datetime.now(TEHRAN_TIMEZONE)
-        target_time = now_tehran.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-        sleep_seconds = (target_time - now_tehran).total_seconds()
-        await asyncio.sleep(sleep_seconds)
-        logging.info("Clearing secretary replied users list for the new day.")
-        for user_id in USERS_REPLIED_IN_SECRETARY:
-            USERS_REPLIED_IN_SECRETARY[user_id].clear()
+    # Start Flask app in a separate thread
+    def run_flask():
+        # Use a simple run for development. For production, use a proper WSGI server like Waitress or Gunicorn.
+        app_flask.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
 
-async def main():
-    logging.info("Starting Telegram Self Bot...")
     flask_thread = Thread(target=run_flask, daemon=True)
     flask_thread.start()
-    logging.info("Flask web server started on http://0.0.0.0:5000")
-    await asyncio.sleep(2)
-    await load_saved_sessions()
-    asyncio.create_task(clear_secretary_replied_users_daily())
-    logging.info("Daily clear task for secretary replied users started.")
-    try:
-        while True:
-            await asyncio.sleep(3600)
-    except KeyboardInterrupt:
-        logging.info("Received interrupt signal. Shutting down...")
-    finally:
-        logging.info("Stopping all active bot instances...")
-        for user_id, (client, tasks) in list(ACTIVE_BOTS.items()):
-            logging.info(f"Stopping instance for user_id {user_id}...")
-            for task in tasks:
-                if task and not task.done():
-                    task.cancel()
-                    try:
-                        await asyncio.wait_for(task, timeout=5.0)
-                    except (asyncio.CancelledError, asyncio.TimeoutError):
-                        pass
-                    except Exception as e:
-                        logging.warning(f"Error cancelling task for user_id {user_id}: {e}")
-            if client and client.is_connected:
-                try:
-                    await client.stop(block=False)
-                    logging.info(f"Client for user_id {user_id} stopped.")
-                except Exception as e:
-                    logging.error(f"Error stopping client for user_id {user_id}: {e}")
-        logging.info("Shutdown complete.")
+    logging.info("Flask app started on http://0.0.0.0:5000")
+
+    # Keep the main asyncio loop running
+    while True:
+        await asyncio.sleep(3600) # Sleep for an hour, or handle other periodic tasks
 
 if __name__ == '__main__':
-    asyncio.set_event_loop(EVENT_LOOP)
     try:
-        EVENT_LOOP.run_until_complete(main())
+        asyncio.run(main())
     except KeyboardInterrupt:
-        pass
+        logging.info("Application stopped by user (KeyboardInterrupt).")
+    except Exception as e_main:
+        logging.critical(f"Fatal error in main: {e_main}", exc_info=True)
     finally:
-        EVENT_LOOP.close()
+        logging.info("Shutting down...")
+        # Perform any final cleanup if necessary
+[/file content end]
