@@ -68,7 +68,7 @@ FONT_STYLES = {
     "monospace":    {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':':':'},
     "normal":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':':':'},
     "circled":      {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':':'∶'},
-    "fullwidth":    {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'６','7':'７','8':'８','9':'９',':':'：'},
+    "fullwidth":    {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'۶','7':'７','8':'８','9':'９',':':'：'},
     "sans_normal":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':'∶'},
     "negative_circled": {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':':'∶'},
     "parenthesized": {'0':'🄀','1':'⑴','2':'⑵','3':'⑶','4':'⑷','5':'⑸','6':'⑹','7':'⑺','8':'⑻','9':'⑼',':':'∶'},
@@ -80,14 +80,14 @@ FONT_STYLES = {
     "superscript":  {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',':':':'},
     "subscript":    {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'},
     "tibetan":      {'0':'༠','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩',':':' : '},
-    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯',':':' : '},
+    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'۷','8':'۸','9':'۹',':':' : '},
     "gujarati":     {'0':'૦','1':'૧','2':'૨','3':'૩','4':'૪','5':'૫','6':'૬','7':'૭','8':'૮','9':'૯',':':' : '},
     "mongolian":    {'0':'᠐','1':'᠑','2':'᠒','3':'᠓','4':'᠔','5':'᠕','6':'᠖','7':'᠗','8':'᠘','9':'᠙',':':' : '},
     "lao":          {'0':'໐','1':'໑','2':'໒','3':'໓','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':':' : '},
     "fraktur":      {'0':'𝔃','1':'𝔄','2':'𝔅','3':'𝔆','4':'𝔇','5':'𝔈','6':'𝔉','7':'𝔊','8':'𝔋','9':'𝔌',':':':'},
     "bold_fraktur": {'0':'𝖀','1':'𝖁','2':'𝖂','3':'𝖃','4':'𝖄','5':'𝖅','6':'𝖆','7':'𝖇','8':'𝖈','9':'𝖉',':':':'},
     "script":       {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':':'},
-    "bold_script":  {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟓','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "bold_script":  {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
     "squared":      {'0':'🄀','1':'🄁','2':'🄂','3':'🄃','4':'🄄','5':'🄅','6':'🄆','7':'🄇','8':'🄈','9':'🄉',':':'∶'},
     "negative_squared": {'0':'🅀','1':'🅁','2':'🅂','3':'🅃','4':'🅄','5':'🅅','6':'🅆','7':'🅇','8':'🅈','9':'🅉',':':'∶'},
     "roman":        {'0':'⓪','1':'Ⅰ','2':'Ⅱ','3':'Ⅲ','4':'Ⅳ','5':'Ⅴ','6':'Ⅵ','7':'Ⅶ','8':'Ⅷ','9':'Ⅸ',':':':'},
@@ -97,15 +97,15 @@ FONT_STYLES = {
     "mirror":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'9','7':'7','8':'8','9':'6',':':':'},
     "strike":       {'0':'0̶','1':'1̶','2':'2̶','3':'3̶','4':'4̶','5':'5̶','6':'6̶','7':'7̶','8':'8̶','9':'9̶',':':':'},
     "bubble":       {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':':'∶'},
-    "fancy1":       {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'６','7':'７','8':'８','9':'９',':':'：'},
+    "fancy1":       {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'６','7':'۷','8':'８','9':'９',':':'：'},
     "fancy2":       {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
-    "fancy3":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟓','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "fancy3":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
     "fancy4":       {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':':'∶'},
     # Additional cool fonts
     "ethiopic":     {'0':'፩','1':'፪','2':'፫','3':'፬','4':'፭','5':'፮','6':'፯','7':'፰','8':'፱','9':'፲',':':' : '},  # Approximate
     "gothic":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},  # Bold variant
     "runic":        {'0':'ᛟ','1':'ᛁ','2':'ᛒ','3':'ᛏ','4':'ᚠ','5':'ᚢ','6':'ᛋ','7':'ᚷ','8':'ᚺ','9':'ᛉ',':':' : '},  # Approximate runic
-    "math_bold":    {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟓','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "math_bold":    {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
     "math_italic":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':':'},
     "math_sans":    {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
     "math_monospace": {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':':':'},
@@ -162,7 +162,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
+COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
 
 # --- Main Bot Functions ---
 def stylize_time(time_str: str, style: str) -> str:
@@ -366,7 +366,11 @@ async def translate_text(text: str, target_lang: str = "fa") -> str:
 
 async def outgoing_message_modifier(client, message):
     user_id = client.me.id
-    if not message.text or message.text.startswith("/") or message.entities or re.match(COMMAND_REGEX, message.text.strip(), re.IGNORECASE):
+    if not message.text or message.text.startswith("/") or message.entities:
+        return
+
+    # چک کردن اگر دستور هست
+    if re.match(COMMAND_REGEX, message.text.strip(), re.IGNORECASE):
         return
 
     original_text = message.text
@@ -537,7 +541,6 @@ async def incoming_message_manager(client, message):
     except Exception as e_main:
         logging.error(f"Incoming Manager: Unhandled error processing message {getattr(message, 'id', 'N/A')}: {e_main}", exc_info=True)
 
-
 async def auto_seen_handler(client, message):
     user_id = client.me.id
     if message.chat.type == ChatType.PRIVATE and AUTO_SEEN_STATUS.get(user_id, False):
@@ -556,7 +559,6 @@ async def auto_seen_handler(client, message):
              # Avoid logging common errors if chat becomes inaccessible
              if "Could not find the input peer" not in str(e) and "PEER_ID_INVALID" not in str(e).upper():
                  logging.warning(f"AutoSeen: Could not mark chat {getattr(message.chat, 'id', 'N/A')} as read: {e}")
-
 
 async def translate_controller(client, message):
     user_id = client.me.id
@@ -583,7 +585,6 @@ async def translate_controller(client, message):
             pass
         except Exception as e_edit_warn:
              logging.warning(f"Translate: Failed to edit warning message: {e_edit_warn}")
-
 
 async def toggle_controller(client, message):
     user_id = client.me.id
@@ -665,7 +666,6 @@ async def toggle_controller(client, message):
         except Exception: # Avoid further errors if editing fails
             pass
 
-
 async def set_translation_controller(client, message):
     user_id = client.me.id
     command = message.text.strip().lower()
@@ -734,10 +734,9 @@ async def set_translation_controller(client, message):
         except Exception:
             pass
 
-
 async def set_secretary_message_controller(client, message):
     user_id = client.me.id
-    match = re.match(r"^منشی متن(?: |$)(.*)", message.text, re.DOTALL | re.IGNORECASE) # Added IGNORECASE
+    match = re.match(r"^منشی متن(?: |$)(.*)", message.text, re.DOTALL | re.IGNORECASE) # Added ignorecase
     text = match.group(1).strip() if match else None # Use None to distinguish no match from empty text
 
     try:
@@ -767,7 +766,6 @@ async def set_secretary_message_controller(client, message):
         except Exception:
             pass
 
-
 async def pv_lock_controller(client, message):
     user_id = client.me.id
     command = message.text.strip()
@@ -794,7 +792,6 @@ async def pv_lock_controller(client, message):
             await message.edit_text("⚠️ خطایی در پردازش دستور قفل PV رخ داد.")
         except Exception:
             pass
-
 
 async def copy_profile_controller(client, message):
     user_id = client.me.id
@@ -936,7 +933,6 @@ async def copy_profile_controller(client, message):
         except Exception:
             pass # Avoid error loops
 
-
 async def set_enemy_controller(client, message):
     user_id = client.me.id
     if message.reply_to_message and message.reply_to_message.from_user:
@@ -949,7 +945,6 @@ async def set_enemy_controller(client, message):
             await message.edit_text(f"ℹ️ کاربر با آیدی `{target_id}` از قبل در لیست دشمن بود.")
     else:
         await message.edit_text("⚠️ برای افزودن به لیست دشمن، روی پیام کاربر مورد نظر ریپلای کنید.")
-
 
 async def delete_enemy_controller(client, message):
     user_id = client.me.id
@@ -966,7 +961,6 @@ async def delete_enemy_controller(client, message):
     else:
         await message.edit_text("⚠️ برای حذف از لیست دشمن، روی پیام کاربر مورد نظر ریپلای کنید.")
 
-
 async def clear_enemy_list_controller(client, message):
     user_id = client.me.id
     if ENEMY_LIST.get(user_id): # Check if the list exists and is not empty
@@ -974,7 +968,6 @@ async def clear_enemy_list_controller(client, message):
         await message.edit_text("✅ لیست دشمن با موفقیت پاکسازی شد.")
     else:
         await message.edit_text("ℹ️ لیست دشمن از قبل خالی بود.")
-
 
 async def list_enemies_controller(client, message):
     user_id = client.me.id
@@ -1000,7 +993,6 @@ async def list_enemies_controller(client, message):
             list_text = list_text[:4090] + "\n[...]" # Truncate if too long
         await message.edit_text(list_text)
 
-
 async def list_enemy_replies_controller(client, message):
     user_id = client.me.id
     replies = ENEMY_REPLIES.get(user_id, [])
@@ -1011,7 +1003,6 @@ async def list_enemy_replies_controller(client, message):
         if len(list_text) > 4096:
             list_text = list_text[:4090] + "\n[...]"
         await message.edit_text(list_text)
-
 
 async def delete_enemy_reply_controller(client, message):
     user_id = client.me.id
@@ -1043,7 +1034,6 @@ async def delete_enemy_reply_controller(client, message):
             await message.edit_text("⚠️ خطایی در حذف متن دشمن رخ داد.")
     # else: Regex didn't match (should not happen with current handler setup)
 
-
 async def set_enemy_reply_controller(client, message):
     user_id = client.me.id
     # Use re.IGNORECASE for robustness
@@ -1060,7 +1050,6 @@ async def set_enemy_reply_controller(client, message):
             await message.edit_text("⚠️ متن پاسخ نمی‌تواند خالی باشد.")
     # else: Regex didn't match (should not happen with current handler setup)
 
-
 async def set_friend_controller(client, message):
     user_id = client.me.id
     if message.reply_to_message and message.reply_to_message.from_user:
@@ -1073,7 +1062,6 @@ async def set_friend_controller(client, message):
             await message.edit_text(f"ℹ️ کاربر با آیدی `{target_id}` از قبل در لیست دوست بود.")
     else:
         await message.edit_text("⚠️ برای افزودن به لیست دوست، روی پیام کاربر مورد نظر ریپلای کنید.")
-
 
 async def delete_friend_controller(client, message):
     user_id = client.me.id
@@ -1088,7 +1076,6 @@ async def delete_friend_controller(client, message):
     else:
         await message.edit_text("⚠️ برای حذف از لیست دوست، روی پیام کاربر مورد نظر ریپلای کنید.")
 
-
 async def clear_friend_list_controller(client, message):
     user_id = client.me.id
     if FRIEND_LIST.get(user_id):
@@ -1096,7 +1083,6 @@ async def clear_friend_list_controller(client, message):
         await message.edit_text("✅ لیست دوست با موفقیت پاکسازی شد.")
     else:
         await message.edit_text("ℹ️ لیست دوست از قبل خالی بود.")
-
 
 async def list_friends_controller(client, message):
     user_id = client.me.id
@@ -1118,7 +1104,6 @@ async def list_friends_controller(client, message):
             list_text = list_text[:4090] + "\n[...]"
         await message.edit_text(list_text)
 
-
 async def list_friend_replies_controller(client, message):
     user_id = client.me.id
     replies = FRIEND_REPLIES.get(user_id, [])
@@ -1129,7 +1114,6 @@ async def list_friend_replies_controller(client, message):
         if len(list_text) > 4096:
             list_text = list_text[:4090] + "\n[...]"
         await message.edit_text(list_text)
-
 
 async def delete_friend_reply_controller(client, message):
     user_id = client.me.id
@@ -1159,7 +1143,6 @@ async def delete_friend_reply_controller(client, message):
             logging.error(f"Delete Friend Reply: Error for user {user_id}: {e}", exc_info=True)
             await message.edit_text("⚠️ خطایی در حذف متن دوست رخ داد.")
 
-
 async def set_friend_reply_controller(client, message):
     user_id = client.me.id
     match = re.match(r"^تنظیم متن دوست (.*)", message.text, re.DOTALL | re.IGNORECASE)
@@ -1172,7 +1155,6 @@ async def set_friend_reply_controller(client, message):
             await message.edit_text(f"✅ متن جدید به لیست پاسخ دوست اضافه شد (مورد {len(FRIEND_REPLIES[user_id])}).")
         else:
             await message.edit_text("⚠️ متن پاسخ نمی‌تواند خالی باشد.")
-
 
 async def help_controller(client, message):
     # Using a raw string to avoid issues with backslashes and formatting
@@ -1203,6 +1185,7 @@ async def help_controller(client, message):
 
 **🔹 مدیریت پیام و کاربر 🔹**
 • `حذف [عدد]`: حذف X پیام آخر شما در چت فعلی (شامل خود دستور نمی‌شود). مثال: `حذف 10`. بدون عدد، 5 پیام آخر حذف می‌شود.
+• `حذف همه`: حذف تمام پیام‌های شما در چت فعلی (تا 1000 پیام).
 • `ذخیره` (ریپلای): ذخیره کردن پیام ریپلای شده در Saved Messages شما.
 • `تکرار [عدد] [ثانیه]` (ریپلای): تکرار پیام ریپلای شده X بار با فاصله Y ثانیه. فاصله ثانیه اختیاری است (پیش‌فرض بدون فاصله). مثال: `تکرار 5 2`.
 • `بلاک روشن` / `خاموش` (ریپلای): بلاک یا آنبلاک کردن کاربر ریپلای شده.
@@ -1231,9 +1214,9 @@ async def help_controller(client, message):
 • `حذف متن دوست [عدد]`: حذف متن شماره X از لیست پاسخ دوست. بدون عدد، تمام متن‌ها حذف می‌شود.
 
 **🔹 سرگرمی 🔹**
-• `تاس`: ارسال تاس شانسی (نتیجه 1 تا 6).
-• `تاس [عدد ۱-۶]`: (توجه: این دستور فقط تاس می‌فرستد و نمی‌تواند نتیجه را تعیین کند).
-• `بولینگ`: ارسال ایموجی بولینگ شانسی.
+• `تاس`: ارسال تاس شانسی (تا 6 ادامه می‌دهد).
+• `تاس [عدد ۱-۶]`: ارسال تاس تا موقعی که عدد مورد نظر نیاید.
+• `بولینگ`: ارسال بولینگ شانسی (تا استرایک ادامه می‌دهد).
 
 **🔹 امنیت و منشی 🔹**
 • `پیوی قفل` / `باز`: فعال/غیرفعال کردن حذف خودکار تمام پیام‌های دریافتی در PV (چت شخصی).
@@ -1252,7 +1235,6 @@ async def help_controller(client, message):
         pass
     except Exception as e:
         logging.error(f"Help Controller: Error editing help message: {e}", exc_info=True)
-
 
 async def block_unblock_controller(client, message):
     user_id = client.me.id
@@ -1289,7 +1271,6 @@ async def block_unblock_controller(client, message):
         try:
             await message.edit_text(f"⚠️ خطایی در بلاک/آنبلاک {target_info} رخ داد: {type(e).__name__}")
         except Exception: pass
-
 
 async def mute_unmute_controller(client, message):
     user_id = client.me.id
@@ -1342,7 +1323,6 @@ async def mute_unmute_controller(client, message):
         try:
             await message.edit_text(f"⚠️ خطایی در عملیات سکوت برای {target_info} {chat_info} رخ داد.")
         except Exception: pass
-
 
 async def auto_reaction_controller(client, message):
     user_id = client.me.id
@@ -1410,7 +1390,6 @@ async def auto_reaction_controller(client, message):
         try:
             await message.edit_text(f"⚠️ خطایی در تنظیم واکنش برای {target_info} رخ داد.")
         except Exception: pass
-
 
 async def save_message_controller(client, message):
     user_id = client.me.id
@@ -1510,164 +1489,159 @@ async def repeat_message_controller(client, message):
              await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تکرار 5` یا `تکرار 3 10`")
         except Exception: pass
 
-
 async def delete_messages_controller(client, message):
     user_id = client.me.id
-    match = re.match(r"^حذف(?: (\d+))?$", message.text)
-    if not match:
+    command = message.text.strip()
+    
+    # چک کردن دستور "حذف همه"
+    if command == "حذف همه":
+        count = 1000  # عدد بزرگ برای حذف همه
+    else:
+        match = re.match(r"^حذف(?: (\d+))?$", command)
+        if not match:
+            try:
+                await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `حذف` یا `حذف 10` یا `حذف همه`")
+            except Exception: pass
+            return
+        
+        count_str = match.group(1)
         try:
-             await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `حذف` یا `حذف 10`")
-        except Exception: pass
-        return
-
-    count_str = match.group(1)
-    # Default to 5, ensure count is at least 1
-    try:
-        count = int(count_str) if count_str else 5
-        if count < 1: count = 1
-        # Add a reasonable upper limit
-        if count > 100: # Max 100 messages + command = 101
-            count = 100
-            await message.reply_text("⚠️ حداکثر تعداد حذف 100 پیام است.", quote=True) # Reply, don't edit original
-    except ValueError:
-         await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
-         return
+            count = int(count_str) if count_str else 5
+            if count < 1: count = 1
+            if count > 1000: count = 1000
+        except ValueError:
+            await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
+            return
 
     chat_id = message.chat.id
     message_ids_to_delete = []
-    processed_count = 0
-    limit = count + 10 # Fetch a bit more to be sure we find enough user messages
-
+    
     try:
-        # Include the command message ID itself for deletion
+        # اضافه کردن پیام دستور به لیست حذف
         message_ids_to_delete.append(message.id)
-
+        
+        # پیدا کردن پیام‌های کاربر
+        user_messages_found = 0
+        limit = min(count * 3, 1000)  # حداکثر 1000 پیام برای جستجو
+        
         async for msg in client.get_chat_history(chat_id, limit=limit):
-            processed_count += 1
-            # Skip the command message itself if found again
             if msg.id == message.id:
                 continue
-            # Check if it's user's message and we still need more
-            if msg.from_user and msg.from_user.id == user_id and len(message_ids_to_delete) <= count:
+                
+            if msg.from_user and msg.from_user.id == user_id:
                 message_ids_to_delete.append(msg.id)
-
-            # Stop fetching if we have enough messages or processed the limit
-            if len(message_ids_to_delete) > count or processed_count >= limit:
-                break
-
-        # Adjust the list to exactly `count + 1` (or fewer if less found)
-        # Keep the command message (first element) + the latest 'count' messages
-        if len(message_ids_to_delete) > count + 1:
-            message_ids_to_delete = message_ids_to_delete[:1] + message_ids_to_delete[-(count):]
-
-
-        deleted_count_actual = 0
+                user_messages_found += 1
+                
+                if user_messages_found >= count:
+                    break
+        
+        # حذف پیام‌ها
         if len(message_ids_to_delete) > 0:
-            try:
-                # delete_messages returns the count of successfully deleted messages
-                deleted_count_actual = await client.delete_messages(chat_id, message_ids_to_delete)
-                # Subtract 1 if the command message itself was counted
-                feedback_count = deleted_count_actual -1 if message.id in message_ids_to_delete else deleted_count_actual
-
-                if feedback_count > 0:
-                    status_msg = await client.send_message(chat_id, f"✅ {feedback_count} پیام شما حذف شد.")
-                    await asyncio.sleep(3)
-                    await status_msg.delete()
-                elif deleted_count_actual == 1 and message.id in message_ids_to_delete:
-                    # Only the command was deleted, no feedback needed
-                    pass
-                elif deleted_count_actual == 0:
-                     # This might happen if messages were deleted by someone else quickly
-                     status_msg = await client.send_message(chat_id, "ℹ️ پیامی برای حذف یافت نشد (ممکن است قبلاً حذف شده باشند).")
-                     await asyncio.sleep(3)
-                     await status_msg.delete()
-
-            except MessageIdInvalid:
-                 logging.warning(f"Delete Msgs: Some message IDs were invalid for user {user_id}. Might have been deleted already.")
-                 # Try to send a generic feedback if deletion partially failed or IDs were bad
-                 try:
-                     status_msg = await client.send_message(chat_id, f"✅ تعدادی پیام حذف شد (ممکن است برخی قبلاً حذف شده باشند).")
-                     await asyncio.sleep(3)
-                     await status_msg.delete()
-                 except Exception: pass # Failsafe
-            except FloodWait as e_del:
-                logging.warning(f"Delete Msgs: Flood wait during deletion for user {user_id}. Sleeping {e_del.value}s.")
-                await asyncio.sleep(e_del.value + 1)
+            # حذف دسته‌ای (100 تایی)
+            for i in range(0, len(message_ids_to_delete), 100):
+                batch = message_ids_to_delete[i:i+100]
                 try:
-                     await client.send_message(chat_id, f"⏳ Flood wait ({e_del.value}s) هنگام حذف پیام‌ها. ممکن است همه حذف نشده باشند.")
-                except Exception: pass
-            except Exception as e_del_batch:
-                 logging.error(f"Delete Msgs: Error during batch deletion for user {user_id}: {e_del_batch}", exc_info=True)
-                 try:
-                     await client.send_message(chat_id, "⚠️ خطایی در حذف دسته‌ای پیام‌ها رخ داد.")
-                 except Exception: pass
-
-        # If somehow message_ids_to_delete is empty (e.g., only command was sent and no history found)
-        # This case is unlikely now that we add command ID first, but kept as failsafe.
-        elif message.id:
-             try: await client.delete_messages(chat_id, [message.id]) # Try deleting only the command
-             except Exception: pass # Ignore if it fails
-
-    except FloodWait as e_hist:
-        logging.warning(f"Delete Msgs: Flood wait getting history for user {user_id}. Sleeping {e_hist.value}s.")
-        await asyncio.sleep(e_hist.value + 1)
+                    await client.delete_messages(chat_id, batch)
+                    await asyncio.sleep(0.5)  # تاخیر برای جلوگیری از محدودیت
+                except FloodWait as e:
+                    await asyncio.sleep(e.value + 1)
+                except MessageIdInvalid:
+                    pass
+                except Exception as e:
+                    logging.warning(f"Delete Messages: Error deleting batch: {e}")
+            
+            # ارسال پیام تایید
+            deleted_count = len(message_ids_to_delete) - 1  # منهای پیام دستور
+            confirm_msg = await client.send_message(chat_id, f"✅ {deleted_count} پیام با موفقیت حذف شد.")
+            await asyncio.sleep(3)
+            await confirm_msg.delete()
+            
+    except FloodWait as e:
+        await asyncio.sleep(e.value + 1)
+        await message.edit_text(f"⏳ لطفاً {e.value} ثانیه صبر کنید و دوباره تلاش کنید.")
+    except Exception as e:
+        logging.error(f"Delete Messages Controller: Error for user {user_id}: {e}")
         try:
-            await message.reply_text(f"⏳ Flood wait ({e_hist.value}s) در دریافت تاریخچه. لطفاً دوباره تلاش کنید.", quote=True)
+            await message.edit_text("⚠️ خطایی در حذف پیام‌ها رخ داد.")
         except Exception: pass
-    except Exception as e_main:
-        logging.error(f"Delete Msgs Controller: General error for user {user_id}: {e_main}", exc_info=True)
-        try:
-            await message.reply_text("⚠️ خطای ناشناخته‌ای در پردازش دستور حذف رخ داد.", quote=True)
-        except Exception: pass
-
 
 async def game_controller(client, message):
     user_id = client.me.id
-    command = message.text.strip().lower() # Use lower for case-insensitivity
+    command = message.text.strip().lower()
     chat_id = message.chat.id
 
     try:
-        # Use elif for clarity and efficiency
         if command == "تاس":
-            await client.send_dice(chat_id, emoji="🎲")
-            await message.delete() # Delete the command
+            # تاس معمولی - ادامه تا 6
+            target_value = 6
+            max_attempts = 20
+            attempts = 0
+            
+            while attempts < max_attempts:
+                result = await client.send_dice(chat_id, emoji="🎲")
+                attempts += 1
+                
+                # چک کردن نتیجه تاس
+                if hasattr(result, 'dice') and result.dice.value == target_value:
+                    break
+                    
+                await asyncio.sleep(1)  # تاخیر بین پرتاب‌ها
+                
+            await message.delete()
+            
         elif command.startswith("تاس "):
             match = re.match(r"^تاس (\d+)$", command)
             if match:
-                num_str = match.group(1)
                 try:
-                    num = int(num_str)
-                    if 1 <= num <= 6:
-                        # As noted before, we cannot force a value. Send a normal dice.
-                        await client.send_dice(chat_id, emoji="🎲")
-                        await message.delete() # Delete the command
+                    target_value = int(match.group(1))
+                    if 1 <= target_value <= 6:
+                        max_attempts = 20
+                        attempts = 0
+                        
+                        while attempts < max_attempts:
+                            result = await client.send_dice(chat_id, emoji="🎲")
+                            attempts += 1
+                            
+                            if hasattr(result, 'dice') and result.dice.value == target_value:
+                                break
+                                
+                            await asyncio.sleep(1)
+                            
+                        await message.delete()
                     else:
                         await message.edit_text("⚠️ عدد تاس باید بین ۱ تا ۶ باشد.")
                 except ValueError:
-                     await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
+                    await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
             else:
-                 # This case might be redundant if the main regex catches it, but safe to have
-                 await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تاس` یا `تاس [۱-۶]`")
+                await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تاس` یا `تاس ۶`")
+                
         elif command == "بولینگ":
-            await client.send_dice(chat_id, emoji="🎳")
-            await message.delete() # Delete the command
-        # else: Command matched the regex but wasn't handled (shouldn't happen)
+            # بولینگ - ادامه تا استرایک (10)
+            target_value = 10
+            max_attempts = 10
+            attempts = 0
+            
+            while attempts < max_attempts:
+                result = await client.send_dice(chat_id, emoji="🎳")
+                attempts += 1
+                
+                if hasattr(result, 'dice') and result.dice.value == target_value:
+                    break
+                    
+                await asyncio.sleep(1)
+                
+            await message.delete()
 
     except FloodWait as e:
         logging.warning(f"Game Controller: Flood wait for user {user_id}: {e.value}s")
         await asyncio.sleep(e.value + 1)
     except MessageIdInvalid:
-         logging.warning(f"Game Controller: Command message {message.id} already deleted.")
-    except MessageNotModified:
-         pass # Ignore if edit fails because text is the same
+        logging.warning(f"Game Controller: Command message {message.id} already deleted.")
     except Exception as e:
-        logging.error(f"Game Controller: Error processing command '{command}' for user {user_id}: {e}", exc_info=True)
+        logging.error(f"Game Controller: Error processing command '{command}' for user {user_id}: {e}")
         try:
-            # Try to edit if possible, otherwise just log
             await message.edit_text("⚠️ خطایی در ارسال بازی رخ داد.")
-        except Exception:
-             logging.warning(f"Game Controller: Could not edit error message for command '{command}'.")
-
+        except Exception: pass
 
 async def font_controller(client, message):
     user_id = client.me.id
@@ -1754,7 +1728,6 @@ async def font_controller(client, message):
             await message.edit_text("⚠️ خطایی در پردازش دستور فونت رخ داد.")
         except Exception: pass
 
-
 async def clock_controller(client, message):
     user_id = client.me.id
     command = message.text.strip()
@@ -1810,7 +1783,6 @@ async def clock_controller(client, message):
             await message.edit_text("⚠️ خطایی در تنظیم ساعت پروفایل رخ داد.")
         except Exception: pass
 
-
 # --- Filters and Bot Setup ---
 async def is_enemy_filter(_, client, message):
     user_id = client.me.id
@@ -1829,7 +1801,6 @@ async def is_friend_filter(_, client, message):
     return False
 
 is_friend = filters.create(is_friend_filter)
-
 
 async def start_bot_instance(session_string: str, phone: str, font_style: str, disable_clock: bool = False):
     # Sanitize phone number for client name if needed (basic example)
@@ -1922,11 +1893,20 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         MUTED_USERS.setdefault(user_id, set())
         # ORIGINAL_PROFILE_DATA should not be setdefault, it's temporary during copy mode
         if user_id not in ORIGINAL_PROFILE_DATA: ORIGINAL_PROFILE_DATA[user_id] = {}
-        ENEMY_REPLIES.setdefault(user_id, [ # Default enemy replies if list is empty/new user
+        
+        # متن‌های پیش‌فرض دشمن با لیست کامل شما
+        ENEMY_REPLIES.setdefault(user_id, [
             "کیرم تو رحم اجاره ای و خونی مالی مادرت",
-            # ... (other default replies) ...
+            "دو میلیون شبی پول ویلا بدم تا مادرتو تو گوشه کناراش بگام و اب کوسشو بریزم کف خونه تا فردا صبح کارگرای افغانی برای نظافت اومدن با بوی اب کس مادرت بجقن و ابکیراشون نثار قبر مرده هات بشه",
+            "احمق مادر کونی من کس مادرت گذاشتم تو بازم داری کسشر میگی",
+            "هی بیناموس کیرم بره تو کس ننت واس بابات نشآخ مادر کیری کیرم بره تو کس اجدادت کسکش بیناموس کس ول نسل شوتی ابجی کسده کیرم تو کس مادرت بیناموس کیری کیرم تو کس نسل ابجی کونی کس نسل سگ ممبر کونی ابجی سگ ممبر سگ کونی کیرم تو کس ننت کیر تو کس مادرت کیر خاندان تو کس نسل مادر کونی ابجی کونی کیری ناموس ابجیتو گاییدم سگ حرومی خارکسه مادر کیری با کیر بزنم تو رحم مادرت ناموستو بگام لاشی کونی ابجی کس خیابونی مادرخونی ننت کیرمو میماله تو میای کص میگی شاخ نشو ییا ببین شاخو کردم تو کون ابجی جندت کس ابجیتو پاره کردم تو شاخ میشی اوبی",
+            "کیرم تو کس سیاه مادرت خارکصده",
+            "حروم زاده باک کص ننت با ابکیرم پر میکنم",
+            "منبع اب ایرانو با اب کص مادرت تامین میکنم",
+            "خارکسته میخای مادرتو بگام بعد بیای ادعای شرف کنی کیرم تو شرف مادرت",
             "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی"
         ])
+        
         FRIEND_REPLIES.setdefault(user_id, []) # Default empty list
         ENEMY_LIST.setdefault(user_id, set())
         FRIEND_LIST.setdefault(user_id, set())
@@ -1946,7 +1926,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         # Group -1: Outgoing message modifications (bold, translate)
         # Ensure it doesn't process commands by checking regex again? Or rely on outgoing_message_modifier logic.
         # Added ~filters.regex(COMMAND_REGEX) to be explicit
-        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.reply & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
+        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
 
         # Group 0: Command handlers (default group)
         cmd_filters = filters.me & filters.user(user_id) & filters.text
@@ -1980,7 +1960,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(copy_profile_controller, cmd_filters & filters.regex("^(کپی روشن|کپی خاموش)$"))) # Logic inside handles reply check
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
-        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^حذف(?: \d+)?$")))
+        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^(حذف(?: \d+)?|حذف همه)$")))
         client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$")))
 
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
@@ -2015,7 +1995,6 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         # Ensure it's removed from ACTIVE_BOTS if config fails at any point
         ACTIVE_BOTS.pop(user_id, None)
 
-
 # --- Web Section (Flask) ---
 HTML_TEMPLATE = """
 <!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>سلف بات تلگرام</title><style>@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');body{font-family:'Vazirmatn',sans-serif;background-color:#f0f2f5;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box;}.container{background:white;padding:30px 40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1);text-align:center;width:100%;max-width:480px;}h1{color:#333;margin-bottom:20px;font-size:1.5em;}p{color:#666;line-height:1.6;}form{display:flex;flex-direction:column;gap:15px;margin-top:20px;}input[type="tel"],input[type="text"],input[type="password"]{padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;text-align:left;direction:ltr;}button{padding:12px;background-color:#007bff;color:white;border:none;border-radius:8px;font-size:16px;cursor:pointer;transition:background-color .2s;}.error{color:#d93025;margin-top:15px;font-weight:bold;}label{font-weight:bold;color:#555;display:block;margin-bottom:5px;text-align:right;}.font-options{border:1px solid #ddd;border-radius:8px;overflow:hidden;max-height: 200px; overflow-y: auto; text-align: right;}.font-option{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #eee;cursor:pointer;}.font-option:last-child{border-bottom:none;}.font-option input[type="radio"]{margin-left:15px; flex-shrink: 0;}.font-option label{display:flex;justify-content:space-between;align-items:center;width:100%;font-weight:normal;cursor:pointer;}.font-option .preview{font-size:1.2em;font-weight:bold;direction:ltr;color:#0056b3; margin-right: 10px; white-space: nowrap;}.success{color:#1e8e3e;}.checkbox-option{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:10px;padding:8px;background-color:#f8f9fa;border-radius:8px;}.checkbox-option label{margin-bottom:0;font-weight:normal;cursor:pointer;color:#444;}</style></head><body><div class="container">
@@ -2042,7 +2021,6 @@ async def cleanup_client(phone):
      else:
          logging.debug(f"No active temporary client found for {phone} during cleanup.")
 
-
 @app_flask.route('/')
 def home():
     # Clear session potentially related to a previous login attempt
@@ -2061,7 +2039,6 @@ def login():
          current_step = 'GET_CODE'
     if action == 'password': # Should only be reached after SessionPasswordNeeded
          current_step = 'GET_PASSWORD'
-
 
     logging.info(f"Login request received: action='{action}', phone_in_session='{phone}'")
 
@@ -2237,7 +2214,6 @@ def login():
                                 phone_number=phone, # Pass phone even on error if available
                                 font_previews=get_font_previews())
 
-
 # --- Async Tasks for Login Flow ---
 async def send_code_task(phone):
     """Creates a client, connects, sends code, and stores hash in session."""
@@ -2267,7 +2243,6 @@ async def send_code_task(phone):
         logging.error(f"Error sending code to {phone}: {type(e).__name__} - {e}")
         await cleanup_client(phone) # Cleanup on failure
         raise e # Re-raise the exception to be caught by the Flask route
-
 
 async def sign_in_task(phone, code):
     """Attempts to sign in using the code. Handles SessionPasswordNeeded."""
@@ -2329,7 +2304,6 @@ async def sign_in_task(phone, code):
         session.clear() # Clear session on failure
         raise e # Re-raise to be caught by Flask
 
-
 async def check_password_task(phone, password):
     """Checks the 2FA password."""
     client = ACTIVE_CLIENTS.get(phone)
@@ -2378,7 +2352,6 @@ async def check_password_task(phone, password):
         session.clear() # Clear session on failure
         raise e # Re-raise to be caught by Flask
 
-
 # --- Running the Application ---
 def run_flask():
     port = int(os.environ.get("PORT", 10000)); logging.info(f"Starting Flask web server on host 0.0.0.0, port {port}")
@@ -2393,7 +2366,6 @@ def run_flask():
         app_flask.run(host='0.0.0.0', port=port)
     except Exception as flask_err:
          logging.critical(f"Flask server failed to start: {flask_err}", exc_info=True)
-
 
 def run_asyncio_loop():
     global EVENT_LOOP
@@ -2521,7 +2493,6 @@ def run_asyncio_loop():
              if not cleanup_completed:
                  logging.warning("Cleanup sequence did not fully complete before loop closure.")
 
-
 if __name__ == "__main__":
     logging.info("========================================")
     logging.info(" Starting Telegram Self Bot Service... ")
@@ -2567,4 +2538,3 @@ if __name__ == "__main__":
     logging.info("========================================")
     logging.info(" Application shutdown complete.        ")
     logging.info("========================================")
-
