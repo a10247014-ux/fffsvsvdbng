@@ -1,5 +1,3 @@
-[file name]: TG-TD2S-Converter_Log.(17-10-2025(07_53_24)).log
-[file content begin]
 import asyncio
 import os
 import logging
@@ -64,57 +62,57 @@ app_flask.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
 
 # --- Clock Font Dictionaries ---
 FONT_STYLES = {
-    "cursive":      {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
-    "stylized":     {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':'},
-    "doublestruck": {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':'},
-    "monospace":    {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':'},
-    "normal":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':'},
-    "circled":      {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':'},
-    "fullwidth":    {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'۶','7':'７','8':'８','9':'９',':'},
-    "sans_normal":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':'},
-    "negative_circled": {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':'},
-    "parenthesized": {'0':'🄀','1':'⑴','2':'⑵','3':'⑶','4':'⑷','5':'⑸','6':'⑹','7':'⑺','8':'⑻','9':'⑼',':'},
-    "dot":          {'0':'🄀','1':'⒈','2':'⒉','3':'⒊','4':'⒋','5':'⒌','6':'⒍','7':'⒎','8':'⒏','9':'⒐',':'},
-    "thai":         {'0':'๐','1':'๑','2':'๒','3':'๓','4':'๔','5':'๕','6':'๖','7':'๗','8':'๘','9':'๙',':'},
-    "devanagari":   {'0':'०','1':'१','2':'२','3':'३','4':'४','5':'५','6':'६','7':'७','8':'८','9':'९',':'},
-    "arabic_indic": {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩',':'},
-    "keycap":       {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':'},
-    "superscript":  {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',':'},
-    "subscript":    {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':'},
-    "tibetan":      {'0':'༠','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩',':'},
-    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'۷','8':'۸','9':'۹',':'},
-    "gujarati":     {'0':'૦','1':'૧','2':'૨','3':'૩','4':'૪','5':'૫','6':'૬','7':'૭','8':'૮','9':'૯',':'},
-    "mongolian":    {'0':'᠐','1':'᠑','2':'᠒','3':'᠓','4':'᠔','5':'᠕','6':'᠖','7':'᠗','8':'᠘','9':'᠙',':'},
-    "lao":          {'0':'໐','1':'໑','2':'໒','3':'໓','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':'},
-    "fraktur":      {'0':'𝔃','1':'𝔄','2':'𝔅','3':'𝔆','4':'𝔇','5':'𝔈','6':'𝔉','7':'𝔊','8':'𝔋','9':'𝔌',':'},
-    "bold_fraktur": {'0':'𝖀','1':'𝖁','2':'𝖂','3':'𝖃','4':'𝖄','5':'𝖅','6':'𝖆','7':'𝖇','8':'𝖈','9':'𝖉',':'},
-    "script":       {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':'},
-    "bold_script":  {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
-    "squared":      {'0':'🄀','1':'🄁','2':'🄂','3':'🄃','4':'🄄','5':'🄅','6':'🄆','7':'🄇','8':'🄈','9':'🄉',':'},
-    "negative_squared": {'0':'🅀','1':'🅁','2':'🅂','3':'🅃','4':'🅄','5':'🅅','6':'🅆','7':'🅇','8':'🅈','9':'🅉',':'},
-    "roman":        {'0':'⓪','1':'Ⅰ','2':'Ⅱ','3':'Ⅲ','4':'Ⅳ','5':'Ⅴ','6':'Ⅵ','7':'Ⅶ','8':'Ⅷ','9':'Ⅸ',':'},
-    "small_caps":   {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':'},
-    "oldstyle":     {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
-    "inverted":     {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':'},
-    "mirror":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'9','7':'7','8':'8','9':'6',':'},
-    "strike":       {'0':'0̶','1':'1̶','2':'2̶','3':'3̶','4':'4̶','5':'5̶','6':'6̶','7':'7̶','8':'8̶','9':'9̶',':'},
-    "bubble":       {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':'},
-    "fancy1":       {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'۵','6':'６','7':'۷','8':'８','9':'９',':'},
-    "fancy2":       {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':'},
-    "fancy3":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
-    "fancy4":       {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':'},
+    "cursive":      {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "stylized":     {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
+    "doublestruck": {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
+    "monospace":    {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':':':'},
+    "normal":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':':':'},
+    "circled":      {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':':'∶'},
+    "fullwidth":    {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'۶','7':'７','8':'８','9':'９',':':'：'},
+    "sans_normal":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':'∶'},
+    "negative_circled": {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':':'∶'},
+    "parenthesized": {'0':'🄀','1':'⑴','2':'⑵','3':'⑶','4':'⑷','5':'⑸','6':'⑹','7':'⑺','8':'⑻','9':'⑼',':':'∶'},
+    "dot":          {'0':'🄀','1':'⒈','2':'⒉','3':'⒊','4':'⒋','5':'⒌','6':'⒍','7':'⒎','8':'⒏','9':'⒐',':':'∶'},
+    "thai":         {'0':'๐','1':'๑','2':'๒','3':'๓','4':'๔','5':'๕','6':'๖','7':'๗','8':'๘','9':'๙',':':' : '},
+    "devanagari":   {'0':'०','1':'१','2':'२','3':'३','4':'४','5':'५','6':'६','7':'७','8':'८','9':'९',':':' : '},
+    "arabic_indic": {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩',':':' : '},
+    "keycap":       {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
+    "superscript":  {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',':':':'},
+    "subscript":    {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'},
+    "tibetan":      {'0':'༠','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩',':':' : '},
+    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'۷','8':'۸','9':'۹',':':' : '},
+    "gujarati":     {'0':'૦','1':'૧','2':'૨','3':'૩','4':'૪','5':'૫','6':'૬','7':'૭','8':'૮','9':'૯',':':' : '},
+    "mongolian":    {'0':'᠐','1':'᠑','2':'᠒','3':'᠓','4':'᠔','5':'᠕','6':'᠖','7':'᠗','8':'᠘','9':'᠙',':':' : '},
+    "lao":          {'0':'໐','1':'໑','2':'໒','3':'໓','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':':' : '},
+    "fraktur":      {'0':'𝔃','1':'𝔄','2':'𝔅','3':'𝔆','4':'𝔇','5':'𝔈','6':'𝔉','7':'𝔊','8':'𝔋','9':'𝔌',':':':'},
+    "bold_fraktur": {'0':'𝖀','1':'𝖁','2':'𝖂','3':'𝖃','4':'𝖄','5':'𝖅','6':'𝖆','7':'𝖇','8':'𝖈','9':'𝖉',':':':'},
+    "script":       {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':':'},
+    "bold_script":  {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "squared":      {'0':'🄀','1':'🄁','2':'🄂','3':'🄃','4':'🄄','5':'🄅','6':'🄆','7':'🄇','8':'🄈','9':'🄉',':':'∶'},
+    "negative_squared": {'0':'🅀','1':'🅁','2':'🅂','3':'🅃','4':'🅄','5':'🅅','6':'🅆','7':'🅇','8':'🅈','9':'🅉',':':'∶'},
+    "roman":        {'0':'⓪','1':'Ⅰ','2':'Ⅱ','3':'Ⅲ','4':'Ⅳ','5':'Ⅴ','6':'Ⅵ','7':'Ⅶ','8':'Ⅷ','9':'Ⅸ',':':':'},
+    "small_caps":   {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'},
+    "oldstyle":     {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "inverted":     {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',':':':'},
+    "mirror":       {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'9','7':'7','8':'8','9':'6',':':':'},
+    "strike":       {'0':'0̶','1':'1̶','2':'2̶','3':'3̶','4':'4̶','5':'5̶','6':'6̶','7':'7̶','8':'8̶','9':'9̶',':':':'},
+    "bubble":       {'0':'⓪','1':'①','2':'②','3':'③','4':'④','5':'⑤','6':'⑥','7':'⑦','8':'⑧','9':'⑨',':':'∶'},
+    "fancy1":       {'0':'０','1':'１','2':'２','3':'３','4':'４','5':'５','6':'６','7':'۷','8':'８','9':'９',':':'：'},
+    "fancy2":       {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
+    "fancy3":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "fancy4":       {'0':'⓿','1':'❶','2':'❷','3':'❸','4':'❹','5':'❺','6':'❻','7':'❼','8':'❽','9':'❾',':':'∶'},
     # Additional cool fonts
-    "ethiopic":     {'0':'፩','1':'፪','2':'፫','3':'፬','4':'፭','5':'፮','6':'፯','7':'፰','8':'፱','9':'፲',':'},
-    "gothic":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
-    "runic":        {'0':'ᛟ','1':'ᛁ','2':'ᛒ','3':'ᛏ','4':'ᚠ','5':'ᚢ','6':'ᛋ','7':'ᚷ','8':'ᚺ','9':'ᛉ',':'},
-    "math_bold":    {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':'},
-    "math_italic":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':'},
-    "math_sans":    {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':'},
-    "math_monospace": {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':'},
-    "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':'},
-    "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':'},
-    "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':'},
-    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':'},
+    "ethiopic":     {'0':'፩','1':'፪','2':'፫','3':'፬','4':'፭','5':'፮','6':'፯','7':'፰','8':'፱','9':'፲',':':' : '},  # Approximate
+    "gothic":       {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},  # Bold variant
+    "runic":        {'0':'ᛟ','1':'ᛁ','2':'ᛒ','3':'ᛏ','4':'ᚠ','5':'ᚢ','6':'ᛋ','7':'ᚷ','8':'ᚺ','9':'ᛉ',':':' : '},  # Approximate runic
+    "math_bold":    {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "math_italic":  {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':':'},
+    "math_sans":    {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
+    "math_monospace": {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':':':'},
+    "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
+    "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':':' : '},  # Kanji numbers
+    "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
+    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate shadow
 }
 FONT_KEYS_ORDER = list(FONT_STYLES.keys())
 FONT_DISPLAY_NAMES = {
@@ -164,6 +162,7 @@ ACTIVE_BOTS = {}
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
+# --- CHANGE 1: Removed 'تاس \d+' from COMMAND_REGEX ---
 COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|بولینگ|راهنما|ترجمه)$"
 
 # --- Main Bot Functions ---
@@ -1159,6 +1158,7 @@ async def set_friend_reply_controller(client, message):
             await message.edit_text("⚠️ متن پاسخ نمی‌تواند خالی باشد.")
 
 async def help_controller(client, message):
+    # --- CHANGE 2: Removed 'تاس [عدد ۱-۶]' line from help text ---
     # Using a raw string to avoid issues with backslashes and formatting
     help_text_formatted = r"""
 **🖤 DARK SELF 🖤**
@@ -1216,8 +1216,8 @@ async def help_controller(client, message):
 • `حذف متن دوست [عدد]`: حذف متن شماره X از لیست پاسخ دوست. بدون عدد، تمام متن‌ها حذف می‌شود.
 
 **🔹 سرگرمی 🔹**
-• `تاس`: ارسال تاس شانسی (یک بار).
-• `بولینگ`: ارسال بولینگ شانسی (یک بار).
+• `تاس`: ارسال تاس شانسی (فقط یکبار).
+• `بولینگ`: ارسال بولینگ شانسی (فقط یکبار).
 
 **🔹 امنیت و منشی 🔹**
 • `پیوی قفل` / `باز`: فعال/غیرفعال کردن حذف خودکار تمام پیام‌های دریافتی در PV (چت شخصی).
@@ -1566,6 +1566,7 @@ async def delete_messages_controller(client, message):
             await message.edit_text("⚠️ خطایی در حذف پیام‌ها رخ داد.")
         except Exception: pass
 
+# --- CHANGE 3: Modified game_controller ---
 async def game_controller(client, message):
     user_id = client.me.id
     command = message.text.strip().lower()
@@ -1573,12 +1574,12 @@ async def game_controller(client, message):
 
     try:
         if command == "تاس":
-            # تاس معمولی - فقط یک بار
+            # ارسال تاس فقط یک بار
             await client.send_dice(chat_id, emoji="🎲")
             await message.delete()
                 
         elif command == "بولینگ":
-            # بولینگ - فقط یک بار
+            # ارسال بولینگ فقط یک بار
             await client.send_dice(chat_id, emoji="🎳")
             await message.delete()
 
@@ -1590,8 +1591,14 @@ async def game_controller(client, message):
     except Exception as e:
         logging.error(f"Game Controller: Error processing command '{command}' for user {user_id}: {e}")
         try:
+            # Try editing first, fallback to send if edit fails (e.g., deleted message)
             await message.edit_text("⚠️ خطایی در ارسال بازی رخ داد.")
-        except Exception: pass
+        except Exception: 
+            try:
+                # Send new message if edit fails
+                await client.send_message(chat_id, "⚠️ خطایی در ارسال بازی رخ داد.")
+            except Exception:
+                pass # Logged already, avoid error loops
 
 async def font_controller(client, message):
     user_id = client.me.id
@@ -1911,7 +1918,8 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
         client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^(حذف(?: \d+)?|حذف همه)$")))
-        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|بولینگ)$"))) # فقط تاس و بولینگ بدون عدد
+        # --- CHANGE 4: Modified regex for game_controller handler ---
+        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|بولینگ)$")))
 
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
         # Added ~filters.user(user_id) to ensure these don't trigger on own messages if filters somehow match
@@ -2103,223 +2111,388 @@ def login():
 
     except (PhoneCodeInvalid, PasswordHashInvalid) as e:
          error_msg = "کد تایید یا رمز عبور وارد شده اشتباه است. لطفاً دوباره بررسی کنید."
-         logging.warning(f"Invalid code/password during login action '{action}' for phone {phone}: {e}")
-         # Stay on the same step (code or password) to let user retry
+         logging.warning(f"Invalid Code/Password during login action '{action}' for phone {phone}: {type(e).__name__}")
+         # Stay on the current step (code or password)
          if action == 'code': current_step = 'GET_CODE'
          elif action == 'password': current_step = 'GET_PASSWORD'
-         else: current_step = 'GET_PHONE'; session.clear() # Fallback
 
-    except (PhoneCodeExpired, SessionPasswordNeeded, UserDeactivated, AuthKeyUnregistered) as e:
-         # These might require restarting the process
-         error_msg = f"خطا: {type(e).__name__}. لطفاً فرآیند ورود را از ابتدا شروع کنید."
-         logging.warning(f"Session-related error during login action '{action}' for phone {phone}: {e}")
-         current_step = 'GET_PHONE' # Force restart
-         session.clear() # Clear session completely
+    except PhoneCodeExpired as e:
+         error_msg = "کد تایید منقضی شده است. لطفاً شماره تلفن را مجدداً وارد کنید تا کد جدید دریافت کنید."
+         logging.warning(f"Phone code expired for {phone}: {e}")
+         current_step = 'GET_PHONE' # Go back to start
+         session.clear()
 
-    except Exception as e:
-        error_msg = f"خطای غیرمنتظره‌ای رخ داد: {type(e).__name__}. لطفاً دوباره تلاش کنید."
-        logging.error(f"Unexpected error during login action '{action}' for phone {phone}: {e}", exc_info=True)
-        # Decide step: if we were in the middle (code/password), stay there, otherwise go to phone
-        if action == 'phone': current_step = 'GET_PHONE'; session.clear()
-        elif action == 'code': current_step = 'GET_CODE'
-        elif action == 'password': current_step = 'GET_PASSWORD'
-        else: current_step = 'GET_PHONE'; session.clear()
+    except SessionPasswordNeeded as e:
+         # This exception is expected, transition to password step
+         logging.info(f"Password needed for {phone} after code entry.")
+         current_step = 'GET_PASSWORD'
+         # No error message needed here, just render the password form
+         return render_template_string(HTML_TEMPLATE, step='GET_PASSWORD', phone_number=phone)
 
-    # --- Render Error Page ---
-    logging.info(f"Rendering page for step '{current_step}' with error: {error_msg}")
-    # Ensure font_previews is available for GET_PHONE step
-    if current_step == 'GET_PHONE':
-         return render_template_string(HTML_TEMPLATE, step=current_step, error_message=error_msg, font_previews=get_font_previews())
-    else:
-         return render_template_string(HTML_TEMPLATE, step=current_step, error_message=error_msg, phone_number=phone or "نامشخص")
+    except FloodWait as e:
+         error_msg = f"تلگرام درخواست شما را به دلیل تعداد زیاد تلاش‌ها محدود کرده است. لطفاً {e.value} ثانیه صبر کنید و دوباره امتحان کنید."
+         logging.warning(f"FloodWait ({e.value}s) during login action '{action}' for phone {phone}.")
+         # Stay on the current step where flood wait occurred
 
-# --- Async Tasks for Flask ---
-async def send_code_task(phone_number: str):
-    logging.info(f"Starting send_code_task for {phone_number}...")
-    client = None
+    except AssertionError as e: # Catch session/input errors
+         error_msg = str(e) or "خطای داخلی: اطلاعات ورود یافت نشد. لطفاً دوباره تلاش کنید."
+         logging.error(f"Assertion Error during login action '{action}' for phone {phone}: {e}")
+         current_step = 'GET_PHONE' # Go back to start on assertion errors
+         session.clear()
+
+    except RuntimeError as e: # Catch loop errors
+         error_msg = f"خطای بحرانی در سرور رخ داده است: {e}. لطفاً بعداً تلاش کنید."
+         logging.critical(f"Runtime Error during login action '{action}': {e}", exc_info=True)
+         current_step = 'GET_PHONE' # Go back to start
+         session.clear()
+
+    except Exception as e: # Catch any other unexpected exception
+         error_msg = f"یک خطای پیش‌بینی نشده رخ داد: {type(e).__name__}. لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید."
+         logging.error(f"Unexpected Exception during login action '{action}' for phone {phone}: {e}", exc_info=True)
+         current_step = 'GET_PHONE' # Go back to start
+         session.clear()
+
+    # --- Cleanup and Render Error Page ---
+    # If an error occurred (except SessionPasswordNeeded), try cleaning up temporary client
+    # Only cleanup if phone number is known and error wasn't SessionPasswordNeeded
+    if error_msg and phone and current_step != 'GET_PASSWORD':
+         logging.info(f"Cleaning up temporary client for {phone} due to error: {error_msg}")
+         try:
+             # Run cleanup in the background loop, don't wait for it here
+             if EVENT_LOOP.is_running():
+                 asyncio.run_coroutine_threadsafe(cleanup_client(phone), EVENT_LOOP)
+         except Exception as cleanup_err:
+             logging.error(f"Error submitting cleanup task for {phone}: {cleanup_err}")
+
+    # Render the appropriate template with error message
+    logging.debug(f"Rendering step '{current_step}' with error: {error_msg}")
+    return render_template_string(HTML_TEMPLATE,
+                                step=current_step,
+                                error_message=error_msg,
+                                phone_number=phone, # Pass phone even on error if available
+                                font_previews=get_font_previews())
+
+# --- Async Tasks for Login Flow ---
+async def send_code_task(phone):
+    """Creates a client, connects, sends code, and stores hash in session."""
+    # Ensure previous client for this number is cleaned up
+    await cleanup_client(phone)
+
+    # Use unique name for temporary client, maybe with timestamp or random part
+    # Using in_memory=True means session won't be saved to disk here
+    client = Client(f"login_attempt_{re.sub(r'\W+', '', phone)}_{int(time.time())}",
+                    api_id=API_ID, api_hash=API_HASH, in_memory=True)
+    ACTIVE_CLIENTS[phone] = client # Store client associated with phone number
+    logging.info(f"Temporary client created for {phone}.")
+
     try:
-        # Generate a safe client name
-        safe_phone_name = re.sub(r'\W+', '', phone_number)
-        client_name = f"temp_client_{safe_phone_name}_{int(time.time())}" # Add timestamp for uniqueness
-        client = Client(client_name, api_id=API_ID, api_hash=API_HASH, in_memory=True)
+        logging.debug(f"Connecting temporary client for {phone}...")
         await client.connect()
+        logging.debug(f"Temporary client connected for {phone}. Sending code...")
+        sent_code = await client.send_code(phone)
 
-        sent_code_info = await client.send_code(phone_number)
-        # Store necessary data in session (thread-safe? careful with flask session)
-        session['phone_code_hash'] = sent_code_info.phone_code_hash
-        # Store the client instance temporarily to use for sign-in
-        ACTIVE_CLIENTS[phone_number] = client
-        logging.info(f"send_code_task: Code sent successfully for {phone_number}.")
-        return # Success, no return value needed
+        # Important: Store phone_code_hash in Flask session (accessible by web thread)
+        session['phone_code_hash'] = sent_code.phone_code_hash
+        logging.info(f"Code sent successfully to {phone}. Hash stored in session.")
+        # Keep client connected for sign_in or check_password
 
-    except FloodWait as e_flood:
-        logging.warning(f"send_code_task: Flood wait for {phone_number}: {e_flood.value}s")
-        # Cleanup client if flood wait happens during send_code
-        if client: await cleanup_client(phone_number)
-        raise # Re-raise to be handled by Flask route
-    except Exception as e:
-        logging.error(f"send_code_task FAILED for {phone_number}: {e}", exc_info=True)
-        # Ensure client is cleaned up on failure
-        if client: await cleanup_client(phone_number)
-        raise # Re-raise to be handled by Flask route
+    except (FloodWait, PhoneNumberInvalid, Exception) as e:
+        # If sending code fails, disconnect and remove the client
+        logging.error(f"Error sending code to {phone}: {type(e).__name__} - {e}")
+        await cleanup_client(phone) # Cleanup on failure
+        raise e # Re-raise the exception to be caught by the Flask route
 
-async def sign_in_task(phone_number: str, code: str):
-    logging.info(f"Starting sign_in_task for {phone_number}...")
-    client = ACTIVE_CLIENTS.get(phone_number)
-    if not client:
-        logging.error(f"sign_in_task: No active client found for {phone_number}.")
-        raise RuntimeError("Client session expired. Please start over.")
+async def sign_in_task(phone, code):
+    """Attempts to sign in using the code. Handles SessionPasswordNeeded."""
+    client = ACTIVE_CLIENTS.get(phone)
+    if not client or not client.is_connected:
+        logging.error(f"Sign in failed for {phone}: Temporary client not found or disconnected.")
+        raise AssertionError("Session expired or client disconnected. Please try again.")
+
+    phone_code_hash = session.get('phone_code_hash')
+    if not phone_code_hash:
+        logging.error(f"Sign in failed for {phone}: phone_code_hash missing from session.")
+        raise AssertionError("Session data corrupted (missing code hash). Please try again.")
 
     try:
-        phone_code_hash = session.get('phone_code_hash')
-        if not phone_code_hash:
-            logging.error(f"sign_in_task: No phone_code_hash in session for {phone_number}.")
-            raise AssertionError("Session data missing (phone_code_hash).")
+        logging.debug(f"Attempting sign in for {phone} with code...")
+        await client.sign_in(phone, phone_code_hash, code)
+        logging.info(f"Sign in successful for {phone} (no password needed). Exporting session.")
 
-        await client.sign_in(phone_number, phone_code_hash, code)
-        logging.info(f"sign_in_task: Sign in successful for {phone_number}.")
-        # Sign-in successful, proceed to get session string and start bot
-        session_string = await client.export_session_string()
+        # --- Session Export and DB Update ---
+        session_str = await client.export_session_string()
         font_style = session.get('font_style', 'stylized')
         disable_clock = session.get('disable_clock', False)
 
-        # Save session to database
         if sessions_collection is not None:
             try:
+                logging.debug(f"Updating/inserting session into DB for {phone}...")
                 sessions_collection.update_one(
-                    {'phone_number': phone_number},
-                    {'$set': {
-                        'session_string': session_string,
-                        'font_style': font_style,
-                        'disable_clock': disable_clock,
-                        'last_updated': datetime.now(TEHRAN_TIMEZONE)
-                    }},
+                    {'phone_number': phone},
+                    {'$set': {'session_string': session_str,
+                              'font_style': font_style,
+                              'disable_clock': disable_clock}},
                     upsert=True
                 )
-                logging.info(f"Session for {phone_number} saved to database.")
+                logging.debug(f"DB updated for {phone}.")
             except Exception as db_err:
-                logging.error(f"Could not save session for {phone_number} to database: {db_err}")
+                 # Log error but continue - bot can start, just won't persist on restart
+                 logging.error(f"Database Error: Failed to save session for {phone}: {db_err}")
 
-        # Schedule the bot instance to start
-        asyncio.create_task(start_bot_instance(session_string, phone_number, font_style, disable_clock))
-        logging.info(f"Bot start scheduled for {phone_number}.")
+        # --- Schedule Bot Start ---
+        logging.info(f"Scheduling main bot instance start for {phone}...")
+        # Ensure it runs in the main asyncio loop
+        EVENT_LOOP.create_task(start_bot_instance(session_str, phone, font_style, disable_clock))
 
-        # Clear temporary data from session and client dict
-        session.pop('phone_code_hash', None)
-        await cleanup_client(phone_number) # This disconnects and removes the temp client
+        # --- Cleanup ---
+        await cleanup_client(phone) # Clean up temporary client after success
+        session.clear() # Clear Flask session after successful login
 
-        return 'SUCCESS'
+        return 'SUCCESS' # Signal success to Flask route
 
     except SessionPasswordNeeded:
-        logging.info(f"sign_in_task: 2FA password required for {phone_number}.")
-        # Keep the client active for password check
-        return 'GET_PASSWORD'
-    except (PhoneCodeInvalid, PhoneCodeExpired) as e:
-        logging.warning(f"sign_in_task: Invalid/expired code for {phone_number}: {e}")
-        # Cleanup client on code error? Maybe keep it for retry? Let's cleanup to be safe.
-        await cleanup_client(phone_number)
-        session.pop('phone_code_hash', None) # Clear the hash as it's likely invalid now
-        raise # Re-raise specific exception
-    except Exception as e:
-        logging.error(f"sign_in_task FAILED for {phone_number}: {e}", exc_info=True)
-        await cleanup_client(phone_number) # Ensure cleanup on any other error
-        session.pop('phone_code_hash', None)
-        raise # Re-raise
+        # Password is required, keep client connected for password check
+        logging.info(f"Password needed for {phone}. Keeping temporary client alive.")
+        return 'GET_PASSWORD' # Signal password needed to Flask route
 
-async def check_password_task(phone_number: str, password: str):
-    logging.info(f"Starting check_password_task for {phone_number}...")
-    client = ACTIVE_CLIENTS.get(phone_number)
-    if not client:
-        logging.error(f"check_password_task: No active client found for {phone_number}.")
-        raise RuntimeError("Client session expired. Please start over.")
+    except (FloodWait, PhoneCodeInvalid, PhoneCodeExpired, Exception) as e:
+        # On error (except PasswordNeeded), cleanup and re-raise
+        logging.error(f"Error during sign in for {phone}: {type(e).__name__} - {e}")
+        await cleanup_client(phone) # Cleanup on failure
+        session.clear() # Clear session on failure
+        raise e # Re-raise to be caught by Flask
+
+async def check_password_task(phone, password):
+    """Checks the 2FA password."""
+    client = ACTIVE_CLIENTS.get(phone)
+    if not client or not client.is_connected:
+        logging.error(f"Password check failed for {phone}: Temporary client not found or disconnected.")
+        raise AssertionError("Session expired or client disconnected. Please try again.")
 
     try:
+        logging.debug(f"Checking password for {phone}...")
         await client.check_password(password)
-        logging.info(f"check_password_task: Password correct for {phone_number}.")
-        # Password correct, proceed similar to successful sign-in
-        session_string = await client.export_session_string()
+        logging.info(f"Password check successful for {phone}. Exporting session.")
+
+        # --- Session Export and DB Update ---
+        session_str = await client.export_session_string()
         font_style = session.get('font_style', 'stylized')
         disable_clock = session.get('disable_clock', False)
 
         if sessions_collection is not None:
             try:
+                logging.debug(f"Updating/inserting session into DB for {phone} after password...")
                 sessions_collection.update_one(
-                    {'phone_number': phone_number},
-                    {'$set': {
-                        'session_string': session_string,
-                        'font_style': font_style,
-                        'disable_clock': disable_clock,
-                        'last_updated': datetime.now(TEHRAN_TIMEZONE)
-                    }},
+                    {'phone_number': phone},
+                    {'$set': {'session_string': session_str,
+                              'font_style': font_style,
+                              'disable_clock': disable_clock}},
                     upsert=True
                 )
-                logging.info(f"Session (with 2FA) for {phone_number} saved to database.")
+                logging.debug(f"DB updated for {phone}.")
             except Exception as db_err:
-                logging.error(f"Could not save session (with 2FA) for {phone_number} to database: {db_err}")
+                 logging.error(f"Database Error: Failed to save session for {phone} after password: {db_err}")
 
-        asyncio.create_task(start_bot_instance(session_string, phone_number, font_style, disable_clock))
-        logging.info(f"Bot start scheduled for {phone_number} (after 2FA).")
+        # --- Schedule Bot Start ---
+        logging.info(f"Scheduling main bot instance start for {phone} after password...")
+        EVENT_LOOP.create_task(start_bot_instance(session_str, phone, font_style, disable_clock))
 
-        await cleanup_client(phone_number)
-        return 'SUCCESS'
+        # --- Cleanup ---
+        await cleanup_client(phone) # Clean up temporary client
+        session.clear() # Clear Flask session
 
-    except PasswordHashInvalid as e:
-        logging.warning(f"check_password_task: Invalid password for {phone_number}: {e}")
-        # Keep client for retry? Let's cleanup to force restart for security.
-        await cleanup_client(phone_number)
-        raise # Re-raise specific exception
-    except Exception as e:
-        logging.error(f"check_password_task FAILED for {phone_number}: {e}", exc_info=True)
-        await cleanup_client(phone_number)
-        raise # Re-raise
+        return 'SUCCESS' # Signal success
 
-# --- Main Application Startup ---
-async def main():
-    global EVENT_LOOP
-    EVENT_LOOP = asyncio.get_running_loop()
+    except (FloodWait, PasswordHashInvalid, Exception) as e:
+        # On error, cleanup and re-raise
+        logging.error(f"Error during password check for {phone}: {type(e).__name__} - {e}")
+        await cleanup_client(phone) # Cleanup on failure
+        session.clear() # Clear session on failure
+        raise e # Re-raise to be caught by Flask
 
-    # Load existing sessions from database and start bots
-    if sessions_collection is not None:
-        try:
-            saved_sessions = list(sessions_collection.find({}))
-            logging.info(f"Found {len(saved_sessions)} saved session(s) in database.")
-            for session_doc in saved_sessions:
-                phone = session_doc.get('phone_number')
-                session_str = session_doc.get('session_string')
-                font = session_doc.get('font_style', 'stylized')
-                disable_clk = session_doc.get('disable_clock', False)
-                if phone and session_str:
-                    logging.info(f"Starting bot instance for saved session: {phone}")
-                    # Use create_task to start them concurrently
-                    asyncio.create_task(start_bot_instance(session_str, phone, font, disable_clk))
-                else:
-                    logging.warning(f"Invalid session document found (missing phone or session_string): {session_doc.get('_id')}")
-            # Small delay to let all instances start reporting
-            await asyncio.sleep(3)
-        except Exception as e_db_load:
-            logging.error(f"Could not load sessions from database: {e_db_load}")
-
-    # Start Flask app in a separate thread
-    def run_flask():
-        # Use a simple run for development. For production, use a proper WSGI server like Waitress or Gunicorn.
-        app_flask.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
-
-    flask_thread = Thread(target=run_flask, daemon=True)
-    flask_thread.start()
-    logging.info("Flask app started on http://0.0.0.0:5000")
-
-    # Keep the main asyncio loop running
-    while True:
-        await asyncio.sleep(3600) # Sleep for an hour, or handle other periodic tasks
-
-if __name__ == '__main__':
+# --- Running the Application ---
+def run_flask():
+    port = int(os.environ.get("PORT", 10000)); logging.info(f"Starting Flask web server on host 0.0.0.0, port {port}")
     try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logging.info("Application stopped by user (KeyboardInterrupt).")
-    except Exception as e_main:
-        logging.critical(f"Fatal error in main: {e_main}", exc_info=True)
+        # Use Waitress for a more production-ready server if available
+        from waitress import serve
+        logging.info("Using Waitress production WSGI server.")
+        serve(app_flask, host='0.0.0.0', port=port, threads=8) # Adjust threads as needed
+    except ImportError:
+        logging.warning("Waitress package not found. Falling back to Flask's built-in development server (NOT recommended for production).")
+        # Flask's dev server is not suitable for production
+        app_flask.run(host='0.0.0.0', port=port)
+    except Exception as flask_err:
+         logging.critical(f"Flask server failed to start: {flask_err}", exc_info=True)
+
+def run_asyncio_loop():
+    global EVENT_LOOP
+    # Set the event loop for the current thread
+    asyncio.set_event_loop(EVENT_LOOP)
+    logging.info("Asyncio event loop set for background thread.")
+
+    # --- Auto-Login from Database ---
+    if sessions_collection is not None:
+        logging.info("Attempting auto-login for existing sessions from database...")
+        started_count = 0
+        try:
+             # Use find() to get a cursor and iterate
+             session_docs = list(sessions_collection.find()) # Fetch all first to avoid cursor issues if collection changes
+             logging.info(f"Found {len(session_docs)} potential session(s) in DB.")
+             for doc in session_docs:
+                 try:
+                     session_string = doc['session_string']
+                     # Use phone_number if available, otherwise generate a placeholder ID
+                     phone = doc.get('phone_number', f"db_user_{doc.get('_id', f'unk_{started_count}')}")
+                     font_style = doc.get('font_style', 'stylized') # Default if missing
+                     disable_clock = doc.get('disable_clock', False) # Default if missing
+
+                     logging.info(f"Scheduling auto-start for session: {phone}...")
+                     # Create task in the running loop
+                     EVENT_LOOP.create_task(start_bot_instance(session_string, phone, font_style, disable_clock))
+                     started_count += 1
+                     # Optional small delay between starts to avoid overwhelming resources/APIs
+                     # time.sleep(1) # Consider async sleep if this causes issues
+                 except KeyError:
+                     logging.error(f"DB AutoLogin Error: Document missing 'session_string'. Skipping. Doc ID: {doc.get('_id')}")
+                 except Exception as e_doc:
+                     logging.error(f"DB AutoLogin Error: Failed to schedule start for session {doc.get('phone_number', doc.get('_id', 'unknown'))}: {e_doc}", exc_info=True)
+             logging.info(f"Finished scheduling auto-start. {started_count} session(s) scheduled.")
+        except Exception as e_db_query:
+             logging.error(f"DB AutoLogin Error: Failed to query database for sessions: {e_db_query}", exc_info=True)
+    else:
+        logging.info("MongoDB not configured. Skipping auto-login from database.")
+
+    # --- Start Event Loop ---
+    try:
+        logging.info("Starting asyncio event loop run_forever()...")
+        EVENT_LOOP.run_forever()
+        # Code here will run after loop.stop() is called
+        logging.info("Asyncio event loop has stopped.")
+
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Shutdown signal (KeyboardInterrupt/SystemExit) received by asyncio loop.")
+        # Loop might already be stopping, but call stop() just in case
+        if EVENT_LOOP.is_running():
+            EVENT_LOOP.stop()
+    except Exception as e_loop:
+        logging.critical(f"CRITICAL ASYNCIO LOOP ERROR: {e_loop}", exc_info=True)
+        # Try to stop the loop gracefully if possible
+        if EVENT_LOOP.is_running():
+            EVENT_LOOP.stop()
+
+    # --- Cleanup Sequence (after loop stops) ---
     finally:
-        logging.info("Shutting down...")
-        # Perform any final cleanup if necessary
-[/file content end]
+        logging.info("Asyncio loop cleanup sequence initiated...")
+        cleanup_completed = False
+        if EVENT_LOOP.is_running(): # Should ideally be false here, but check just in case
+            logging.warning("Event loop was still running at the start of finally block. Forcing stop.")
+            EVENT_LOOP.stop()
+
+        # Run final cleanup tasks within the loop before closing
+        try:
+            async def shutdown_tasks():
+                """Gather and run all cleanup tasks concurrently."""
+                nonlocal cleanup_completed
+                logging.info("Starting asynchronous shutdown tasks...")
+                active_bot_stops = []
+                # Stop active bot instances
+                for user_id, (client, bg_tasks) in list(ACTIVE_BOTS.items()):
+                    logging.debug(f"Initiating shutdown for active bot instance {user_id}...")
+                    # Cancel background tasks first
+                    for task in bg_tasks:
+                        if task and not task.done():
+                            task.cancel()
+                    # Schedule client stop (non-blocking)
+                    if client and client.is_connected:
+                        active_bot_stops.append(client.stop(block=False))
+                    ACTIVE_BOTS.pop(user_id, None) # Remove immediately
+
+                # Disconnect temporary login clients
+                active_client_disconnects = []
+                for phone, client in list(ACTIVE_CLIENTS.items()):
+                    if client and client.is_connected:
+                        logging.debug(f"Initiating disconnect for temporary client {phone}...")
+                        active_client_disconnects.append(client.disconnect())
+                    ACTIVE_CLIENTS.pop(phone, None)
+
+                # Wait for all stop/disconnect tasks
+                all_cleanup_ops = active_bot_stops + active_client_disconnects
+                if all_cleanup_ops:
+                    logging.info(f"Waiting for {len(all_cleanup_ops)} client stops/disconnects...")
+                    results = await asyncio.gather(*all_cleanup_ops, return_exceptions=True)
+                    for i, result in enumerate(results):
+                        if isinstance(result, Exception):
+                             logging.warning(f"Error during client cleanup operation {i}: {result}")
+                logging.info("Client stop/disconnect operations complete.")
+
+                # Cancel any remaining asyncio tasks (should be few now)
+                logging.debug("Cancelling any remaining asyncio tasks...")
+                current_task = asyncio.current_task()
+                tasks_to_cancel = [t for t in asyncio.all_tasks() if t is not current_task]
+                if tasks_to_cancel:
+                    for task in tasks_to_cancel: task.cancel()
+                    await asyncio.gather(*tasks_to_cancel, return_exceptions=True)
+                logging.debug("Remaining asyncio tasks cancelled.")
+                cleanup_completed = True
+
+            # Run the shutdown coroutine until it completes
+            EVENT_LOOP.run_until_complete(shutdown_tasks())
+            logging.info("Asynchronous shutdown tasks completed.")
+
+        except Exception as e_shutdown:
+            logging.error(f"Error during asyncio shutdown sequence: {e_shutdown}", exc_info=True)
+
+        finally:
+             # Close the event loop
+             if not EVENT_LOOP.is_closed():
+                 EVENT_LOOP.close()
+                 logging.info("Asyncio event loop closed.")
+             if not cleanup_completed:
+                 logging.warning("Cleanup sequence did not fully complete before loop closure.")
+
+if __name__ == "__main__":
+    logging.info("========================================")
+    logging.info(" Starting Telegram Self Bot Service... ")
+    logging.info("========================================")
+
+    # Start the asyncio loop in a separate thread
+    loop_thread = Thread(target=run_asyncio_loop, name="AsyncioLoopThread", daemon=True)
+    loop_thread.start()
+
+    # Start the Flask server in the main thread
+    # This will block until Flask stops (e.g., via CTRL+C)
+    run_flask()
+
+    # --- Post-Flask Shutdown ---
+    logging.info("Flask server has stopped.")
+
+    # Signal the asyncio loop thread to stop
+    if loop_thread.is_alive() and EVENT_LOOP.is_running():
+        logging.info("Signaling asyncio loop thread to stop...")
+        # Use call_soon_threadsafe to schedule loop.stop() from this thread
+        EVENT_LOOP.call_soon_threadsafe(EVENT_LOOP.stop)
+    elif not EVENT_LOOP.is_running():
+         logging.info("Asyncio loop was already stopped.")
+
+    # Wait for the asyncio thread to finish its cleanup
+    logging.info("Waiting for asyncio loop thread to finish cleanup (max 15 seconds)...")
+    loop_thread.join(timeout=15)
+
+    if loop_thread.is_alive():
+        logging.warning("Asyncio thread did not exit gracefully within the timeout.")
+    else:
+        logging.info("Asyncio thread joined successfully.")
+
+    # Close MongoDB client if it was initialized
+    if mongo_client:
+        try:
+            logging.info("Closing MongoDB connection...")
+            mongo_client.close()
+            logging.info("MongoDB connection closed.")
+        except Exception as mongo_close_err:
+             logging.error(f"Error closing MongoDB connection: {mongo_close_err}")
+
+    logging.info("========================================")
+    logging.info(" Application shutdown complete.        ")
+    logging.info("========================================")
