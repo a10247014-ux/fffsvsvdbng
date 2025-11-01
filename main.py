@@ -146,11 +146,8 @@ USER_FONT_CHOICES = {}
 CLOCK_STATUS = {}
 TIME_BIO_STATUS = {} # NEW: For TimeBio
 BOLD_MODE_STATUS = {}
-ITALIC_MODE_STATUS = {} # NEW: For Italic
-UNDERLINE_MODE_STATUS = {} # NEW: For Underline
-LINK_MODE_STATUS = {} # NEW: For Link
 AUTO_SEEN_STATUS = {}
-AUTO_REACTION_TARGETS = {}  # {user_id: {target_user_id: emoji}}
+AUTO_REACTION_TARGETS = {}  # {user_id: {target_user_id: emoji}
 AUTO_TRANSLATE_TARGET = {}  # {user_id: lang_code}
 ANTI_LOGIN_STATUS = {}
 COPY_MODE_STATUS = {}
@@ -179,7 +176,7 @@ ACTIVE_BOTS = {}
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
 
 # Updated REGEX to include all new commands
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه|بیو ساعت روشن|بیو ساعت خاموش|ایتالیک روشن|ایتالیک خاموش|زیرخط روشن|زیرخط خاموش|لینک روشن|لینک خاموش|ضبط ویدیو روشن|ضبط ویدیو خاموش|استیکر روشن|استیکر خاموش|آپلود ویدیو روشن|آپلود ویدیو خاموش|آپلود فایل روشن|آپلود فایل خاموش|آپلود صدا روشن|آپلود صدا خاموش|صحبت روشن|صحبت خاموش|تنظیم اسم|تنظیم بیو|تنظیم پروفایل|مربع|قلب|قلب بزرگ|بکیرم|به کیرم|مکعب|لودینگ|Loading|ربات|bot|!YouTube .*|!check .*|ویس .*|پارت .*)$"
+COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه|بیو ساعت روشن|بیو ساعت خاموش|ضبط ویدیو روشن|ضبط ویدیو خاموش|استیکر روشن|استیکر خاموش|آپلود ویدیو روشن|آپلود ویدیو خاموش|آپلود فایل روشن|آپلود فایل خاموش|آپلود صدا روشن|آپلود صدا خاموش|صحبت روشن|صحبت خاموش|تنظیم اسم|تنظیم بیو|تنظیم پروفایل|مربع|قلب|قلب بزرگ|بکیرم|به کیرم|مکعب|لودینگ|Loading|ربات|bot|حذف|ذخیره|تکرار|کپی|منشی|سین|بولد|ترجمه|ساعت|فونت|دشمن|دوست|بلاک|سکوت|ریاکشن|تاس|بولینگ|ربات|!check .*|ویس .*|پارت .*)$"
 
 
 # --- Main Bot Functions ---
@@ -481,33 +478,20 @@ async def outgoing_message_modifier(client, message):
     # Let's switch to HTML for robustness, as File 2 intended.
     
     is_bold = BOLD_MODE_STATUS.get(user_id, False)
-    is_italic = ITALIC_MODE_STATUS.get(user_id, False)
-    is_underline = UNDERLINE_MODE_STATUS.get(user_id, False)
-    is_link = LINK_MODE_STATUS.get(user_id, False)
 
     # Use HTML if any format is active
-    if is_bold or is_italic or is_underline or is_link:
+    if is_bold:
         parse_mode = "html" # Pyrogram uses 'html'
-        
-        # Apply link first (outermost)
-        if is_link:
-            # Escape HTML special chars in text before wrapping
-            escaped_text = modified_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            modified_text = f'<a href="tg://openmessage?user_id={user_id}">{escaped_text}</a>'
         
         # Apply inner formats
         if is_bold:
             modified_text = f"<b>{modified_text}</b>"
-        if is_italic:
-            modified_text = f"<i>{modified_text}</i>"
-        if is_underline:
-            modified_text = f"<u>{modified_text}</u>"
-        
+
         if modified_text != original_text: # Check if formatting actually changed the text
             needs_edit = True
             
     # Fallback to Markdown bold if only bold is active and others aren't (File 1's original logic)
-    elif BOLD_MODE_STATUS.get(user_id, False) and not (is_italic or is_underline or is_link):
+    elif BOLD_MODE_STATUS.get(user_id, False):
         modified_text = f"**{modified_text}**"
         needs_edit = True
         parse_mode = None # Use default Markdown
@@ -814,12 +798,6 @@ async def toggle_controller(client, message):
             # New features
             elif feature == "بیو ساعت":
                 if not TIME_BIO_STATUS.get(user_id, False): TIME_BIO_STATUS[user_id] = True; status_changed = True
-            elif feature == "ایتالیک":
-                if not ITALIC_MODE_STATUS.get(user_id, False): ITALIC_MODE_STATUS[user_id] = True; status_changed = True
-            elif feature == "زیرخط":
-                if not UNDERLINE_MODE_STATUS.get(user_id, False): UNDERLINE_MODE_STATUS[user_id] = True; status_changed = True
-            elif feature == "لینک":
-                if not LINK_MODE_STATUS.get(user_id, False): LINK_MODE_STATUS[user_id] = True; status_changed = True
             elif feature == "ضبط ویدیو":
                 if not RECORD_VIDEO_STATUS.get(user_id, False): RECORD_VIDEO_STATUS[user_id] = True; status_changed = True
             elif feature == "استیکر":
@@ -870,12 +848,6 @@ async def toggle_controller(client, message):
             # New features
             elif feature == "بیو ساعت":
                 if TIME_BIO_STATUS.get(user_id, False): TIME_BIO_STATUS[user_id] = False; status_changed = True
-            elif feature == "ایتالیک":
-                if ITALIC_MODE_STATUS.get(user_id, False): ITALIC_MODE_STATUS[user_id] = False; status_changed = True
-            elif feature == "زیرخط":
-                if UNDERLINE_MODE_STATUS.get(user_id, False): UNDERLINE_MODE_STATUS[user_id] = False; status_changed = True
-            elif feature == "لینک":
-                if LINK_MODE_STATUS.get(user_id, False): LINK_MODE_STATUS[user_id] = False; status_changed = True
             elif feature == "ضبط ویدیو":
                 if RECORD_VIDEO_STATUS.get(user_id, False): RECORD_VIDEO_STATUS[user_id] = False; status_changed = True
             elif feature == "استیکر":
@@ -1521,10 +1493,6 @@ async def help_controller(client, message):
 • `روسی روشن` / `خاموش`: میانبر ترجمه خودکار به روسی (`ru`).
 • `انگلیسی روشن` / `خاموش`: میانبر ترجمه خودکار به انگلیسی (`en`).
 • `بولد روشن` / `خاموش`: برجسته (bold) کردن خودکار تمام پیام‌های ارسالی.
-• `ایتالیک روشن` / `خاموش`: ایتالیک کردن خودکار تمام پیام‌های ارسالی.
-• `زیرخط روشن` / `خاموش`: زیرخط دار کردن خودکار تمام پیام‌های ارسالی.
-• `لینک روشن` / `خاموش`: لینک‌دار کردن خودکار پیام‌ها به پروفایل شما.
-• `پارت [متن]`: ارسال انیمیشنی متن مورد نظر.
 
 **🔹 ساعت و پروفایل 🔹**
 • `ساعت روشن` / `خاموش`: نمایش یا حذف ساعت از **نام** پروفایل شما.
@@ -1570,8 +1538,6 @@ async def help_controller(client, message):
 
 **🔹 ابزار و سرگرمی 🔹**
 • `ربات`: بررسی آنلاین بودن ربات.
-• `ویس [متن]`: تبدیل متن فارسی به ویس.
-• `!YouTube [LINK]`: دانلود ویدیو از لینک یوتیوب.
 • `تاس`: ارسال تاس شانسی (تا 6).
 • `تاس [عدد ۱-۶]`: ارسال تاس تا رسیدن به عدد مورد نظر.
 • `بولینگ`: ارسال بولینگ شانسی (تا استرایک).
@@ -1907,7 +1873,7 @@ async def delete_messages_controller(client, message):
                 try:
                     await client.delete_messages(chat_id, batch)
                     deleted_count_total += len(batch)
-                    await asyncio.sleep(0.5)  # تاخیر برای جلوگیری از محدودیت
+                    await asyncio.sleep(0.5) # تاخیر برای جلوگیری از محدودیت
                 except FloodWait as e:
                     logging.warning(f"Delete Messages: Flood wait, sleeping {e.value}s")
                     await asyncio.sleep(e.value + 1)
@@ -1959,7 +1925,7 @@ async def game_controller(client, message):
                 if hasattr(result, 'dice') and result.dice.value == target_value:
                     break
                     
-                await asyncio.sleep(1.5)  # تاخیر بین پرتاب‌ها
+                await asyncio.sleep(1.5) # تاخیر بین پرتاب‌ها
             
         elif command.startswith("تاس "):
             match = re.match(r"^تاس (\d+)$", command)
@@ -2156,293 +2122,6 @@ async def clock_controller(client, message):
             await message.edit_text("⚠️ خطایی در تنظیم ساعت پروفایل رخ داد.")
         except Exception: pass
 
-# --- NEW Controllers (from bot.txt) ---
-
-async def text_to_voice_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^ویس (.*)", message.text, re.DOTALL)
-    if not match:
-        await message.edit_text("⚠️ فرمت نامعتبر. مثال: `ویس سلام خوبی`")
-        return
-        
-    text = match.group(1).strip()
-    if not text:
-        await message.edit_text("⚠️ متن برای تبدیل به ویس ارائه نشد.")
-        return
-
-    url = f"https://haji-api.ir/text-to-voice/?text={quote(text)}&Character=DilaraNeural"
-    
-    try:
-        await message.edit_text("⏳ در حال تبدیل متن به ویس...")
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    try:
-                        data = await response.json()
-                        voice_url = data['results']['url']
-                        await client.send_voice(message.chat.id, voice=voice_url, reply_to_message_id=message.id)
-                        await message.delete() # Delete the command message
-                    except (KeyError, aiohttp.ContentTypeError, Exception) as e_json:
-                        logging.error(f"Text2Voice: Error parsing API response: {e_json}")
-                        await message.edit_text("⚠️ خطایی در پردازش پاسخ API رخ داد.")
-                else:
-                    logging.error(f"Text2Voice: API request failed with status {response.status}")
-                    await message.edit_text("⚠️ سرویس تبدیل متن به ویس در دسترس نیست.")
-                    
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except Exception as e:
-        logging.error(f"Text2Voice: Error for user {user_id}: {e}", exc_info=True)
-        await message.edit_text(f"⚠️ خطایی در ارسال ویس رخ داد: {type(e).__name__}")
-
-async def youtube_dl_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^!YouTube (.*)", message.text)
-    if not match:
-        await message.edit_text("⚠️ فرمت نامعتبر. مثال: `!YouTube https://...`")
-        return
-
-    video_url = match.group(1).strip()
-    local_path = None
-    
-    try:
-        await message.edit_text("⏳ در حال پردازش لینک یوتیوب...")
-        yt = YouTube(video_url)
-        
-        # Try to get 720p, fallback to highest resolution
-        video_stream = yt.streams.filter(progressive=True, file_extension='mp4').get_by_resolution("720p")
-        if not video_stream:
-            video_stream = yt.streams.filter(progressive=True, file_extension='mp4').get_highest_resolution()
-
-        if not video_stream:
-            await message.edit_text("⚠️ ویدیویی با فرمت mp4 (progressive) یافت نشد.")
-            return
-
-        downloaded_file_name = video_stream.default_filename
-        # Sanitize filename
-        normalized_file_name = unicodedata.normalize('NFKD', downloaded_file_name).encode('ascii', 'ignore').decode('ascii')
-        normalized_file_name = re.sub(r'[^\w\s.-]', '', normalized_file_name).strip()
-        if not normalized_file_name: normalized_file_name = f"youtube_video_{yt.video_id}.mp4"
-
-        download_path = "downloads"
-        os.makedirs(download_path, exist_ok=True)
-        
-        # Note: Pytube download path logic is tricky. It might create a dir.
-        # Let's specify the full file path directly.
-        local_path = os.path.join(download_path, normalized_file_name)
-
-        await message.edit_text("⏳ در حال دانلود ویدیو... (این ممکن است طول بکشد)")
-        video_stream.download(output_path=download_path, filename=normalized_file_name)
-
-        await message.edit_text("⏳ در حال آپلود ویدیو...")
-        caption = yt.title if yt.title else "YouTube Video"
-        
-        await client.send_video(
-            message.chat.id,
-            video=local_path,
-            caption=caption,
-            reply_to_message_id=message.id
-        )
-        await message.delete() # Delete command message
-
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except Exception as e:
-        logging.error(f"YouTubeDL: Error for user {user_id} downloading {video_url}: {e}", exc_info=True)
-        await message.edit_text(f"⚠️ خطایی در دانلود از یوتیوب رخ داد: {type(e).__name__}")
-    
-    finally:
-        # Clean up the downloaded file
-        if local_path and os.path.exists(local_path):
-            os.remove(local_path)
-
-async def part_text_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^پارت (.*)", message.text, re.DOTALL)
-    if not match:
-        await message.edit_text("⚠️ فرمت نامعتبر. مثال: `پارت سلام`")
-        return
-        
-    text_to_part = match.group(1).strip()
-    if not text_to_part:
-        await message.edit_text("⚠️ متنی برای پارت کردن ارائه نشد.")
-        return
-
-    try:
-        current_text = ""
-        for char in text_to_part:
-            current_text += char
-            # Avoid editing too fast or with same text
-            if char != " ":
-                await message.edit_text(current_text)
-                await asyncio.sleep(0.2)
-        
-        # Final edit to ensure text is complete
-        await message.edit_text(current_text)
-        
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass # Expected if text is short
-    except Exception as e:
-        logging.error(f"Part Text: Error for user {user_id}: {e}", exc_info=True)
-        # Don't edit message on error, it might be gone
-        
-async def ping_controller(client, message):
-    try:
-        await message.reply_text("✅ **Self is Online**", quote=True)
-    except Exception:
-        pass # Ignore errors
-
-# --- Animation/Game Controllers (from bot.txt, made async) ---
-
-async def square_controller(client, message):
-    try:
-        await message.edit_text("◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        # ... (Continue animation)
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️")
-        await asyncio.sleep(0.5)
-        await message.edit_text("✅ مربع تمام شد.")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass # Ignore errors in animations
-
-async def heart_controller(client, message):
-    hearts = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "❤️‍🔥", "❤️‍🩹", "❣️", "💓", "💗"]
-    try:
-        for _ in range(2): # Loop twice
-            for heart in hearts:
-                await message.edit_text(heart)
-                await asyncio.sleep(0.3)
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def big_heart_controller(client, message):
-    heart_parts = [
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕‌",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕\n🌑🌑🌑🌒🌕🌗🌑🌔🌕🌕🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕\n🌑🌑🌑🌒🌕🌗🌑🌔🌕🌕🌕\n🌑🌑🌑🌑🌒🌗🌔🌕🌕🌕🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕\n🌑🌑🌑🌒🌕🌗🌑🌔🌕🌕🌕\n🌑🌑🌑🌑🌒🌗🌔🌕🌕🌕🌕\n🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕",
-        # Simplified the rest for brevity
-        "❤️"
-    ]
-    try:
-        for part in heart_parts:
-            await message.edit_text(part)
-            await asyncio.sleep(0.4)
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def bakiram_controller(client, message):
-    bk_parts = [
-        "\n😂😂😂          😂         😂\n😂         😂      😂       😂\n😂           😂    😂     😂\n😂        😂       😂   😂\n😂😂😂          😂😂\n😂         😂      😂   😂\n😂           😂    😂      😂\n😂           😂    😂        😂\n😂        😂       😂          😂\n😂😂😂          😂            😂\n",
-        "\n🤤🤤🤤          🤤         🤤\n🤤         🤤      🤤       🤤\n🤤           🤤    🤤     🤤\n🤤        🤤       🤤   🤤\n🤤🤤🤤          🤤🤤\n🤤         🤤      🤤   🤤\n🤤           🤤    🤤      🤤\n🤤           🤤    🤤        🤤\n🤤        🤤       🤤          🤤\n🤤🤤🤤          🤤            🤤\n",
-        "\n💩💩💩          💩         💩\n💩         💩      💩       💩\n💩           💩    💩     💩\n💩        💩       💩   💩\n💩💩💩          💩💩\n💩         💩      💩   💩\n💩           💩    💩      💩\n💩           💩    💩        💩\n💩        💩       💩          💩\n💩💩💩          💩            💩\n",
-        "\n🌹🌹🌹          🌹         🌹\n🌹         🌹      🌹       🌹\n🌹           🌹    🌹     🌹\n🌹        🌹       🌹   🌹\n🌹🌹🌹          🌹🌹\n🌹         🌹      🌹   🌹\n🌹           🌹    🌹      🌹\n🌹           🌹    🌹        🌹\n🌹        🌹       🌹          🌹\n🌹🌹🌹          🌹            🌹\n",
-        "\n💀💀💀          💀         💀\n💀         💀      💀       💀\n💀           💀    💀     💀\n💀        💀       💀   💀\n💀💀💀          💀💀\n💀         💀      💀   💀\n💀           💀    💀      💀\n💀           💀    💀        💀\n💀        💀       💀          💀\n💀💀💀          💀            💀\n",
-        "\n🌑🌑🌑          🌑         🌑\n🌑         🌑      🌑       🌑\n🌑           🌑    🌑     🌑\n🌑        🌑       🌑   🌑\n🌑🌑🌑          🌑🌑\n🌑         🌑      🌑   Tooltip\n🌑           🌑    🌑      🌑\n🌑           🌑    🌑        🌑\n🌑        🌑       🌑          🌑\n🌑🌑🌑          🌑            🌑\n",
-        "کلا بکیرم"
-    ]
-    try:
-        for part in bk_parts:
-            await message.edit_text(part)
-            await asyncio.sleep(0.8)
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def cube_controller(client, message):
-    mk = ['🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '⬛️', '⬜️', '🟫']
-    try:
-        for _ in range(15): # Loop 15 times
-            cube_text = (
-                f"{random.choice(mk)}{random.choice(mk)}{random.choice(mk)}\n"
-                f"{random.choice(mk)}{random.choice(mk)}{random.choice(mk)}\n"
-                f"{random.choice(mk)}{random.choice(mk)}{random.choice(mk)}"
-            )
-            await message.edit_text(cube_text)
-            await asyncio.sleep(0.3)
-        await message.edit_text("✅ مکعب تمام شد.")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def loading_controller(client, message):
-    try:
-        await message.edit_text("⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 0%\nLoading")
-        await asyncio.sleep(0.5)
-        await message.edit_text("⚪️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 10%\nLoading . . .")
-        await asyncio.sleep(0.3)
-        await message.edit_text("⚪️⚪️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 20%\nLoading")
-        await asyncio.sleep(0.1)
-        await message.edit_text("⚪️⚪️⚪️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 30%\nLoading . . .")
-        await asyncio.sleep(1)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚫️⚫️⚫️⚫️⚫️⚫️ 40%\nLoading")
-        await asyncio.sleep(0.8)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚫️⚫️⚫️⚫️⚫️ 50%\nLoading . . .")
-        await asyncio.sleep(1.5)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚫️⚫️⚫️⚫️ 60%\nLoading")
-        await asyncio.sleep(0.2)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚫️⚫️⚫️ 70%\nLoading")
-        await asyncio.sleep(0.4)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚫️⚫️ 80%\nLoading")
-        await asyncio.sleep(0.1)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚫️ 90%\nLoading")
-        await asyncio.sleep(2)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️ 100%\nLoading")
-        await asyncio.sleep(0.5)
-        await message.edit_text("✅ لودینگ تمام شد.")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
 # --- Filters and Bot Setup ---
 async def is_enemy_filter(_, client, message):
     user_id = client.me.id
@@ -2498,7 +2177,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         if client.is_connected:
              try: await client.stop()
              except Exception as stop_err: logging.error(f"Error stopping failed client {phone}: {stop_err}")
-        return # Stop execution for this instance
+    return # Stop execution for this instance
 
     # --- Configuration and Task Starting ---
     try:
@@ -2549,9 +2228,6 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         
         # NEW Settings
         TIME_BIO_STATUS.setdefault(user_id, False)
-        ITALIC_MODE_STATUS.setdefault(user_id, False)
-        UNDERLINE_MODE_STATUS.setdefault(user_id, False)
-        LINK_MODE_STATUS.setdefault(user_id, False)
         
         # Statuses
         TYPING_MODE_STATUS.setdefault(user_id, False)
@@ -2608,7 +2284,7 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         
         # Updated Toggle Regex
         toggle_regex = (
-            r"^(بولد|سین|منشی|انتی لوگین|تایپ|بازی|ضبط ویس|عکس|گیف|دشمن|دوست|بیو ساعت|ایتالیک|زیرخط|لینک|ضبط ویدیو|استیکر|آپلود ویدیو|آپلود فایل|آپلود صدا|صحبت)"
+            r"^(بولد|سین|منشی|انتی لوگین|تایپ|بازی|ضبط ویس|عکس|گیف|دشمن|دوست|بیو ساعت|ضبط ویدیو|استیکر|آپلود ویدیو|آپلود فایل|آپلود صدا|صحبت)"
             r" (روشن|خاموش)$"
         )
         client.add_handler(MessageHandler(toggle_controller, cmd_filters & filters.regex(toggle_regex)))
@@ -2626,14 +2302,14 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(clear_enemy_list_controller, cmd_filters & filters.regex("^پاکسازی لیست دشمن$")))
         client.add_handler(MessageHandler(list_enemies_controller, cmd_filters & filters.regex("^لیست دشمن$")))
         client.add_handler(MessageHandler(list_enemy_replies_controller, cmd_filters & filters.regex("^لیست متن دشمن$")))
-        client.add_handler(MessageHandler(delete_enemy_reply_controller, cmd_filters & filters.regex(r"^حذف متن دشمن(?: \d+)?$")))
+        client.add_handler(MessageHandler(delete_enemy_reply_controller, cmd_filters & filters.regex(r"^حذف متن دشمن(?: \d+)?$"))
         client.add_handler(MessageHandler(set_enemy_reply_controller, cmd_filters & filters.regex(r"^تنظیم متن دشمن (.*)", flags=re.DOTALL | re.IGNORECASE))) # Allow multiline text
         client.add_handler(MessageHandler(set_friend_controller, cmd_filters & filters.reply & filters.regex("^تنظیم دوست$"))) # Requires reply
         client.add_handler(MessageHandler(delete_friend_controller, cmd_filters & filters.reply & filters.regex("^حذف دوست$"))) # Requires reply
         client.add_handler(MessageHandler(clear_friend_list_controller, cmd_filters & filters.regex("^پاکسازی لیست دوست$")))
         client.add_handler(MessageHandler(list_friends_controller, cmd_filters & filters.regex("^لیست دوست$")))
         client.add_handler(MessageHandler(list_friend_replies_controller, cmd_filters & filters.regex("^لیست متن دوست$")))
-        client.add_handler(MessageHandler(delete_friend_reply_controller, cmd_filters & filters.regex(r"^حذف متن دوست(?: \d+)?$")))
+        client.add_handler(MessageHandler(delete_friend_reply_controller, cmd_filters & filters.regex(r"^حذف متن دوست(?: \d+)?$"))
         client.add_handler(MessageHandler(set_friend_reply_controller, cmd_filters & filters.regex(r"^تنظیم متن دوست (.*)", flags=re.DOTALL | re.IGNORECASE))) # Allow multiline text
         
         # Management Handlers
@@ -2643,26 +2319,16 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(copy_profile_controller, cmd_filters & filters.regex("^(کپی روشن|کپی خاموش)$"))) # Logic inside handles reply check
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
-        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^(حذف(?: \d+)?|حذف همه)$")))
+        client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^(حذف(?: \d+)?|حذف همه)$"))
         
         # Game Handlers
-        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$")))
+        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$"))
         
         # NEW Handlers
-        client.add_handler(MessageHandler(text_to_voice_controller, cmd_filters & filters.regex(r"^ویس (.*)", flags=re.DOTALL)))
-        client.add_handler(MessageHandler(set_name_controller, cmd_filters & filters.reply & filters.regex("^تنظیم اسم$")))
-        client.add_handler(MessageHandler(set_bio_controller, cmd_filters & filters.reply & filters.regex("^تنظیم بیو$")))
-        client.add_handler(MessageHandler(set_profile_controller, cmd_filters & filters.reply & filters.regex("^تنظیم پروفایل$")))
-        client.add_handler(MessageHandler(youtube_dl_controller, cmd_filters & filters.regex(r"^!YouTube (.*)")))
-        client.add_handler(MessageHandler(part_text_controller, cmd_filters & filters.regex(r"^پارت (.*)", flags=re.DOTALL)))
-        client.add_handler(MessageHandler(ping_controller, cmd_filters & filters.regex(r"^(ربات|bot)$")))
-        # NEW Game/Animation Handlers
-        client.add_handler(MessageHandler(square_controller, cmd_filters & filters.regex("^مربع$")))
-        client.add_handler(MessageHandler(heart_controller, cmd_filters & filters.regex("^قلب$")))
-        client.add_handler(MessageHandler(big_heart_controller, cmd_filters & filters.regex("^قلب بزرگ$")))
-        client.add_handler(MessageHandler(bakiram_controller, cmd_filters & filters.regex(r"^(بکیرم|به کیرم)$")))
-        client.add_handler(MessageHandler(cube_controller, cmd_filters & filters.regex("^مکعب$")))
-        client.add_handler(MessageHandler(loading_controller, cmd_filters & filters.regex(r"^(لودینگ|Loading)$")))
+        client.add_handler(MessageHandler(set_name_controller, cmd_filters & filters.reply & filters.regex("^تنظیم اسم$"))
+        client.add_handler(MessageHandler(set_bio_controller, cmd_filters & filters.reply & filters.regex("^تنظیم بیو$"))
+        client.add_handler(MessageHandler(set_profile_controller, cmd_filters & filters.reply & filters.regex("^تنظیم پروفایل$"))
+        client.add_handler(MessageHandler(ping_controller, cmd_filters & filters.regex(r"^(ربات|bot)$"))
 
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
         # Added ~filters.user(user_id) to ensure these don't trigger on own messages if filters somehow match
