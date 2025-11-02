@@ -11,12 +11,9 @@ from urllib.parse import quote
 from pyrogram import Client, filters
 from pyrogram.handlers import MessageHandler
 from pyrogram.enums import ChatType, ChatAction, UserStatus, MessageMediaType
-from pyrogram.errors import (
-    FloodWait, SessionPasswordNeeded, PhoneCodeInvalid,
+from pyrogram.errors import FloodWait, SessionPasswordNeeded, PhoneCodeInvalid,
     PasswordHashInvalid, PhoneNumberInvalid, PhoneCodeExpired, UserDeactivated, AuthKeyUnregistered,
-    ReactionInvalid, MessageIdInvalid, MessageNotModified, PeerIdInvalid, UserNotParticipant,
-    ChannelPrivate, ChannelInvalid, SlowmodeWait, UserIsBlocked, ChatAdminRequired
-   
+    ReactionInvalid, MessageIdInvalid, MessageNotModified, PeerIdInvalid, UserNotParticipant
 )
 try:
     from pyrogram.raw import functions
