@@ -4,9 +4,6 @@ import logging
 import re
 import aiohttp
 import time
-import unicodedata
-import shutil
-import random
 from urllib.parse import quote
 from pyrogram import Client, filters
 from pyrogram.handlers import MessageHandler
@@ -14,7 +11,7 @@ from pyrogram.enums import ChatType, ChatAction, UserStatus
 from pyrogram.errors import (
     FloodWait, SessionPasswordNeeded, PhoneCodeInvalid,
     PasswordHashInvalid, PhoneNumberInvalid, PhoneCodeExpired, UserDeactivated, AuthKeyUnregistered,
-    ReactionInvalid, MessageIdInvalid, MessageNotModified, PeerIdInvalid, UserNotParticipant, PhotoCropSizeSmall
+    ReactionInvalid, MessageIdInvalid, MessageNotModified, PeerIdInvalid, UserNotParticipant
 )
 try:
     from pyrogram.raw import functions
@@ -26,10 +23,29 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from flask import Flask, request, render_template_string, redirect, session, url_for
 from threading import Thread
+import random
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from pytube import YouTube
 import certifi
+
+# --- New Imports from self.py (Ported) ---
+try:
+    from gtts import gTTS
+    from pytgcalls import PyTgCalls, idle
+    from pytgcalls.types import MediaStream
+    from google_play_scraper import search
+except ImportError:
+    logging.warning("Missing new dependencies (gTTS, PyTgCalls, google_play_scraper). Installing...")
+    # This might not work in all environments, user should be aware
+    try:
+        os.system('pip install gTTS pytgcalls google_play_scraper')
+        from gtts import gTTS
+        from pytgcalls import PyTgCalls, idle
+        from pytgcalls.types import MediaStream
+        from google_play_scraper import search
+    except Exception as e_install:
+        logging.critical(f"Failed to auto-install new dependencies: {e_install}")
+        logging.critical("Please manually install 'gTTS', 'pytgcalls', and 'google_play_scraper'")
 
 # --- Logging Setup ---
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')
@@ -65,7 +81,7 @@ app_flask.secret_key = os.environ.get("FLASK_SECRET_KEY", os.urandom(24))
 
 # --- Clock Font Dictionaries ---
 FONT_STYLES = {
-    "cursive":      {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'V𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
+    "cursive":      {'0':'𝟎','1':'𝟏','2':'𝟐','3':'𝟑','4':'𝟒','5':'𝟓','6':'𝟔','7':'𝟕','8':'𝟖','9':'𝟗',':':':'},
     "stylized":     {'0':'𝟬','1':'𝟭','2':'𝟮','3':'𝟯','4':'𝟰','5':'𝟱','6':'𝟲','7':'𝟳','8':'𝟴','9':'𝟵',':':':'},
     "doublestruck": {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
     "monospace":    {'0':'𝟶','1':'𝟷','2':'𝟸','3':'𝟹','4':'𝟺','5':'𝟻','6':'𝟼','7':'𝟽','8':'𝟾','9':'𝟿',':':':'},
@@ -77,16 +93,16 @@ FONT_STYLES = {
     "parenthesized": {'0':'🄀','1':'⑴','2':'⑵','3':'⑶','4':'⑷','5':'⑸','6':'⑹','7':'⑺','8':'⑻','9':'⑼',':':'∶'},
     "dot":          {'0':'🄀','1':'⒈','2':'⒉','3':'⒊','4':'⒋','5':'⒌','6':'⒍','7':'⒎','8':'⒏','9':'⒐',':':'∶'},
     "thai":         {'0':'๐','1':'๑','2':'๒','3':'๓','4':'๔','5':'๕','6':'๖','7':'๗','8':'๘','9':'๙',':':' : '},
-    "devanagari":   {'0':'०','1':'१','2':'२','3':'३','4':'४','5':'५','6':'६','7':'७','8':'८','9':'९',':':' : '},
+    "devanagari":   {'0':'०','1':'१','2':'२','3':'۳','4':'४','5':'५','6':'۶','7':'۷','8':'۸','9':'९',':':' : '},
     "arabic_indic": {'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩',':':' : '},
     "keycap":       {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
     "superscript":  {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹',':':':'},
     "subscript":    {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉',':':':'},
     "tibetan":      {'0':'༠','1':'༡','2':'༢','3':'༣','4':'༤','5':'༥','6':'༦','7':'༧','8':'༨','9':'༩',':':' : '},
-    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'۷','8':'۸','9':'۹',':':' : '},
+    "bengali":      {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'۵','6':'۶','7':'۷','8':'۸','9':'۹',':':' : '},
     "gujarati":     {'0':'૦','1':'૧','2':'૨','3':'૩','4':'૪','5':'૫','6':'૬','7':'૭','8':'૮','9':'૯',':':' : '},
     "mongolian":    {'0':'᠐','1':'᠑','2':'᠒','3':'᠓','4':'᠔','5':'᠕','6':'᠖','7':'᠗','8':'᠘','9':'᠙',':':' : '},
-    "lao":          {'0':'໐','1':'໑','2':'໒','3':'໓','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':':' : '},
+    "lao":          {'0':'໐','1':'໑','2':'໒','3':'৩৩','4':'໔','5':'໕','6':'໖','7':'໗','8':'໘','9':'໙',':':' : '},
     "fraktur":      {'0':'𝔃','1':'𝔄','2':'𝔅','3':'𝔆','4':'𝔇','5':'𝔈','6':'𝔉','7':'𝔊','8':'𝔋','9':'𝔌',':':':'},
     "bold_fraktur": {'0':'𝖀','1':'𝖁','2':'𝖂','3':'𝖃','4':'𝖄','5':'𝖅','6':'𝖆','7':'𝖇','8':'𝖈','9':'𝖉',':':':'},
     "script":       {'0':'𝟢','1':'𝟣','2':'𝟤','3':'𝟥','4':'𝟦','5':'𝟧','6':'𝟨','7':'𝟩','8':'𝟪','9':'𝟫',':':':'},
@@ -115,7 +131,7 @@ FONT_STYLES = {
     "math_double":  {'0':'𝟘','1':'𝟙','2':'𝟚','3':'𝟛','4':'𝟜','5':'𝟝','6':'𝟞','7':'𝟟','8':'𝟠','9':'𝟡',':':':'},
     "japanese":     {'0':'零','1':'壱','2':'弐','3':'参','4':'四','5':'伍','6':'陸','7':'漆','8':'捌','9':'玖',':':' : '},  # Kanji numbers
     "emoji":        {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣',':':':'},
-    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate
+    "shadow":       {'0':'🅾','1':'🅰','2':'🅱','3':'🅲','4':'🅳','5':'🅴','6':'🅵','7':'G','8':'🅷','9':'🅸',':':' : '},  # Approximate shadow
 }
 FONT_KEYS_ORDER = list(FONT_STYLES.keys())
 FONT_DISPLAY_NAMES = {
@@ -144,42 +160,84 @@ USERS_REPLIED_IN_SECRETARY = {}
 MUTED_USERS = {}    # {user_id: set of (sender_id, chat_id)}
 USER_FONT_CHOICES = {}
 CLOCK_STATUS = {}
-TIME_BIO_STATUS = {} # NEW: For TimeBio
 BOLD_MODE_STATUS = {}
-ITALIC_MODE_STATUS = {} # NEW: For Italic
-UNDERLINE_MODE_STATUS = {} # NEW: For Underline
-LINK_MODE_STATUS = {} # NEW: For Link
 AUTO_SEEN_STATUS = {}
 AUTO_REACTION_TARGETS = {}  # {user_id: {target_user_id: emoji}}
 AUTO_TRANSLATE_TARGET = {}  # {user_id: lang_code}
 ANTI_LOGIN_STATUS = {}
 COPY_MODE_STATUS = {}
 ORIGINAL_PROFILE_DATA = {}
-PV_LOCK_STATUS = {}
-# Statuses
 TYPING_MODE_STATUS = {}
 PLAYING_MODE_STATUS = {}
 RECORD_VOICE_STATUS = {}
 UPLOAD_PHOTO_STATUS = {}
 WATCH_GIF_STATUS = {}
-# NEW Statuses from bot.txt
-RECORD_VIDEO_STATUS = {}
-CHOOSE_STICKER_STATUS = {}
-UPLOAD_VIDEO_STATUS = {}
-UPLOAD_DOCUMENT_STATUS = {}
-UPLOAD_AUDIO_STATUS = {}
-SPEAKING_STATUS = {}
+PV_LOCK_STATUS = {}
 
+# --- Ported Feature Variables (from self.py) ---
+COMMENT_FIRST_STATUS = {} # For 'comment on/off'
+COMMENT_FIRST_TEXT = {}   # For 'commenttext ...'
+# Variables for ported edit modes
+ITALIC_MODE_STATUS = {}
+CODE_MODE_STATUS = {}
+UNDERLINE_MODE_STATUS = {}
+STRIKE_MODE_STATUS = {} # 'delete' in self.py
+REVERSE_MODE_STATUS = {}
+SPOILER_MODE_STATUS = {}
+HASHTAG_MODE_STATUS = {}
+# Note: 'part' and 'mention' modes from self.py are complex and UI-blocking, 
+# they are NOT ported to avoid issues.
 
 # --- Task Management ---
 EVENT_LOOP = asyncio.new_event_loop()
 ACTIVE_CLIENTS = {}
 ACTIVE_BOTS = {}
+ACTIVE_CALLS = {} # For PyTgCalls
 
 DEFAULT_SECRETARY_MESSAGE = "سلام! منشی هستم. پیامتون رو دیدم، بعدا جواب می‌دم."
+DEFAULT_COMMENT_TEXT = "first !" # Ported from self.py
 
-# Updated REGEX to include all new commands
-COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه|بیو ساعت روشن|بیو ساعت خاموش|ایتالیک روشن|ایتالیک خاموش|زیرخط روشن|زیرخط خاموش|لینک روشن|لینک خاموش|ضبط ویدیو روشن|ضبط ویدیو خاموش|استیکر روشن|استیکر خاموش|آپلود ویدیو روشن|آپلود ویدیو خاموش|آپلود فایل روشن|آپلود فایل خاموش|آپلود صدا روشن|آپلود صدا خاموش|صحبت روشن|صحبت خاموش|تنظیم اسم|تنظیم بیو|تنظیم پروفایل|مربع|قلب|قلب بزرگ|بکیرم|به کیرم|مکعب|لودینگ|Loading|ربات|bot|!YouTube .*|!check .*|ویس .*|پارت .*)$"
+# --- Combined Command Regex ---
+# Original regex
+BASE_COMMAND_REGEX = r"^(تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش|بولد روشن|بولد خاموش|سین روشن|سین خاموش|ساعت روشن|ساعت خاموش|فونت|فونت \d+|منشی روشن|منشی خاموش|منشی متن(?: |$)(.*)|انتی لوگین روشن|انتی لوگین خاموش|پیوی قفل|پیوی باز|ذخیره|تکرار \d+( \d+)?|حذف همه|حذف(?: \d+)?|دشمن روشن|دشمن خاموش|تنظیم دشمن|حذف دشمن|پاکسازی لیست دشمن|لیست دشمن|لیست متن دشمن|تنظیم متن دشمن .*|حذف متن دشمن(?: \d+)?|دوست روشن|دوست خاموش|تنظیم دوست|حذف دوست|پاکسازی لیست دوست|لیست دوست|لیست متن دوست|تنظیم متن دوست .*|حذف متن دوست(?: \d+)?|بلاک روشن|بلاک خاموش|سکوت روشن|سکوت خاموش|ریاکشن .*|ریاکشن خاموش|کپی روشن|کپی خاموش|تاس|تاس \d+|بولینگ|راهنما|ترجمه)$"
+
+# Ported commands to add
+PORTED_COMMAND_REGEX_PART = (
+    # TTS
+    r"|tts|بگو|tts [a-z]{2}|بگو [a-z]{2}"
+    # Google Play
+    r"|googleplay .*|گوگل پلی .*"
+    # Whisper
+    r"|whisper .*|نجوا .*"
+    # Screenshot
+    r"|screenshot|اسکرین شات"
+    # Voice Call
+    r"|voicecall|ویس کال|voicecallplay|ویس کال پلی|voicecallstop|پایان ویس کال"
+    # Download
+    r"|download|دانلود"
+    # Fun
+    r"|fun .*|فان .*"
+    # Comment
+    r"|comment on|comment off|کامنت روشن|کامنت خاموش"
+    r"|commenttext .*|متن کامنت .*"
+    # Tag
+    r"|tagall|تگ"
+    r"|tagadmins|تگ ادمین ها"
+    # XO Game
+    r"|xo|دوز"
+    # Ported Edit Modes
+    r"|italic on|italic off|ایتالیک روشن|ایتالیک خاموش"
+    r"|code on|code off|کد روشن|کد خاموش"
+    r"|underline on|underline off|زیرخط روشن|زیرخط خاموش"
+    r"|strike on|strike off|خط خورده روشن|خط خورده خاموش"
+    r"|reverse on|reverse off|برعکس روشن|برعکس خاموش"
+    r"|spoiler on|spoiler off|اسپویل روشن|اسپویل خاموش"
+    r"|hashtag on|hashtag off|هشتگ روشن|هشتگ خاموش"
+)
+
+# Combine regex
+# We remove the final '$' from the base regex, add the ported part, and then add '$'
+COMMAND_REGEX_COMBINED = BASE_COMMAND_REGEX[:-1] + PORTED_COMMAND_REGEX_PART + r")$"
 
 
 # --- Main Bot Functions ---
@@ -193,28 +251,21 @@ async def update_profile_clock(client: Client, user_id: int):
 
     while user_id in ACTIVE_BOTS:
         try:
-            # Check if clock is enabled AND copy mode is off
             if CLOCK_STATUS.get(user_id, True) and not COPY_MODE_STATUS.get(user_id, False):
                 current_font_style = USER_FONT_CHOICES.get(user_id, 'stylized')
                 me = await client.get_me()
                 current_name = me.first_name or ""
-                # Use robust regex to find base name
                 base_name = re.sub(r'\s+[' + re.escape(ALL_CLOCK_CHARS) + r':\s]+$', '', current_name).strip()
                 if not base_name: base_name = me.username or f"User_{user_id}"
-                
                 tehran_time = datetime.now(TEHRAN_TIMEZONE)
                 current_time_str = tehran_time.strftime("%H:%M")
                 stylized_time = stylize_time(current_time_str, current_font_style)
-                
                 new_name = f"{base_name} {stylized_time}"
-                
-                # Check if name needs updating
                 if new_name != current_name:
-                    await client.update_profile(first_name=new_name[:64]) # Apply 64 char limit
+                    await client.update_profile(first_name=new_name[:64])
 
-            # Calculate sleep duration
             now = datetime.now(TEHRAN_TIMEZONE)
-            sleep_duration = 60 - now.second + 0.1 # Sleep until the start of the next minute
+            sleep_duration = 60 - now.second + 0.1
             await asyncio.sleep(sleep_duration)
 
         except (UserDeactivated, AuthKeyUnregistered):
@@ -228,44 +279,6 @@ async def update_profile_clock(client: Client, user_id: int):
             await asyncio.sleep(60)
 
     logging.info(f"Clock task for user_id {user_id} has stopped.")
-
-# NEW: Task for TimeBio, based on File 2
-async def update_profile_bio(client: Client, user_id: int):
-    logging.info(f"Starting TimeBio loop for user_id {user_id}...")
-
-    while user_id in ACTIVE_BOTS:
-        try:
-            # Check if TimeBio is enabled AND copy mode is off
-            if TIME_BIO_STATUS.get(user_id, False) and not COPY_MODE_STATUS.get(user_id, False):
-                current_font_style = USER_FONT_CHOICES.get(user_id, 'stylized')
-                
-                tehran_time = datetime.now(TEHRAN_TIMEZONE)
-                current_time_str = tehran_time.strftime("%H:%M")
-                stylized_time = stylize_time(current_time_str, current_font_style)
-                
-                new_bio = f"Time Now : {stylized_time}"
-                
-                # We can't easily check the current bio, so we just update it.
-                # Telegram's servers will handle if it's the same.
-                # Apply 70 char limit for bio
-                await client.update_profile(bio=new_bio[:70])
-
-            # Calculate sleep duration (same as clock)
-            now = datetime.now(TEHRAN_TIMEZONE)
-            sleep_duration = 60 - now.second + 0.1
-            await asyncio.sleep(sleep_duration)
-
-        except (UserDeactivated, AuthKeyUnregistered):
-            logging.error(f"TimeBio Task: Session for user_id {user_id} is invalid. Stopping task.")
-            break
-        except FloodWait as e:
-            logging.warning(f"TimeBio Task: Flood wait of {e.value}s for user_id {user_id}.")
-            await asyncio.sleep(e.value + 5)
-        except Exception as e:
-            logging.error(f"An error occurred in TimeBio task for user_id {user_id}: {e}", exc_info=True)
-            await asyncio.sleep(60)
-
-    logging.info(f"TimeBio task for user_id {user_id} has stopped.")
 
 async def anti_login_task(client: Client, user_id: int):
     logging.info(f"Starting anti-login task for user_id {user_id}...")
@@ -305,69 +318,51 @@ async def anti_login_task(client: Client, user_id: int):
                     #if sessions_terminated > 0:
                     #    logging.info(f"Anti-Login: Terminated {sessions_terminated} session(s) for user {user_id}.")
 
-            await asyncio.sleep(60 * 5) # Check every 5 minutes
+            await asyncio.sleep(60 * 5)
 
         except (UserDeactivated, AuthKeyUnregistered):
             logging.error(f"Anti-Login Task: Session for user_id {user_id} is invalid. Stopping task.")
             break
         except AttributeError:
              logging.error(f"Anti-Login Task: 'pyrogram.raw.functions' module not available for user_id {user_id}. Feature disabled.")
-             ANTI_LOGIN_STATUS[user_id] = False # Disable it permanently for this session
-             await asyncio.sleep(3600) # Sleep for an hour
+             ANTI_LOGIN_STATUS[user_id] = False
+             await asyncio.sleep(3600)
         except Exception as e:
             logging.error(f"An error occurred in anti-login task for user_id {user_id}: {e}", exc_info=True)
             await asyncio.sleep(120)
 
     logging.info(f"Anti-login task for user_id {user_id} has stopped.")
 
-# UPDATED: status_action_task to include all new statuses
 async def status_action_task(client: Client, user_id: int):
     logging.info(f"Starting status action task for user_id {user_id}...")
     chat_ids_cache = []
     last_dialog_fetch_time = 0
-    FETCH_INTERVAL = 300 # 5 minutes
+    FETCH_INTERVAL = 300
 
     while user_id in ACTIVE_BOTS:
         try:
-            # Load all status flags
             typing_mode = TYPING_MODE_STATUS.get(user_id, False)
             playing_mode = PLAYING_MODE_STATUS.get(user_id, False)
             record_voice = RECORD_VOICE_STATUS.get(user_id, False)
             upload_photo = UPLOAD_PHOTO_STATUS.get(user_id, False)
             watch_gif = WATCH_GIF_STATUS.get(user_id, False)
-            # New statuses
-            record_video = RECORD_VIDEO_STATUS.get(user_id, False)
-            choose_sticker = CHOOSE_STICKER_STATUS.get(user_id, False)
-            upload_video = UPLOAD_VIDEO_STATUS.get(user_id, False)
-            upload_doc = UPLOAD_DOCUMENT_STATUS.get(user_id, False)
-            upload_audio = UPLOAD_AUDIO_STATUS.get(user_id, False)
-            speaking_mode = SPEAKING_STATUS.get(user_id, False)
 
-            active_statuses = {
-                ChatAction.TYPING: typing_mode,
-                ChatAction.PLAYING: playing_mode,
-                ChatAction.RECORD_AUDIO: record_voice,
-                ChatAction.UPLOAD_PHOTO: upload_photo,
-                ChatAction.CHOOSE_STICKER: watch_gif or choose_sticker, # Combine watch_gif and choose_sticker
-                ChatAction.RECORD_VIDEO: record_video,
-                ChatAction.UPLOAD_VIDEO: upload_video,
-                ChatAction.UPLOAD_DOCUMENT: upload_doc,
-                ChatAction.UPLOAD_AUDIO: upload_audio,
-                ChatAction.SPEAKING: speaking_mode,
-            }
-
-            # Find the first active action
-            action_to_send = None
-            for action, is_active in active_statuses.items():
-                if is_active:
-                    action_to_send = action
-                    break # Send only one action at a time
-
-            if not action_to_send:
-                await asyncio.sleep(5) # No action active, check again soon
+            if not (typing_mode or playing_mode or record_voice or upload_photo or watch_gif):
+                await asyncio.sleep(5)
                 continue
 
-            # Refresh chat list if needed
+            action_to_send = None
+            if typing_mode:
+                action_to_send = ChatAction.TYPING
+            elif playing_mode:
+                action_to_send = ChatAction.PLAYING
+            elif record_voice:
+                action_to_send = ChatAction.RECORD_AUDIO
+            elif upload_photo:
+                action_to_send = ChatAction.UPLOAD_PHOTO
+            elif watch_gif:
+                action_to_send = ChatAction.CHOOSE_STICKER
+
             now = asyncio.get_event_loop().time()
             if not chat_ids_cache or (now - last_dialog_fetch_time > FETCH_INTERVAL):
                 logging.info(f"Status Action: Refreshing dialog list for user_id {user_id}...")
@@ -381,9 +376,9 @@ async def status_action_task(client: Client, user_id: int):
                     logging.info(f"Status Action: Found {len(chat_ids_cache)} chats for user {user_id}.")
                 except Exception as e_dialog:
                      logging.error(f"Status Action: Error fetching dialogs for user {user_id}: {e_dialog}")
-                     chat_ids_cache = [] # Clear cache on error
-                     last_dialog_fetch_time = 0 # Force retry soon
-                     await asyncio.sleep(60) # Wait before retrying dialog fetch
+                     chat_ids_cache = []
+                     last_dialog_fetch_time = 0
+                     await asyncio.sleep(60)
                      continue
 
             if not chat_ids_cache:
@@ -391,7 +386,6 @@ async def status_action_task(client: Client, user_id: int):
                 await asyncio.sleep(30)
                 continue
 
-            # Send action to all cached chats
             for chat_id in chat_ids_cache:
                 try:
                     await client.send_chat_action(chat_id, action_to_send)
@@ -400,18 +394,12 @@ async def status_action_task(client: Client, user_id: int):
                     await asyncio.sleep(e_action.value + 1)
                 except PeerIdInvalid:
                      logging.warning(f"Status Action: PeerIdInvalid for chat {chat_id}. Removing from cache.")
-                     try: chat_ids_cache.remove(chat_id) # Remove invalid chat
-                     except ValueError: pass # Ignore if already removed
-                except UserNotParticipant:
-                     logging.warning(f"Status Action: Not participant in chat {chat_id}. Removing from cache.")
                      try: chat_ids_cache.remove(chat_id)
                      except ValueError: pass
                 except Exception:
-                    # Ignore other minor errors (like chat deleted, user kicked, etc.)
                     pass
 
-            # Standard sleep interval for sending actions
-            await asyncio.sleep(4.5) 
+            await asyncio.sleep(4.5)
 
         except (UserDeactivated, AuthKeyUnregistered):
             logging.error(f"Status Action Task: Session for user_id {user_id} is invalid. Stopping task.")
@@ -432,7 +420,7 @@ async def translate_text(text: str, target_lang: str = "fa") -> str:
             async with session.get(url, headers=headers) as response:
                 if response.status == 200:
                     try:
-                        data = await response.json(content_type=None) # Allow non-json content type
+                        data = await response.json(content_type=None)
                         if isinstance(data, list) and data and isinstance(data[0], list):
                             translated_text = "".join(segment[0] for segment in data[0] if isinstance(segment, list) and segment and isinstance(segment[0], str))
                             return translated_text.strip() if translated_text else text
@@ -452,20 +440,18 @@ async def translate_text(text: str, target_lang: str = "fa") -> str:
         logging.error(f"Translation request failed: {e}", exc_info=True)
     return text
 
-# UPDATED: outgoing_message_modifier to include new text formats
 async def outgoing_message_modifier(client, message):
     user_id = client.me.id
     if not message.text or message.text.startswith("/") or message.entities:
         return
 
     # چک کردن اگر دستور هست
-    if re.match(COMMAND_REGEX, message.text.strip(), re.IGNORECASE):
+    if re.match(COMMAND_REGEX_COMBINED, message.text.strip(), re.IGNORECASE):
         return
 
     original_text = message.text
     modified_text = original_text
     needs_edit = False
-    parse_mode = None # Default is None (Markdown)
 
     target_lang = AUTO_TRANSLATE_TARGET.get(user_id)
     if target_lang:
@@ -473,54 +459,50 @@ async def outgoing_message_modifier(client, message):
         if translated != modified_text:
              modified_text = translated
              needs_edit = True
-    
-    # Check formatting modes
-    # Note: Stacking multiple markdowns (like bold and italic) can be tricky.
-    # We'll apply them in a specific order.
-    # HTML is more robust for stacking, but let's try Markdown first.
-    # Let's switch to HTML for robustness, as File 2 intended.
-    
-    is_bold = BOLD_MODE_STATUS.get(user_id, False)
-    is_italic = ITALIC_MODE_STATUS.get(user_id, False)
-    is_underline = UNDERLINE_MODE_STATUS.get(user_id, False)
-    is_link = LINK_MODE_STATUS.get(user_id, False)
+             original_text_before_style = translated
+        else:
+             original_text_before_style = original_text
+    else:
+        original_text_before_style = original_text
 
-    # Use HTML if any format is active
-    if is_bold or is_italic or is_underline or is_link:
-        parse_mode = "html" # Pyrogram uses 'html'
-        
-        # Apply link first (outermost)
-        if is_link:
-            # Escape HTML special chars in text before wrapping
-            escaped_text = modified_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            modified_text = f'<a href="tg://openmessage?user_id={user_id}">{escaped_text}</a>'
-        
-        # Apply inner formats
-        if is_bold:
-            modified_text = f"<b>{modified_text}</b>"
-        if is_italic:
-            modified_text = f"<i>{modified_text}</i>"
-        if is_underline:
-            modified_text = f"<u>{modified_text}</u>"
-        
-        if modified_text != original_text: # Check if formatting actually changed the text
-            needs_edit = True
-            
-    # Fallback to Markdown bold if only bold is active and others aren't (File 1's original logic)
-    elif BOLD_MODE_STATUS.get(user_id, False) and not (is_italic or is_underline or is_link):
+    # --- Ported Edit Modes ---
+    # Apply modes in a specific order, e.g., format first, then reverse
+    if HASHTAG_MODE_STATUS.get(user_id, False):
+        modified_text = "#" + modified_text.replace(" ", "_")
+        needs_edit = True
+
+    if BOLD_MODE_STATUS.get(user_id, False):
         modified_text = f"**{modified_text}**"
         needs_edit = True
-        parse_mode = None # Use default Markdown
-        
+    elif ITALIC_MODE_STATUS.get(user_id, False):
+        modified_text = f"//{modified_text}//"
+        needs_edit = True
+    elif CODE_MODE_STATUS.get(user_id, False):
+        modified_text = f"`{modified_text}`"
+        needs_edit = True
+    elif UNDERLINE_MODE_STATUS.get(user_id, False):
+        modified_text = f"__{modified_text}__"
+        needs_edit = True
+    elif STRIKE_MODE_STATUS.get(user_id, False):
+        modified_text = f"~~{modified_text}~~"
+        needs_edit = True
+    elif SPOILER_MODE_STATUS.get(user_id, False):
+        modified_text = f"||{modified_text}||"
+        needs_edit = True
+
+    if REVERSE_MODE_STATUS.get(user_id, False):
+        modified_text = modified_text[::-1]
+        needs_edit = True
+
+    # --- End Ported Edit Modes ---
+    
+    # Check if anything actually changed
+    if modified_text == original_text:
+        needs_edit = False
 
     if needs_edit:
         try:
-            # Determine parse_mode for edit
-            if parse_mode == "html":
-                 await message.edit_text(modified_text, parse_mode=enums.ParseMode.HTML, disable_web_page_preview=True)
-            else:
-                 # Default behavior (Markdown)
-                 await message.edit_text(modified_text, disable_web_page_preview=True)
+            await message.edit_text(modified_text, disable_web_page_preview=True)
         except FloodWait as e:
              logging.warning(f"Outgoing Modifier: Flood wait editing msg {message.id} for user {user_id}: {e.value}s")
              await asyncio.sleep(e.value + 1)
@@ -682,78 +664,458 @@ async def auto_seen_handler(client, message):
              if "Could not find the input peer" not in str(e) and "PEER_ID_INVALID" not in str(e).upper():
                  logging.warning(f"AutoSeen: Could not mark chat {getattr(message.chat, 'id', 'N/A')} as read: {e}")
 
-# NEW: Handler for saving timed media (from bot.txt)
-async def save_timed_media_handler(client, message):
-    user_id = client.me.id
-    try:
-        is_timed = False
-        media_type = None
-        file_id = None
-        extension = None
+# --- Ported Handler from self.py (Comment on Forward) ---
+async def comment_on_forward_handler(client, message):
+    owner_user_id = client.me.id
+    if (COMMENT_FIRST_STATUS.get(owner_user_id, False) and
+            message.forward_date and
+            message.from_user and not message.from_user.is_self): # Check if it's forwarded and not by self
         
-        if message.photo and message.photo.ttl_seconds:
-            is_timed = True
-            media_type = "photo"
-            file_id = message.photo.file_id
-            extension = "jpg"
-        elif message.video and message.video.ttl_seconds:
-            is_timed = True
-            media_type = "video"
-            file_id = message.video.file_id
-            extension = "mp4"
+        reply_text = COMMENT_FIRST_TEXT.get(owner_user_id, DEFAULT_COMMENT_TEXT)
+        try:
+            await message.reply_text(reply_text, quote=True)
+        except FloodWait as e:
+             logging.warning(f"Comment Handler: Flood wait replying for user {owner_user_id}: {e.value}s")
+             await asyncio.sleep(e.value + 1)
+        except Exception as e:
+            logging.warning(f"Comment Handler: Could not auto-reply to fwd message {message.id} for owner {owner_user_id}: {e}")
 
-        if is_timed:
-            logging.info(f"Timed {media_type} detected from user {message.from_user.id} for owner {user_id}.")
-            rand = random.randint(1000, 9999999)
-            local_path = f"downloads/{media_type}-{rand}.{extension}"
-            
-            # Ensure downloads directory exists
-            os.makedirs("downloads", exist_ok=True)
-            
-            await client.download_media(message=file_id, file_name=local_path)
-            
-            caption = (
-                f"🔥 **مدیای زمان‌دار ذخیره شد** 🔥\n"
-                f"**از:** {message.from_user.first_name} (`{message.from_user.id}`)\n"
-                f"**نوع:** {media_type}\n"
-                f"**زمان:** {datetime.now(TEHRAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S')}"
-            )
+# --- New Controller Functions (Ported) ---
 
-            if media_type == "photo":
-                await client.send_photo("me", local_path, caption=caption)
-            elif media_type == "video":
-                await client.send_video("me", local_path, caption=caption)
-            
-            # Clean up the downloaded file
-            if os.path.exists(local_path):
-                os.remove(local_path)
-
-    except FloodWait as e:
-        logging.warning(f"Save Timed Media: Flood wait for user {user_id}: {e.value}s")
-        await asyncio.sleep(e.value + 1)
-    except Exception as e:
-        logging.error(f"Save Timed Media: Error processing timed media for user {user_id}: {e}", exc_info=True)
-        # Clean up partial file if error occurred
-        if 'local_path' in locals() and os.path.exists(local_path):
-            os.remove(local_path)
-
-# NEW: Handler for login codes (from bot.txt)
-async def code_expire_handler(client, message):
+async def tts_controller(client, message):
     user_id = client.me.id
+    if not message.reply_to_message or not message.reply_to_message.text:
+        await message.edit_text("⚠️ برای تبدیل به ویس، روی یک پیام متنی ریپلای کنید.")
+        return
+
+    text = message.reply_to_message.text
+    lang = 'fa' # Default to Persian
+    match = re.match(r"^(tts|بگو) ([a-z]{2})$", message.text.lower())
+    if match:
+        lang = match.group(2)
+
+    await message.edit_text("⏳ در حال تبدیل متن به ویس...")
+    audio_file = f"tts_audio_{user_id}.mp3"
     try:
-        logging.info(f"Login code detected for user {user_id}. Forwarding to 'me'...")
-        await message.forward("me")
-        # Optional: Delete the original message from 777000 chat
-        # await message.delete() # This might be risky if you want to see it there
+        tts = gTTS(text=text, lang=lang, slow=False)
+        tts.save(audio_file)
+        
+        await client.send_voice(
+            message.chat.id,
+            voice=audio_file,
+            reply_to_message_id=message.reply_to_message.id
+        )
+        await message.delete() # Delete the command message
+    except Exception as e:
+        logging.error(f"TTS Controller: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در تبدیل متن به ویس رخ داد: {e}")
+    finally:
+        if os.path.exists(audio_file):
+            os.remove(audio_file)
+
+async def google_play_controller(client, message):
+    user_id = client.me.id
+    # Use re.match to get the query part
+    match = re.match(r"^(googleplay|گوگل پلی) (.*)$", message.text, re.DOTALL)
+    if not match:
+         await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `گوگل پلی [نام]`")
+         return
+         
+    input_str = match.group(2).strip()
+    if not input_str:
+        await message.edit_text("⚠️ لطفاً نام برنامه/بازی را وارد کنید.")
+        return
+
+    await message.edit_text(f"🔎 در حال جستجو برای '{input_str}' در گوگل پلی...")
+    try:
+        results = search(input_str, lang='en', n_hits=3)
+        if not results:
+            await message.edit_text(f"ℹ️ برنامه‌ای با نام '{input_str}' یافت نشد.")
+            return
+
+        await message.delete() # Delete "searching..." message
+        for result in results:
+            caption = (
+                f"**{result.get('title', 'N/A')}**\n\n"
+                f"**امتیاز:** {result.get('score', 'N/A')} ⭐\n"
+                f"**توسعه‌دهنده:** {result.get('developer', 'N/A')}\n"
+                f"**تعداد نصب:** {result.get('installs', 'N/A')}\n"
+                f"**قیمت:** {result.get('price', 'N/A')} ({result.get('currency', 'N/A')})\n\n"
+                f"_{result.get('description', '')[:500]}..."
+            )
+            
+            # Try sending with icon, fallback to text
+            try:
+                await client.send_photo(
+                    message.chat.id,
+                    photo=result.get('icon', 'https://placehold.co/128x128/eeeeee/999999?text=Icon'),
+                    caption=caption[:1024] # Caption limit
+                )
+            except Exception as e_photo:
+                logging.warning(f"Google Play: Could not send photo for '{result.get('title')}', sending text. Error: {e_photo}")
+                await client.send_message(message.chat.id, caption[:4096])
+            
+            await asyncio.sleep(0.5) # Avoid flood
+    except Exception as e:
+        logging.error(f"Google Play Controller: Error for user {user_id}: {e}", exc_info=True)
+        # Check if message was deleted before trying to edit
+        try:
+            await message.edit_text(f"⚠️ خطایی در جستجوی گوگل پلی رخ داد: {e}")
+        except MessageIdInvalid:
+            pass # Message was already deleted
+            
+async def whisper_controller(client, message):
+    user_id = client.me.id
+    match = re.match(r"^(whisper|نجوا) (.*)$", message.text, re.DOTALL)
+    if not match:
+         await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `نجوا [متن]`")
+         return
+         
+    input_str = match.group(2).strip()
+    target_user_id = None
+    
+    if message.reply_to_message and message.reply_to_message.from_user:
+        target_user_id = message.reply_to_message.from_user.id
+    else:
+        # Try to get username from text
+        parts = input_str.split(' ', 1)
+        if len(parts) > 1 and (parts[0].startswith('@') or parts[0].isdigit()):
+            try:
+                target_name = parts[0]
+                # Try resolving as int first, then as username
+                try:
+                    target_id_int = int(target_name)
+                    target = await client.get_users(target_id_int)
+                except ValueError:
+                    target = await client.get_users(target_name)
+                    
+                target_user_id = target.id
+                input_str = parts[1] # The rest is the message
+            except Exception:
+                 await message.edit_text("⚠️ برای نجوا یا روی پیام کاربر ریپلای کنید، یا فرمت `نجوا @username متن` یا `نجوا 12345 متن` را استفاده کنید.")
+                 return
+        else:
+            await message.edit_text("⚠️ برای نجوا باید روی پیام کاربر ریپلای کنید یا آیدی/یوزرنیم او را در ابتدا ذکر کنید.")
+            return
+
+    if not input_str:
+        await message.edit_text("⚠️ متن نجوا خالی است.")
+        return
+
+    await message.edit_text("⏳ در حال ساخت نجوا...")
+    try:
+        # Use target_user_id (as number) for whisperbot
+        results = await client.get_inline_bot_results("whisperbot", f"{input_str} {target_user_id}")
+        if not results.results:
+            await message.edit_text("⚠️ ربات @whisperbot پاسخ نداد.")
+            return
+
+        await client.send_inline_bot_result(
+            message.chat.id,
+            results.query_id,
+            results.results[0].id
+        )
+        await message.delete() # Delete the command
+    except Exception as e:
+        logging.error(f"Whisper Controller: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در ارسال نجوا رخ داد: {e}")
+
+async def screenshot_controller(client, message):
+    user_id = client.me.id
+    target_message_id = message.id
+    if message.reply_to_message:
+        target_message_id = message.reply_to_message.id
+
+    await message.edit_text("📸 در حال ارسال اعلان اسکرین شات...")
+    try:
+        await client.send_screenshot_notification(
+            message.chat.id,
+            reply_to_message_id=target_message_id
+        )
+        await message.delete()
+    except Exception as e:
+        logging.error(f"Screenshot Controller: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در ارسال اعلان اسکرین شات رخ داد: {e}")
+
+async def voice_call_create_controller(client, message):
+    user_id = client.me.id
+    chat_id = message.chat.id
+    if message.chat.type == ChatType.PRIVATE:
+        await message.edit_text("⚠️ ویس کال فقط در گروه‌ها قابل استفاده است.")
+        return
+    
+    await message.edit_text("⏳ در حال ایجاد ویس کال...")
+    try:
+        await client.create_group_call(chat_id)
+        await message.edit_text("✅ ویس کال با موفقیت ایجاد شد.")
+    except Exception as e:
+        logging.error(f"Voice Call Create: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در ایجاد ویس کال رخ داد: {e}")
+
+async def voice_call_play_controller(client, message):
+    user_id = client.me.id
+    call_app = ACTIVE_CALLS.get(user_id)
+    if not call_app:
+        await message.edit_text("⚠️ سرویس ویس کال (PyTgCalls) برای این اکانت فعال نیست. (ربات را ریستارت کنید)")
+        return
+    
+    if not message.reply_to_message or (not message.reply_to_message.audio and not message.reply_to_message.video):
+        await message.edit_text("⚠️ برای پخش، روی یک فایل صوتی یا تصویری ریپلای کنید.")
+        return
+    
+    await message.edit_text("⏳ در حال دانلود و آماده‌سازی فایل برای پخش...")
+    file_path = f"call_media_{user_id}.raw" # Use a consistent name
+    download_path = None
+    try:
+        download_path = await message.reply_to_message.download()
+        
+        stream = MediaStream(
+            download_path,
+            video_flags=MediaStream.Flags.IGNORE if message.reply_to_message.audio else MediaStream.Flags.DEFAULT,
+        )
+        
+        await call_app.play(
+            message.chat.id,
+            stream
+        )
+        await message.edit_text("▶️ پخش فایل در ویس کال آغاز شد.")
+        # Note: We should not delete download_path here as pytgcalls might need it
+        # We need a stop command to handle cleanup
+    except Exception as e:
+        logging.error(f"Voice Call Play: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در پخش فایل رخ داد: {e}")
+        if download_path and os.path.exists(download_path): # Clean up on failure
+            os.remove(download_path)
+
+async def voice_call_stop_controller(client, message):
+    user_id = client.me.id
+    call_app = ACTIVE_CALLS.get(user_id)
+    if not call_app:
+        await message.edit_text("⚠️ سرویس ویس کال (PyTgCalls) برای این اکانت فعال نیست.")
+        return
+
+    await message.edit_text("⏳ در حال توقف پخش...")
+    try:
+        await call_app.stop(message.chat.id)
+        await message.edit_text("⏹️ پخش در ویس کال متوقف شد.")
+        
+        # Cleanup downloaded file (simple approach)
+        # This assumes only one file is played at a time per user
+        # A more robust solution would track the file path per chat
+        for f in os.listdir('.'):
+             if f.startswith(f"call_media_{user_id}") or f == "input.raw" or f == "output.raw":
+                 try:
+                     os.remove(f)
+                 except Exception as e_clean:
+                     logging.warning(f"Voice Call Stop: Could not clean up file {f}: {e_clean}")
+
+    except Exception as e:
+        logging.error(f"Voice Call Stop: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در توقف پخش رخ داد: {e}")
+
+async def download_controller(client, message):
+    user_id = client.me.id
+    if not message.reply_to_message:
+        await message.edit_text("⚠️ برای دانلود، روی یک مدیا ریپلای کنید.")
+        return
+    
+    await message.edit_text("⏳ در حال دانلود مدیا...")
+    download_path = None
+    try:
+        download_path = await message.reply_to_message.download(in_memory=False) # Download to disk
+        await client.send_document("me", download_path)
+        await message.edit_text("✅ فایل با موفقیت در Saved Messages شما آپلود شد.")
+    except Exception as e:
+        logging.error(f"Download Controller: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در دانلود یا ارسال فایل رخ داد: {e}")
+    finally:
+        if download_path and os.path.exists(download_path):
+            os.remove(download_path) # Cleanup
+
+async def fun_controller(client, message):
+    user_id = client.me.id
+    match = re.match(r"^(fun|فان) (.*)$", message.text, re.DOTALL)
+    if not match:
+        await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `فان love`")
+        return
+    input_str = match.group(2).strip().lower()
+
+    if input_str == 'love':
+        emoticons = ['🤍','🖤','💜','💙','💚','💛','🧡','❤️','🤎','💖']
+    elif input_str == 'oclock':
+        emoticons = ['🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛','🕜','🕝','🕞','🕟','🕠','🕡','🕢','🕣','🕤','🕥','🕦','🕧']
+    elif input_str == 'star':
+        emoticons = ['💥','⚡️','✨','🌟','⭐️','💫']
+    elif input_str == 'snow':
+        emoticons = ['❄️','☃️','⛄️']
+    else:
+        await message.edit_text("⚠️ دسته فان معتبر نیست. (love, oclock, star, snow)")
+        return
+        
+    random.shuffle(emoticons)
+    try:
+        for emoji in emoticons:
+            await message.edit_text(emoji)
+            await asyncio.sleep(0.5)
     except FloodWait as e:
-        logging.warning(f"Code Expire Handler: Flood wait forwarding code for user {user_id}: {e.value}s")
         await asyncio.sleep(e.value + 1)
     except Exception as e:
-        logging.error(f"Code Expire Handler: Error forwarding login code for user {user_id}: {e}", exc_info=True)
+        logging.warning(f"Fun Controller: Error for user {user_id}: {e}")
+        
+async def comment_toggle_controller(client, message):
+    user_id = client.me.id
+    command = message.text.strip().lower()
+    
+    if command in ["comment on", "کامنت روشن"]:
+        if not COMMENT_FIRST_STATUS.get(user_id, False):
+            COMMENT_FIRST_STATUS[user_id] = True
+            await message.edit_text("✅ کامنت اول برای فورواردها فعال شد.")
+        else:
+            await message.edit_text("ℹ️ کامنت اول از قبل فعال بود.")
+    elif command in ["comment off", "کامنت خاموش"]:
+        if COMMENT_FIRST_STATUS.get(user_id, False):
+            COMMENT_FIRST_STATUS[user_id] = False
+            await message.edit_text("❌ کامنت اول غیرفعال شد.")
+        else:
+            await message.edit_text("ℹ️ کامنت اول از قبل غیرفعال بود.")
 
+async def comment_text_controller(client, message):
+    user_id = client.me.id
+    match = re.match(r"^(commenttext|متن کامنت) (.*)$", message.text, re.DOTALL | re.IGNORECASE)
+    if not match:
+         await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `متن کامنت [متن]`")
+         return
+         
+    text = match.group(2).strip()
+    if text:
+        COMMENT_FIRST_TEXT[user_id] = text
+        await message.edit_text("✅ متن کامنت اول با موفقیت تنظیم شد.")
+    else:
+        COMMENT_FIRST_TEXT[user_id] = DEFAULT_COMMENT_TEXT
+        await message.edit_text("✅ متن کامنت اول به حالت پیش‌فرض بازگشت.")
 
-# --- Command Controllers ---
+async def tag_all_controller(client, message):
+    user_id = client.me.id
+    if message.chat.type == ChatType.PRIVATE:
+        await message.edit_text("⚠️ این دستور فقط در گروه‌ها قابل استفاده است.")
+        return
 
+    await message.edit_text("⏳ در حال جمع‌آوری لیست کاربران (تا ۱۰۰ نفر)...")
+    mentions = "👥 تگ همگانی:\n"
+    count = 0
+    try:
+        async for member in client.get_chat_members(message.chat.id, limit=100):
+            if member.user and not member.user.is_bot:
+                # Use mention_text for a cleaner mention
+                mentions += f"• {member.user.mention}\n"
+                count += 1
+        
+        if count > 0:
+            await message.edit_text(mentions)
+        else:
+            await message.edit_text("ℹ️ کاربری برای تگ کردن یافت نشد.")
+    except Exception as e:
+        logging.error(f"Tag All Controller: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در تگ کردن رخ داد: {e}")
+
+async def tag_admins_controller(client, message):
+    user_id = client.me.id
+    if message.chat.type == ChatType.PRIVATE:
+        await message.edit_text("⚠️ این دستور فقط در گروه‌ها قابل استفاده است.")
+        return
+        
+    await message.edit_text("⏳ در حال جمع‌آوری لیست ادمین‌ها...")
+    mentions = "👑 تگ ادمین‌ها:\n"
+    count = 0
+    try:
+        async for member in client.get_chat_members(message.chat.id, filter=filters.chat_admins):
+            if member.user and not member.user.is_bot:
+                mentions += f"• {member.user.mention}\n"
+                count += 1
+        
+        if count > 0:
+            await message.edit_text(mentions)
+        else:
+            await message.edit_text("ℹ️ ادمینی برای تگ کردن یافت نشد.")
+    except Exception as e:
+        logging.error(f"Tag Admins Controller: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در تگ کردن ادمین‌ها رخ داد: {e}")
+
+async def xo_controller(client, message):
+    user_id = client.me.id
+    await message.edit_text("⏳ در حال باز کردن بازی دوز...")
+    try:
+        results = await client.get_inline_bot_results("xoBot", "")
+        if not results.results:
+            await message.edit_text("⚠️ ربات @xoBot پاسخ نداد. (مطمئن شوید در چت شما بلاک نیست)")
+            return
+
+        await client.send_inline_bot_result(
+            message.chat.id,
+            results.query_id,
+            results.results[0].id
+        )
+        await message.delete() # Delete the command
+    except Exception as e:
+        logging.error(f"XO Controller: Error for user {user_id}: {e}", exc_info=True)
+        await message.edit_text(f"⚠️ خطایی در اجرای بازی دوز رخ داد: {e}")
+
+async def ported_edit_mode_controller(client, message):
+    user_id = client.me.id
+    command = message.text.strip().lower()
+    
+    mode_map = {
+        "italic": (ITALIC_MODE_STATUS, "ایتالیک"),
+        "code": (CODE_MODE_STATUS, "کد"),
+        "underline": (UNDERLINE_MODE_STATUS, "زیرخط"),
+        "strike": (STRIKE_MODE_STATUS, "خط خورده"),
+        "reverse": (REVERSE_MODE_STATUS, "برعکس"),
+        "spoiler": (SPOILER_MODE_STATUS, "اسپویل"),
+        "hashtag": (HASHTAG_MODE_STATUS, "هشتگ")
+    }
+    
+    target_mode = None
+    new_status = None
+    
+    for key, (status_dict, name_fa) in mode_map.items():
+        if command == f"{key} on" or command == f"{name_fa} روشن":
+            target_mode = key
+            new_status = True
+            break
+        if command == f"{key} off" or command == f"{name_fa} خاموش":
+            target_mode = key
+            new_status = False
+            break
+            
+    if target_mode is None or new_status is None:
+        await message.edit_text("⚠️ دستور حالت ادیت نامعتبر است.")
+        return
+
+    status_dict, name_fa = mode_map[target_mode]
+    
+    try:
+        if new_status: # Turning ON
+            if not status_dict.get(user_id, False):
+                status_dict[user_id] = True
+                await message.edit_text(f"✅ حالت ادیت «{name_fa}» فعال شد.")
+            else:
+                await message.edit_text(f"ℹ️ حالت ادیت «{name_fa}» از قبل فعال بود.")
+        else: # Turning OFF
+            if status_dict.get(user_id, False):
+                status_dict[user_id] = False
+                await message.edit_text(f"❌ حالت ادیت «{name_fa}» غیرفعال شد.")
+            else:
+                await message.edit_text(f"ℹ️ حالت ادیت «{name_fa}» از قبل غیرفعال بود.")
+                
+    except FloodWait as e:
+        await asyncio.sleep(e.value + 1)
+    except MessageNotModified:
+        pass
+    except Exception as e:
+        logging.error(f"Ported Edit Mode: Error processing '{command}' for user {user_id}: {e}", exc_info=True)
+        await message.edit_text("⚠️ خطایی در تنظیم حالت ادیت رخ داد.")
+
+# --- End of Ported Controller Functions ---
 async def translate_controller(client, message):
     user_id = client.me.id
     # Add checks for message attributes existence
@@ -780,7 +1142,6 @@ async def translate_controller(client, message):
         except Exception as e_edit_warn:
              logging.warning(f"Translate: Failed to edit warning message: {e_edit_warn}")
 
-# UPDATED: toggle_controller to include all new features
 async def toggle_controller(client, message):
     user_id = client.me.id
     command = message.text.strip()
@@ -788,7 +1149,6 @@ async def toggle_controller(client, message):
         if command.endswith("روشن"):
             feature = command[:-5].strip()
             status_changed = False
-            # Standard features
             if feature == "بولد":
                 if not BOLD_MODE_STATUS.get(user_id, False): BOLD_MODE_STATUS[user_id] = True; status_changed = True
             elif feature == "سین":
@@ -811,27 +1171,6 @@ async def toggle_controller(client, message):
                 if not ENEMY_ACTIVE.get(user_id, False): ENEMY_ACTIVE[user_id] = True; status_changed = True
             elif feature == "دوست":
                 if not FRIEND_ACTIVE.get(user_id, False): FRIEND_ACTIVE[user_id] = True; status_changed = True
-            # New features
-            elif feature == "بیو ساعت":
-                if not TIME_BIO_STATUS.get(user_id, False): TIME_BIO_STATUS[user_id] = True; status_changed = True
-            elif feature == "ایتالیک":
-                if not ITALIC_MODE_STATUS.get(user_id, False): ITALIC_MODE_STATUS[user_id] = True; status_changed = True
-            elif feature == "زیرخط":
-                if not UNDERLINE_MODE_STATUS.get(user_id, False): UNDERLINE_MODE_STATUS[user_id] = True; status_changed = True
-            elif feature == "لینک":
-                if not LINK_MODE_STATUS.get(user_id, False): LINK_MODE_STATUS[user_id] = True; status_changed = True
-            elif feature == "ضبط ویدیو":
-                if not RECORD_VIDEO_STATUS.get(user_id, False): RECORD_VIDEO_STATUS[user_id] = True; status_changed = True
-            elif feature == "استیکر":
-                if not CHOOSE_STICKER_STATUS.get(user_id, False): CHOOSE_STICKER_STATUS[user_id] = True; status_changed = True
-            elif feature == "آپلود ویدیو":
-                if not UPLOAD_VIDEO_STATUS.get(user_id, False): UPLOAD_VIDEO_STATUS[user_id] = True; status_changed = True
-            elif feature == "آپلود فایل":
-                if not UPLOAD_DOCUMENT_STATUS.get(user_id, False): UPLOAD_DOCUMENT_STATUS[user_id] = True; status_changed = True
-            elif feature == "آپلود صدا":
-                if not UPLOAD_AUDIO_STATUS.get(user_id, False): UPLOAD_AUDIO_STATUS[user_id] = True; status_changed = True
-            elif feature == "صحبت":
-                if not SPEAKING_STATUS.get(user_id, False): SPEAKING_STATUS[user_id] = True; status_changed = True
 
             if status_changed:
                 await message.edit_text(f"✅ {feature} فعال شد.")
@@ -841,7 +1180,6 @@ async def toggle_controller(client, message):
         elif command.endswith("خاموش"):
             feature = command[:-6].strip()
             status_changed = False
-            # Standard features
             if feature == "بولد":
                  if BOLD_MODE_STATUS.get(user_id, False): BOLD_MODE_STATUS[user_id] = False; status_changed = True
             elif feature == "سین":
@@ -867,27 +1205,6 @@ async def toggle_controller(client, message):
                  if ENEMY_ACTIVE.get(user_id, False): ENEMY_ACTIVE[user_id] = False; status_changed = True
             elif feature == "دوست":
                  if FRIEND_ACTIVE.get(user_id, False): FRIEND_ACTIVE[user_id] = False; status_changed = True
-            # New features
-            elif feature == "بیو ساعت":
-                if TIME_BIO_STATUS.get(user_id, False): TIME_BIO_STATUS[user_id] = False; status_changed = True
-            elif feature == "ایتالیک":
-                if ITALIC_MODE_STATUS.get(user_id, False): ITALIC_MODE_STATUS[user_id] = False; status_changed = True
-            elif feature == "زیرخط":
-                if UNDERLINE_MODE_STATUS.get(user_id, False): UNDERLINE_MODE_STATUS[user_id] = False; status_changed = True
-            elif feature == "لینک":
-                if LINK_MODE_STATUS.get(user_id, False): LINK_MODE_STATUS[user_id] = False; status_changed = True
-            elif feature == "ضبط ویدیو":
-                if RECORD_VIDEO_STATUS.get(user_id, False): RECORD_VIDEO_STATUS[user_id] = False; status_changed = True
-            elif feature == "استیکر":
-                if CHOOSE_STICKER_STATUS.get(user_id, False): CHOOSE_STICKER_STATUS[user_id] = False; status_changed = True
-            elif feature == "آپلود ویدیو":
-                if UPLOAD_VIDEO_STATUS.get(user_id, False): UPLOAD_VIDEO_STATUS[user_id] = False; status_changed = True
-            elif feature == "آپلود فایل":
-                if UPLOAD_DOCUMENT_STATUS.get(user_id, False): UPLOAD_DOCUMENT_STATUS[user_id] = False; status_changed = True
-            elif feature == "آپلود صدا":
-                if UPLOAD_AUDIO_STATUS.get(user_id, False): UPLOAD_AUDIO_STATUS[user_id] = False; status_changed = True
-            elif feature == "صحبت":
-                if SPEAKING_STATUS.get(user_id, False): SPEAKING_STATUS[user_id] = False; status_changed = True
 
             if status_changed:
                 await message.edit_text(f"❌ {feature} غیرفعال شد.")
@@ -1076,12 +1393,7 @@ async def copy_profile_controller(client, message):
             if original_photo_data:
                 # Assuming original_photo_data is bytes downloaded earlier
                 try:
-                    # Pyrogram's set_profile_photo expects a file path or BytesIO
-                    # Let's write bytes to a temporary BytesIO object
-                    from io import BytesIO
-                    photo_bytes_io = BytesIO(original_photo_data)
-                    photo_bytes_io.name = "original_profile.jpg" # Give it a name
-                    await client.set_profile_photo(photo=photo_bytes_io)
+                    await client.set_profile_photo(photo=original_photo_data)
                 except Exception as e_set_photo:
                      logging.warning(f"Copy Profile (Revert): Could not set original photo for user {user_id}: {e_set_photo}")
                      # Try deleting again if setting failed? Might be redundant.
@@ -1110,11 +1422,7 @@ async def copy_profile_controller(client, message):
             # Download current photo if exists
             if me.photo:
                 try:
-                    # Download to memory as bytes
-                    from io import BytesIO
-                    me_photo_stream = await client.download_media(me.photo.big_file_id, in_memory=True)
-                    if isinstance(me_photo_stream, BytesIO):
-                         me_photo_bytes = me_photo_stream.getvalue()
+                    me_photo_bytes = await client.download_media(me.photo.big_file_id, in_memory=True) # download to memory
                 except Exception as e_download_me:
                      logging.warning(f"Copy Profile (Backup): Could not download own photo for user {user_id}: {e_download_me}")
 
@@ -1127,7 +1435,7 @@ async def copy_profile_controller(client, message):
             }
 
             # --- Get Target Profile Info ---
-            target_photo_bytes_io = None # We need BytesIO for set_profile_photo
+            target_photo_bytes = None
             target_bio = ""
             try:
                  target_full = await client.invoke(functions.users.GetFullUser(id=await client.resolve_peer(target_id)))
@@ -1137,12 +1445,7 @@ async def copy_profile_controller(client, message):
 
             if target_user.photo:
                 try:
-                    # Download to memory as BytesIO
-                    from io import BytesIO
-                    target_photo_stream = await client.download_media(target_user.photo.big_file_id, in_memory=True)
-                    if isinstance(target_photo_stream, BytesIO):
-                        target_photo_bytes_io = target_photo_stream
-                        target_photo_bytes_io.name = "target_profile.jpg" # Give it a name
+                    target_photo_bytes = await client.download_media(target_user.photo.big_file_id, in_memory=True) # download to memory
                 except Exception as e_download_target:
                     logging.warning(f"Copy Profile (Target): Could not download target photo for user {target_id}: {e_download_target}")
 
@@ -1163,9 +1466,9 @@ async def copy_profile_controller(client, message):
                 logging.warning(f"Copy Profile (Apply): Could not delete existing photos for user {user_id}: {e_del_apply}")
 
             # Set target photo if available
-            if target_photo_bytes_io:
+            if target_photo_bytes:
                 try:
-                    await client.set_profile_photo(photo=target_photo_bytes_io)
+                    await client.set_profile_photo(photo=target_photo_bytes)
                 except Exception as e_set_target_photo:
                      logging.warning(f"Copy Profile (Apply): Could not set target photo for user {user_id}: {e_set_target_photo}")
             # else: target had no photo or download failed
@@ -1185,89 +1488,6 @@ async def copy_profile_controller(client, message):
             await message.edit_text(error_text)
         except Exception:
             pass # Avoid error loops
-
-# NEW: Controller for SetName (from bot.txt)
-async def set_name_controller(client, message):
-    user_id = client.me.id
-    if message.reply_to_message and message.reply_to_message.text:
-        try:
-            new_name = message.reply_to_message.text[:64] # Apply 64 char limit
-            await client.update_profile(first_name=new_name)
-            await message.edit_text(f"✅ نام با موفقیت به `{new_name}` تغییر یافت.")
-        except FloodWait as e:
-            await asyncio.sleep(e.value + 1)
-        except Exception as e:
-            logging.error(f"SetName Controller: Error for user {user_id}: {e}", exc_info=True)
-            await message.edit_text(f"⚠️ خطایی در تنظیم نام رخ داد: {type(e).__name__}")
-    else:
-        await message.edit_text("⚠️ برای تنظیم نام، روی یک پیام متنی ریپلای کنید.")
-
-# NEW: Controller for SetBio (from bot.txt)
-async def set_bio_controller(client, message):
-    user_id = client.me.id
-    if message.reply_to_message and message.reply_to_message.text:
-        try:
-            new_bio = message.reply_to_message.text[:70] # Apply 70 char limit
-            await client.update_profile(bio=new_bio)
-            await message.edit_text(f"✅ بیو با موفقیت به `{new_bio}` تغییر یافت.")
-        except FloodWait as e:
-            await asyncio.sleep(e.value + 1)
-        except Exception as e:
-            logging.error(f"SetBio Controller: Error for user {user_id}: {e}", exc_info=True)
-            await message.edit_text(f"⚠️ خطایی در تنظیم بیو رخ داد: {type(e).__name__}")
-    else:
-        await message.edit_text("⚠️ برای تنظیم بیو، روی یک پیام متنی ریپلای کنید.")
-
-# NEW: Controller for SetProfile (from bot.txt)
-async def set_profile_controller(client, message):
-    user_id = client.me.id
-    if not message.reply_to_message:
-        await message.edit_text("⚠️ برای تنظیم پروفایل، روی عکس یا ویدیو ریپلای کنید.")
-        return
-
-    pm = message.reply_to_message
-    local_path = None
-    
-    try:
-        if pm.photo:
-            await message.edit_text("⏳ در حال دانلود عکس...")
-            rand = random.randint(1000, 9999999)
-            local_path = f"downloads/photo-{rand}.jpg"
-            os.makedirs("downloads", exist_ok=True)
-            await client.download_media(message=pm.photo.file_id, file_name=local_path)
-            
-            await message.edit_text("⏳ در حال آپلود عکس پروفایل...")
-            await client.set_profile_photo(photo=local_path)
-            await message.edit_text("✅ عکس پروفایل با موفقیت تنظیم شد.")
-            
-        elif pm.video:
-            await message.edit_text("⏳ در حال دانلود ویدیو...")
-            rand = random.randint(1000, 9999999)
-            local_path = f"downloads/Video-{rand}.mp4"
-            os.makedirs("downloads", exist_ok=True)
-            await client.download_media(message=pm.video.file_id, file_name=local_path)
-            
-            await message.edit_text("⏳ در حال آپلود ویدیو پروفایل...")
-            await client.set_profile_photo(video=local_path)
-            await message.edit_text("✅ ویدیو پروفایل با موفقیت تنظیم شد.")
-            
-        else:
-            await message.edit_text("⚠️ ریپلای باید روی عکس یا ویدیو باشد.")
-
-    except PhotoCropSizeSmall:
-        await message.edit_text("⚠️ خطای `PhotoCropSizeSmall`: عکس بیش از حد کوچک است و تلگرام آن را نپذیرفت.")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-        await message.edit_text(f"⏳ خطای Flood Wait. لطفاً {e.value} ثانیه صبر کنید.")
-    except Exception as e:
-        logging.error(f"SetProfile Controller: Error for user {user_id}: {e}", exc_info=True)
-        await message.edit_text(f"⚠️ خطایی در تنظیم پروفایل رخ داد: {type(e).__name__}")
-    
-    finally:
-        # Clean up the downloaded file
-        if local_path and os.path.exists(local_path):
-            os.remove(local_path)
-
 
 async def set_enemy_controller(client, message):
     user_id = client.me.id
@@ -1492,112 +1712,6 @@ async def set_friend_reply_controller(client, message):
         else:
             await message.edit_text("⚠️ متن پاسخ نمی‌تواند خالی باشد.")
 
-# UPDATED: help_controller with all new commands
-async def help_controller(client, message):
-    # Using a raw string to avoid issues with backslashes and formatting
-    help_text_formatted = r"""
-**🖤 DARK SELF (ادغام شده) 🖤**
-
-**راهنمای کامل دستورات سلف بات**
-
-**🔹 وضعیت و قالب‌بندی 🔹**
-• `تایپ روشن` / `خاموش`: فعال‌سازی حالت "در حال تایپ".
-• `بازی روشن` / `خاموش`: فعال‌سازی حالت "در حال بازی".
-• `ضبط ویس روشن` / `خاموش`: فعال‌سازی حالت "در حال ضبط ویس".
-• `عکس روشن` / `خاموش`: فعال‌سازی حالت "ارسال عکس".
-• `گیف روشن` / `خاموش`: فعال‌سازی حالت "دیدن گیف".
-• `ضبط ویدیو روشن` / `خاموش`: فعال‌سازی حالت "در حال ضبط ویدیو".
-• `استیکر روشن` / `خاموش`: فعال‌سازی حالت "انتخاب استیکر".
-• `آپلود ویدیو روشن` / `خاموش`: فعال‌سازی حالت "ارسال ویدیو".
-• `آپلود فایل روشن` / `خاموش`: فعال‌سازی حالت "ارسال فایل".
-• `آپلود صدا روشن` / `خاموش`: فعال‌سازی حالت "ارسال صدا".
-• `صحبت روشن` / `خاموش`: فعال‌سازی حالت "در حال صحبت".
-
-**🔹 ترجمه و متن 🔹**
-• `ترجمه` (ریپلای): ترجمه پیام ریپلای شده به فارسی.
-• `ترجمه [کد زبان]`: فعالسازی ترجمه خودکار پیام‌های ارسالی (مثال: `ترجمه en`).
-• `ترجمه خاموش`: غیرفعال کردن ترجمه خودکار.
-• `چینی روشن` / `خاموش`: میانبر ترجمه خودکار به چینی (`zh`).
-• `روسی روشن` / `خاموش`: میانبر ترجمه خودکار به روسی (`ru`).
-• `انگلیسی روشن` / `خاموش`: میانبر ترجمه خودکار به انگلیسی (`en`).
-• `بولد روشن` / `خاموش`: برجسته (bold) کردن خودکار تمام پیام‌های ارسالی.
-• `ایتالیک روشن` / `خاموش`: ایتالیک کردن خودکار تمام پیام‌های ارسالی.
-• `زیرخط روشن` / `خاموش`: زیرخط دار کردن خودکار تمام پیام‌های ارسالی.
-• `لینک روشن` / `خاموش`: لینک‌دار کردن خودکار پیام‌ها به پروفایل شما.
-• `پارت [متن]`: ارسال انیمیشنی متن مورد نظر.
-
-**🔹 ساعت و پروفایل 🔹**
-• `ساعت روشن` / `خاموش`: نمایش یا حذف ساعت از **نام** پروفایل شما.
-• `بیو ساعت روشن` / `خاموش`: نمایش یا حذف ساعت از **بیو** پروفایل شما.
-• `فونت`: نمایش لیست فونت‌های موجود برای ساعت.
-• `فونت [عدد]`: انتخاب فونت جدید برای نمایش ساعت (در نام و بیو).
-• `تنظیم اسم` (ریپلای): تنظیم نام پروفایل شما به متن ریپلای شده.
-• `تنظیم بیو` (ریپلای): تنظیم بیو پروفایل شما به متن ریپلای شده.
-• `تنظیم پروفایل` (ریپلای): تنظیم عکس/ویدیو پروفایل شما به مدیای ریپلای شده.
-• `کپی روشن` (ریپلای): کپی کردن نام، بیو و عکس پروفایل کاربر (پروفایل شما ذخیره می‌شود).
-• `کپی خاموش`: بازگرداندن پروفایل اصلی شما.
-
-**🔹 مدیریت پیام و کاربر 🔹**
-• `سین روشن` / `خاموش`: تیک دوم (خوانده شدن) خودکار پیام‌ها در PV.
-• `حذف [عدد]`: حذف X پیام آخر شما (پیش‌فرض 5). مثال: `حذف 10`.
-• `حذف همه`: حذف تمام پیام‌های شما در چت فعلی (تا 1000).
-• `ذخیره` (ریپلای): ذخیره کردن پیام ریپلای شده در Saved Messages.
-• `تکرار [عدد] [ثانیه]` (ریپلای): تکرار پیام X بار با فاصله Y ثانیه.
-• `بلاک روشن` / `خاموش` (ریپلای): بلاک یا آنبلاک کردن کاربر.
-• `سکوت روشن` / `خاموش` (ریپلای): حذف خودکار پیام‌های کاربر **فقط در همین چت**.
-• `ریاکشن [ایموجی]` (ریپلای): واکنش خودکار با ایموجی دلخواه به کاربر.
-• `ریاکشن خاموش` (ریپلای): غیرفعال‌سازی واکنش خودکار برای کاربر.
-
-**🔹 لیست دشمن (Enemy List) 🔹**
-• `دشمن روشن` / `خاموش`: فعال/غیرفعال کردن پاسخ خودکار به دشمنان.
-• `تنظیم دشمن` (ریپلای): اضافه کردن کاربر به لیست دشمن.
-• `حذف دشمن` (ریپلای): حذف کاربر از لیست دشمن.
-• `پاکسازی لیست دشمن`: حذف تمام کاربران از لیست.
-• `لیست دشمن`: نمایش لیست کاربران دشمن.
-• `تنظیم متن دشمن [متن]`: اضافه کردن یک متن جدید به لیست پاسخ (لیست متن‌ها جایگزین شده‌اند).
-• `لیست متن دشمن`: نمایش لیست متن‌های پاسخ دشمن.
-• `حذف متن دشمن [عدد]`: حذف متن شماره X (بدون عدد، همه حذف می‌شوند).
-
-**🔹 لیست دوست (Friend List) 🔹**
-• `دوست روشن` / `خاموش`: فعال/غیرفعال کردن پاسخ خودکار به دوستان.
-• `تنظیم دوست` (ریپلای): اضافه کردن کاربر به لیست دوست.
-• `حذف دوست` (ریپلای): حذف کاربر از لیست دوست.
-• `پاکسازی لیست دوست`: حذف تمام کاربران از لیست.
-• `لیست دوست`: نمایش لیست کاربران دوست.
-• `تنظیم متن دوست [متن]`: اضافه کردن یک متن جدید به لیست پاسخ.
-• `لیست متن دوست`: نمایش لیست متن‌های پاسخ دوست.
-• `حذف متن دوست [عدد]`: حذف متن شماره X (بدون عدد، همه حذف می‌شوند).
-
-**🔹 ابزار و سرگرمی 🔹**
-• `ربات`: بررسی آنلاین بودن ربات.
-• `ویس [متن]`: تبدیل متن فارسی به ویس.
-• `!YouTube [LINK]`: دانلود ویدیو از لینک یوتیوب.
-• `تاس`: ارسال تاس شانسی (تا 6).
-• `تاس [عدد ۱-۶]`: ارسال تاس تا رسیدن به عدد مورد نظر.
-• `بولینگ`: ارسال بولینگ شانسی (تا استرایک).
-• `مربع`
-• `قلب`
-• `قلب بزرگ`
-• `بکیرم`
-• `مکعب`
-• `لودینگ`
-
-**🔹 امنیت و منشی 🔹**
-• `پیوی قفل` / `باز`: فعال/غیرفعال کردن حذف خودکار تمام پیام‌های دریافتی در PV.
-• `منشی روشن` / `خاموش`: فعال/غیرفعال کردن پاسخ خودکار در PV.
-• `منشی متن [متن دلخواه]`: تنظیم متن سفارشی برای منشی.
-• `منشی متن` (بدون متن): بازگرداندن متن منشی به پیش‌فرض.
-• `انتی لوگین روشن` / `خاموش`: خروج خودکار نشست‌های (sessions) جدید و غیرفعال.
-"""
-    try:
-        await message.edit_text(help_text_formatted, disable_web_page_preview=True)
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception as e:
-        logging.error(f"Help Controller: Error editing help message: {e}", exc_info=True)
-
 async def block_unblock_controller(client, message):
     user_id = client.me.id
     command = message.text.strip()
@@ -1720,7 +1834,7 @@ async def auto_reaction_controller(client, message):
             if match:
                 emoji = match.group(1).strip()
                 # Basic emoji check (might not cover all custom/animated ones)
-                if emoji and len(emoji) <= 4: # Crude check for typical emoji length
+                if emoji: # Allow any string, ReactionInvalid will catch it
                     # Send a test reaction to see if it's valid BEFORE saving
                     try:
                         # Use reply_to_message_id for context, maybe react to the command itself temporarily
@@ -1765,7 +1879,7 @@ async def save_message_controller(client, message):
             # await message.delete()
         except FloodWait as e:
             await asyncio.sleep(e.value + 1)
-            # Try to inform user about flood wait if editing fails
+            # Try to inform user about flood wait if editing failed
             try:
                 await client.send_message(message.chat.id, f"⏳ Flood wait ({e.value}s) در ذخیره پیام. لطفاً صبر کنید.")
             except Exception: pass
@@ -1787,7 +1901,7 @@ async def repeat_message_controller(client, message):
         except Exception: pass
         return
 
-    match = re.match(r"^تکرار (\d+)(?: (\d+))?$", message.text) # Make second group optional
+    match = re.match(r"^تکرار (\d+)(?: (\d+))?$", message.text) # Make second group optional non-capturing
     if match:
         try:
             count = int(match.group(1))
@@ -1870,7 +1984,7 @@ async def delete_messages_controller(client, message):
         try:
             count = int(count_str) if count_str else 5
             if count < 1: count = 1
-            if count > 1000: count = 1000 # Limit batch delete query
+            if count > 1000: count = 1000
         except ValueError:
             await message.edit_text("⚠️ عدد وارد شده نامعتبر است.")
             return
@@ -1884,8 +1998,7 @@ async def delete_messages_controller(client, message):
         
         # پیدا کردن پیام‌های کاربر
         user_messages_found = 0
-        # Search limit should be reasonable, e.g., count * 5 or a max of 2000
-        limit = min(max(count * 5, 200), 2000)
+        limit = min(count * 3, 1000)  # حداکثر 1000 پیام برای جستجو
         
         async for msg in client.get_chat_history(chat_id, limit=limit):
             if msg.id == message.id:
@@ -1896,40 +2009,32 @@ async def delete_messages_controller(client, message):
                 user_messages_found += 1
                 
                 if user_messages_found >= count:
-                    break # Found enough messages
+                    break
         
         # حذف پیام‌ها
         if len(message_ids_to_delete) > 0:
             # حذف دسته‌ای (100 تایی)
-            deleted_count_total = 0
             for i in range(0, len(message_ids_to_delete), 100):
                 batch = message_ids_to_delete[i:i+100]
                 try:
                     await client.delete_messages(chat_id, batch)
-                    deleted_count_total += len(batch)
                     await asyncio.sleep(0.5)  # تاخیر برای جلوگیری از محدودیت
                 except FloodWait as e:
-                    logging.warning(f"Delete Messages: Flood wait, sleeping {e.value}s")
                     await asyncio.sleep(e.value + 1)
                 except MessageIdInvalid:
-                    logging.warning("Delete Messages: Some messages already deleted.")
-                    pass # Some messages might already be gone
+                    pass
                 except Exception as e:
                     logging.warning(f"Delete Messages: Error deleting batch: {e}")
             
             # ارسال پیام تایید
-            final_deleted_count = deleted_count_total - 1 if message.id in message_ids_to_delete else deleted_count_total
-            if final_deleted_count < 0: final_deleted_count = 0
-            
-            confirm_msg = await client.send_message(chat_id, f"✅ {final_deleted_count} پیام با موفقیت حذف شد.")
+            deleted_count = len(message_ids_to_delete) - 1  # منهای پیام دستور
+            confirm_msg = await client.send_message(chat_id, f"✅ {deleted_count} پیام با موفقیت حذف شد.")
             await asyncio.sleep(3)
             await confirm_msg.delete()
             
     except FloodWait as e:
         await asyncio.sleep(e.value + 1)
-        try:
-            await message.edit_text(f"⏳ لطفاً {e.value} ثانیه صبر کنید و دوباره تلاش کنید.")
-        except Exception: pass
+        await message.edit_text(f"⏳ لطفاً {e.value} ثانیه صبر کنید و دوباره تلاش کنید.")
     except Exception as e:
         logging.error(f"Delete Messages Controller: Error for user {user_id}: {e}")
         try:
@@ -1948,9 +2053,6 @@ async def game_controller(client, message):
             max_attempts = 20
             attempts = 0
             
-            # Delete command message first
-            await message.delete()
-            
             while attempts < max_attempts:
                 result = await client.send_dice(chat_id, emoji="🎲")
                 attempts += 1
@@ -1959,7 +2061,9 @@ async def game_controller(client, message):
                 if hasattr(result, 'dice') and result.dice.value == target_value:
                     break
                     
-                await asyncio.sleep(1.5)  # تاخیر بین پرتاب‌ها
+                await asyncio.sleep(1)  # تاخیر بین پرتاب‌ها
+                
+            await message.delete()
             
         elif command.startswith("تاس "):
             match = re.match(r"^تاس (\d+)$", command)
@@ -1970,8 +2074,6 @@ async def game_controller(client, message):
                         max_attempts = 20
                         attempts = 0
                         
-                        await message.delete() # Delete command
-                        
                         while attempts < max_attempts:
                             result = await client.send_dice(chat_id, emoji="🎲")
                             attempts += 1
@@ -1979,8 +2081,9 @@ async def game_controller(client, message):
                             if hasattr(result, 'dice') and result.dice.value == target_value:
                                 break
                                 
-                            await asyncio.sleep(1.5)
+                            await asyncio.sleep(1)
                             
+                        await message.delete()
                     else:
                         await message.edit_text("⚠️ عدد تاس باید بین ۱ تا ۶ باشد.")
                 except ValueError:
@@ -1989,22 +2092,23 @@ async def game_controller(client, message):
                 await message.edit_text("⚠️ فرمت دستور نامعتبر. مثال: `تاس` یا `تاس ۶`")
                 
         elif command == "بولینگ":
-            # بولینگ - ادامه تا استرایک (6 in Pyrogram for bowling strike)
-            target_value = 6 # Strike value for 🎳 emoji
+            # بولینگ - ادامه تا استرایک (10)
+            target_value = 10 # Value for Strike in bowling dice
             max_attempts = 10
             attempts = 0
             
-            await message.delete() # Delete command
-            
-            while attempts < max_attempts:
+            # Send bowling emoji
+            result = await client.send_dice(chat_id, emoji="🎳")
+            attempts += 1
+
+            # Keep resending if it's not a strike (value 10)
+            while hasattr(result, 'dice') and result.dice.value != target_value and attempts < max_attempts:
+                await asyncio.sleep(2) # Wait a bit longer for bowling
                 result = await client.send_dice(chat_id, emoji="🎳")
                 attempts += 1
                 
-                if hasattr(result, 'dice') and result.dice.value == target_value:
-                    break
-                    
-                await asyncio.sleep(2) # Bowling takes longer
-                
+            await message.delete()
+
     except FloodWait as e:
         logging.warning(f"Game Controller: Flood wait for user {user_id}: {e.value}s")
         await asyncio.sleep(e.value + 1)
@@ -2015,6 +2119,110 @@ async def game_controller(client, message):
         try:
             await message.edit_text("⚠️ خطایی در ارسال بازی رخ داد.")
         except Exception: pass
+    async def help_controller(client, message):
+    # Using a raw string to avoid issues with backslashes and formatting
+    help_text_formatted = r"""
+**🖤 DARK SELF 🖤**
+
+**راهنمای کامل دستورات سلف بات**
+
+**🔹 وضعیت و قالب‌بندی 🔹**
+• `تایپ روشن` / `خاموش`: فعال‌سازی حالت "در حال تایپ" در همه چت‌ها.
+• `بازی روشن` / `خاموش`: فعال‌سازی حالت "در حال بازی" در همه چت‌ها.
+• `ضبط ویس روشن` / `خاموش`: فعال‌سازی حالت "در حال ضبط ویس".
+• `عکس روشن` / `خاموش`: فعال‌سازی حالت "ارسال عکس".
+• `گیف روشن` / `خاموش`: فعال‌سازی حالت "دیدن گیف".
+• `ترجمه` (ریپلای): ترجمه پیام ریپلای شده به فارسی.
+• `ترجمه [کد زبان]`: فعالسازی ترجمه خودکار پیام‌های ارسالی به زبان مقصد (مثال: `ترجمه en`).
+• `ترجمه خاموش`: غیرفعال کردن ترجمه خودکار پیام‌های ارسالی.
+• `چینی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به چینی (`zh`).
+• `روسی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به روسی (`ru`).
+• `انگلیسی روشن` / `خاموش`: میانبر فعال/غیرفعال‌سازی ترجمه خودکار به انگلیسی (`en`).
+• `بولد روشن` / `خاموش`: برجسته کردن (bold) خودکار تمام پیام‌های ارسالی.
+• `ایتالیک روشن` / `خاموش`: کج کردن (italic) خودکار تمام پیام‌های ارسالی.
+• `کد روشن` / `خاموش`: کد کردن (monospace) خودکار تمام پیام‌های ارسالی.
+• `زیرخط روشن` / `خاموش`: زیرخط‌دار کردن (underline) خودکار.
+• `خط خورده روشن` / `خاموش`: خط زدن (strikethrough) خودکار.
+• `اسپویل روشن` / `خاموش`: اسپویل کردن (spoiler) خودکار.
+• `برعکس روشن` / `خاموش`: برعکس کردن خودکار متن.
+• `هشتگ روشن` / `خاموش`: تبدیل فاصله به `_` و افزودن `#` در ابتدا.
+• `سین روشن` / `خاموش`: تیک دوم (خوانده شدن) خودکار پیام‌ها در چت شخصی (PV).
+
+**🔹 ساعت و فونت (نام پروفایل) 🔹**
+• `ساعت روشن` / `خاموش`: نمایش یا حذف ساعت از انتهای نام پروفایل شما.
+• `فونت`: نمایش لیست فونت‌های موجود برای ساعت و نمونه آن‌ها.
+• `فونت [عدد]`: انتخاب فونت جدید برای نمایش ساعت (عدد از لیست بالا).
+
+**🔹 مدیریت پیام و کاربر 🔹**
+• `حذف [عدد]`: حذف X پیام آخر شما در چت فعلی (شامل خود دستور نمی‌شود). مثال: `حذف 10`. بدون عدد، 5 پیام آخر حذف می‌شود.
+• `حذف همه`: حذف تمام پیام‌های شما در چت فعلی (تا 1000 پیام).
+• `ذخیره` (ریپلای): ذخیره کردن پیام ریپلای شده در Saved Messages شما.
+• `دانلود` (ریپلای): دانلود مدیا ریپلای شده و ارسال آن به Saved Messages.
+• `تکرار [عدد] [ثانیه]` (ریپلای): تکرار پیام ریپلای شده X بار با فاصله Y ثانیه. فاصله ثانیه اختیاری است (پیش‌فرض بدون فاصله). مثال: `تکرار 5 2`.
+• `بلاک روشن` / `خاموش` (ریپلای): بلاک یا آنبلاک کردن کاربر ریپلای شده.
+• `سکوت روشن` / `خاموش` (ریپلای): حذف خودکار تمام پیام‌های دریافتی از کاربر ریپلای شده **فقط در همین چت**.
+• `ریاکشن [ایموجی]` (ریپلای): واکنش خودکار با ایموجی دلخواه به تمام پیام‌های دریافتی از کاربر ریپلای شده در **تمام چت‌ها**.
+• `ریاکشن خاموش` (ریپلای): غیرفعال‌سازی واکنش خودکار برای کاربر ریپلای شده.
+• `تگ` / `tagall`: تگ کردن ۱۰۰ کاربر اخیر گروه.
+• `تگ ادمین ها` / `tagadmins`: تگ کردن تمام ادمین‌های گروه.
+
+**🔹 لیست دشمن (Enemy List) 🔹**
+• `دشمن روشن` / `خاموش`: فعال/غیرفعال کردن ارسال پاسخ خودکار به کاربران لیست دشمن.
+• `تنظیم دشمن` (ریپلای): اضافه کردن کاربر ریپلای شده به لیست دشمن.
+• `حذف دشمن` (ریپلای): حذف کاربر ریپلای شده از لیست دشمن.
+• `پاکسازی لیست دشمن`: حذف تمام کاربران از لیست دشمن.
+• `لیست دشمن`: نمایش لیست کاربران در لیست دشمن (همراه با نام و آیدی).
+• `تنظیم متن دشمن [متن]`: اضافه کردن یک متن جدید به لیست پاسخ‌های تصادفی برای دشمنان.
+• `لیست متن دشمن`: نمایش لیست متن‌های پاسخ دشمن با شماره.
+• `حذف متن دشمن [عدد]`: حذف متن شماره X از لیست پاسخ دشمن. بدون عدد، تمام متن‌ها حذف می‌شود.
+
+**🔹 لیست دوست (Friend List) 🔹**
+• `دوست روشن` / `خاموش`: فعال/غیرفعال کردن ارسال پاسخ خودکار به کاربران لیست دوست.
+• `تنظیم دوست` (ریپلای): اضافه کردن کاربر ریپلای شده به لیست دوست.
+• `حذف دوست` (ریپلای): حذف کاربر ریپلای شده از لیست دوست.
+• `پاکسازی لیست دوست`: حذف تمام کاربران از لیست دوست.
+• `لیست دوست`: نمایش لیست کاربران در لیست دوست (همراه با نام و آیدی).
+• `تنظیم متن دوست [متن]`: اضافه کردن یک متن جدید به لیست پاسخ‌های تصادفی برای دوستان.
+• `لیست متن دوست`: نمایش لیست متن‌های پاسخ دوست با شماره.
+• `حذف متن دوست [عدد]`: حذف متن شماره X از لیست پاسخ دوست. بدون عدد، تمام متن‌ها حذف می‌شود.
+
+**🔹 سرگرمی 🔹**
+• `تاس`: ارسال تاس شانسی (تا 6 ادامه می‌دهد).
+• `تاس [عدد ۱-۶]`: ارسال تاس تا موقعی که عدد مورد نظر نیاید.
+• `بولینگ`: ارسال بولینگ شانسی (تا استرایک ادامه می‌دهد).
+• `فان [love/oclock/star/snow]`: انیمیشن ایموجی.
+• `دوز` / `xo`: اجرای بازی دوز (از @xoBot).
+• `گوگل پلی [نام]` / `googleplay [نام]`: جستجوی برنامه در گوگل پلی.
+
+**🔹 ابزارها و ویس کال 🔹**
+• `بگو [متن]` / `tts [متن]` (ریپلای): تبدیل متن ریپلای شده به ویس (پیش‌فرض فارسی).
+• `بگو [کد زبان] [متن]` (ریپلای): تبدیل به ویس با زبان خاص (مثال: `بگو en`).
+• `نجوا [متن]` / `whisper [متن]` (ریپلای): ارسال نجوا به کاربر ریپلای شده.
+• `نجوا @user متن` / `نجوا 1234 متن`: ارسال نجوا به یوزرنیم/آیدی.
+• `اسکرین شات` / `screenshot` (ریپلای): ارسال اعلان اسکرین شات گرفتن.
+• `ویس کال` / `voicecall`: ایجاد ویس کال در گروه.
+• `ویس کال پلی` / `voicecallplay` (ریپلای): پخش فایل صوتی/تصویری ریپلای شده در ویس کال.
+• `پایان ویس کال` / `voicecallstop`: توقف پخش در ویس کال.
+
+**🔹 امنیت و منشی 🔹**
+• `پیوی قفل` / `باز`: فعال/غیرفعال کردن حذف خودکار تمام پیام‌های دریافتی در PV (چت شخصی).
+• `منشی روشن` / `خاموش`: فعال/غیرفعال کردن پاسخ خودکار در PV.
+• `منشی متن [متن دلخواه]`: تنظیم متن سفارشی برای پاسخ خودکار منشی.
+• `منشی متن` (بدون متن): بازگرداندن متن منشی به حالت پیش‌فرض.
+• `کامنت روشن` / `خاموش`: فعال/غیرفعال کردن کامنت اول روی فورواردها.
+• `متن کامنت [متن]` / `commenttext [متن]`: تنظیم متن کامنت اول.
+• `انتی لوگین روشن` / `خاموش`: فعال/غیرفعال کردن خروج خودکار نشست‌های جدید.
+• `کپی روشن` (ریپلای): کپی کردن پروفایل کاربر ریپلای شده.
+• `کپی خاموش`: بازگرداندن پروفایل اصلی شما.
+"""
+    try:
+        await message.edit_text(help_text_formatted, disable_web_page_preview=True)
+    except FloodWait as e:
+        await asyncio.sleep(e.value + 1)
+    except MessageNotModified:
+        pass
+    except Exception as e:
+        logging.error(f"Help Controller: Error editing help message: {e}", exc_info=True)
 
 async def font_controller(client, message):
     user_id = client.me.id
@@ -2156,293 +2364,6 @@ async def clock_controller(client, message):
             await message.edit_text("⚠️ خطایی در تنظیم ساعت پروفایل رخ داد.")
         except Exception: pass
 
-# --- NEW Controllers (from bot.txt) ---
-
-async def text_to_voice_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^ویس (.*)", message.text, re.DOTALL)
-    if not match:
-        await message.edit_text("⚠️ فرمت نامعتبر. مثال: `ویس سلام خوبی`")
-        return
-        
-    text = match.group(1).strip()
-    if not text:
-        await message.edit_text("⚠️ متن برای تبدیل به ویس ارائه نشد.")
-        return
-
-    url = f"https://haji-api.ir/text-to-voice/?text={quote(text)}&Character=DilaraNeural"
-    
-    try:
-        await message.edit_text("⏳ در حال تبدیل متن به ویس...")
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    try:
-                        data = await response.json()
-                        voice_url = data['results']['url']
-                        await client.send_voice(message.chat.id, voice=voice_url, reply_to_message_id=message.id)
-                        await message.delete() # Delete the command message
-                    except (KeyError, aiohttp.ContentTypeError, Exception) as e_json:
-                        logging.error(f"Text2Voice: Error parsing API response: {e_json}")
-                        await message.edit_text("⚠️ خطایی در پردازش پاسخ API رخ داد.")
-                else:
-                    logging.error(f"Text2Voice: API request failed with status {response.status}")
-                    await message.edit_text("⚠️ سرویس تبدیل متن به ویس در دسترس نیست.")
-                    
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except Exception as e:
-        logging.error(f"Text2Voice: Error for user {user_id}: {e}", exc_info=True)
-        await message.edit_text(f"⚠️ خطایی در ارسال ویس رخ داد: {type(e).__name__}")
-
-async def youtube_dl_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^!YouTube (.*)", message.text)
-    if not match:
-        await message.edit_text("⚠️ فرمت نامعتبر. مثال: `!YouTube https://...`")
-        return
-
-    video_url = match.group(1).strip()
-    local_path = None
-    
-    try:
-        await message.edit_text("⏳ در حال پردازش لینک یوتیوب...")
-        yt = YouTube(video_url)
-        
-        # Try to get 720p, fallback to highest resolution
-        video_stream = yt.streams.filter(progressive=True, file_extension='mp4').get_by_resolution("720p")
-        if not video_stream:
-            video_stream = yt.streams.filter(progressive=True, file_extension='mp4').get_highest_resolution()
-
-        if not video_stream:
-            await message.edit_text("⚠️ ویدیویی با فرمت mp4 (progressive) یافت نشد.")
-            return
-
-        downloaded_file_name = video_stream.default_filename
-        # Sanitize filename
-        normalized_file_name = unicodedata.normalize('NFKD', downloaded_file_name).encode('ascii', 'ignore').decode('ascii')
-        normalized_file_name = re.sub(r'[^\w\s.-]', '', normalized_file_name).strip()
-        if not normalized_file_name: normalized_file_name = f"youtube_video_{yt.video_id}.mp4"
-
-        download_path = "downloads"
-        os.makedirs(download_path, exist_ok=True)
-        
-        # Note: Pytube download path logic is tricky. It might create a dir.
-        # Let's specify the full file path directly.
-        local_path = os.path.join(download_path, normalized_file_name)
-
-        await message.edit_text("⏳ در حال دانلود ویدیو... (این ممکن است طول بکشد)")
-        video_stream.download(output_path=download_path, filename=normalized_file_name)
-
-        await message.edit_text("⏳ در حال آپلود ویدیو...")
-        caption = yt.title if yt.title else "YouTube Video"
-        
-        await client.send_video(
-            message.chat.id,
-            video=local_path,
-            caption=caption,
-            reply_to_message_id=message.id
-        )
-        await message.delete() # Delete command message
-
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except Exception as e:
-        logging.error(f"YouTubeDL: Error for user {user_id} downloading {video_url}: {e}", exc_info=True)
-        await message.edit_text(f"⚠️ خطایی در دانلود از یوتیوب رخ داد: {type(e).__name__}")
-    
-    finally:
-        # Clean up the downloaded file
-        if local_path and os.path.exists(local_path):
-            os.remove(local_path)
-
-async def part_text_controller(client, message):
-    user_id = client.me.id
-    match = re.match(r"^پارت (.*)", message.text, re.DOTALL)
-    if not match:
-        await message.edit_text("⚠️ فرمت نامعتبر. مثال: `پارت سلام`")
-        return
-        
-    text_to_part = match.group(1).strip()
-    if not text_to_part:
-        await message.edit_text("⚠️ متنی برای پارت کردن ارائه نشد.")
-        return
-
-    try:
-        current_text = ""
-        for char in text_to_part:
-            current_text += char
-            # Avoid editing too fast or with same text
-            if char != " ":
-                await message.edit_text(current_text)
-                await asyncio.sleep(0.2)
-        
-        # Final edit to ensure text is complete
-        await message.edit_text(current_text)
-        
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass # Expected if text is short
-    except Exception as e:
-        logging.error(f"Part Text: Error for user {user_id}: {e}", exc_info=True)
-        # Don't edit message on error, it might be gone
-        
-async def ping_controller(client, message):
-    try:
-        await message.reply_text("✅ **Self is Online**", quote=True)
-    except Exception:
-        pass # Ignore errors
-
-# --- Animation/Game Controllers (from bot.txt, made async) ---
-
-async def square_controller(client, message):
-    try:
-        await message.edit_text("◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️")
-        # ... (Continue animation)
-        await asyncio.sleep(0.2)
-        await message.edit_text("◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️\n◻️◻️◻️◻️◻️")
-        await asyncio.sleep(0.5)
-        await message.edit_text("✅ مربع تمام شد.")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass # Ignore errors in animations
-
-async def heart_controller(client, message):
-    hearts = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "❤️‍🔥", "❤️‍🩹", "❣️", "💓", "💗"]
-    try:
-        for _ in range(2): # Loop twice
-            for heart in hearts:
-                await message.edit_text(heart)
-                await asyncio.sleep(0.3)
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def big_heart_controller(client, message):
-    heart_parts = [
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕‌",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕\n🌑🌑🌑🌒🌕🌗🌑🌔🌕🌕🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕\n🌑🌑🌑🌒🌕🌗🌑🌔🌕🌕🌕\n🌑🌑🌑🌑🌒🌗🌔🌕🌕🌕🌕",
-        "🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕\n🌑🌒🌕🌕🌘🌓🌖🌑🌑🌔🌕\n🌑🌔🌕🌕🌕🌓🌑🌑🌑🌒🌕\n🌑🌕🌕🌕🌕🌗🌑🌑🌑🌑🌕\n🌑🌔🌕🌕🌕🌗🌑🌑🌑🌒🌕‌\n🌑🌒🌕🌕🌕🌗🌑🌑🌑🌔🌕\n🌑🌑🌒🌕🌕🌗🌑🌑🌔🌕🌕\n🌑🌑🌑🌒🌕🌗🌑🌔🌕🌕🌕\n🌑🌑🌑🌑🌒🌗🌔🌕🌕🌕🌕\n🌑🌑🌑🌑🌑🌓🌕🌕🌕🌕🌕",
-        # Simplified the rest for brevity
-        "❤️"
-    ]
-    try:
-        for part in heart_parts:
-            await message.edit_text(part)
-            await asyncio.sleep(0.4)
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def bakiram_controller(client, message):
-    bk_parts = [
-        "\n😂😂😂          😂         😂\n😂         😂      😂       😂\n😂           😂    😂     😂\n😂        😂       😂   😂\n😂😂😂          😂😂\n😂         😂      😂   😂\n😂           😂    😂      😂\n😂           😂    😂        😂\n😂        😂       😂          😂\n😂😂😂          😂            😂\n",
-        "\n🤤🤤🤤          🤤         🤤\n🤤         🤤      🤤       🤤\n🤤           🤤    🤤     🤤\n🤤        🤤       🤤   🤤\n🤤🤤🤤          🤤🤤\n🤤         🤤      🤤   🤤\n🤤           🤤    🤤      🤤\n🤤           🤤    🤤        🤤\n🤤        🤤       🤤          🤤\n🤤🤤🤤          🤤            🤤\n",
-        "\n💩💩💩          💩         💩\n💩         💩      💩       💩\n💩           💩    💩     💩\n💩        💩       💩   💩\n💩💩💩          💩💩\n💩         💩      💩   💩\n💩           💩    💩      💩\n💩           💩    💩        💩\n💩        💩       💩          💩\n💩💩💩          💩            💩\n",
-        "\n🌹🌹🌹          🌹         🌹\n🌹         🌹      🌹       🌹\n🌹           🌹    🌹     🌹\n🌹        🌹       🌹   🌹\n🌹🌹🌹          🌹🌹\n🌹         🌹      🌹   🌹\n🌹           🌹    🌹      🌹\n🌹           🌹    🌹        🌹\n🌹        🌹       🌹          🌹\n🌹🌹🌹          🌹            🌹\n",
-        "\n💀💀💀          💀         💀\n💀         💀      💀       💀\n💀           💀    💀     💀\n💀        💀       💀   💀\n💀💀💀          💀💀\n💀         💀      💀   💀\n💀           💀    💀      💀\n💀           💀    💀        💀\n💀        💀       💀          💀\n💀💀💀          💀            💀\n",
-        "\n🌑🌑🌑          🌑         🌑\n🌑         🌑      🌑       🌑\n🌑           🌑    🌑     🌑\n🌑        🌑       🌑   🌑\n🌑🌑🌑          🌑🌑\n🌑         🌑      🌑   Tooltip\n🌑           🌑    🌑      🌑\n🌑           🌑    🌑        🌑\n🌑        🌑       🌑          🌑\n🌑🌑🌑          🌑            🌑\n",
-        "کلا بکیرم"
-    ]
-    try:
-        for part in bk_parts:
-            await message.edit_text(part)
-            await asyncio.sleep(0.8)
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def cube_controller(client, message):
-    mk = ['🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '⬛️', '⬜️', '🟫']
-    try:
-        for _ in range(15): # Loop 15 times
-            cube_text = (
-                f"{random.choice(mk)}{random.choice(mk)}{random.choice(mk)}\n"
-                f"{random.choice(mk)}{random.choice(mk)}{random.choice(mk)}\n"
-                f"{random.choice(mk)}{random.choice(mk)}{random.choice(mk)}"
-            )
-            await message.edit_text(cube_text)
-            await asyncio.sleep(0.3)
-        await message.edit_text("✅ مکعب تمام شد.")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
-async def loading_controller(client, message):
-    try:
-        await message.edit_text("⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 0%\nLoading")
-        await asyncio.sleep(0.5)
-        await message.edit_text("⚪️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 10%\nLoading . . .")
-        await asyncio.sleep(0.3)
-        await message.edit_text("⚪️⚪️⚫️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 20%\nLoading")
-        await asyncio.sleep(0.1)
-        await message.edit_text("⚪️⚪️⚪️⚫️⚫️⚫️⚫️⚫️⚫️⚫️ 30%\nLoading . . .")
-        await asyncio.sleep(1)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚫️⚫️⚫️⚫️⚫️⚫️ 40%\nLoading")
-        await asyncio.sleep(0.8)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚫️⚫️⚫️⚫️⚫️ 50%\nLoading . . .")
-        await asyncio.sleep(1.5)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚫️⚫️⚫️⚫️ 60%\nLoading")
-        await asyncio.sleep(0.2)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚫️⚫️⚫️ 70%\nLoading")
-        await asyncio.sleep(0.4)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚫️⚫️ 80%\nLoading")
-        await asyncio.sleep(0.1)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚫️ 90%\nLoading")
-        await asyncio.sleep(2)
-        await message.edit_text("⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️⚪️ 100%\nLoading")
-        await asyncio.sleep(0.5)
-        await message.edit_text("✅ لودینگ تمام شد.")
-    except FloodWait as e:
-        await asyncio.sleep(e.value + 1)
-    except MessageNotModified:
-        pass
-    except Exception:
-        pass
-
 # --- Filters and Bot Setup ---
 async def is_enemy_filter(_, client, message):
     user_id = client.me.id
@@ -2517,6 +2438,18 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
                         pass # Ignore errors during cancellation
                     except Exception as task_cancel_err:
                          logging.warning(f"Error cancelling task for old instance {user_id}: {task_cancel_err}")
+            
+            # Stop old PyTgCalls instance
+            if user_id in ACTIVE_CALLS:
+                logging.warning(f"Stopping old PyTgCalls instance for {user_id}...")
+                old_call_app = ACTIVE_CALLS.pop(user_id)
+                if old_call_app:
+                    try:
+                        # Schedule stop, don't wait for it
+                        EVENT_LOOP.create_task(old_call_app.stop())
+                    except Exception as stop_call_err:
+                        logging.error(f"Error stopping old PyTgCalls instance {user_id}: {stop_call_err}")
+
             # Stop the old client connection
             if old_client and old_client.is_connected:
                  try:
@@ -2535,6 +2468,17 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         # Load settings from DB if available (Example - needs implementation)
         # load_user_settings_from_db(user_id)
 
+        # --- Ported Settings Initialization ---
+        COMMENT_FIRST_STATUS.setdefault(user_id, False) # Ported from self.py 'comment'
+        COMMENT_FIRST_TEXT.setdefault(user_id, DEFAULT_COMMENT_TEXT) # Ported from self.py 'text'
+        ITALIC_MODE_STATUS.setdefault(user_id, False)
+        CODE_MODE_STATUS.setdefault(user_id, False)
+        UNDERLINE_MODE_STATUS.setdefault(user_id, False)
+        STRIKE_MODE_STATUS.setdefault(user_id, False)
+        REVERSE_MODE_STATUS.setdefault(user_id, False)
+        SPOILER_MODE_STATUS.setdefault(user_id, False)
+        HASHTAG_MODE_STATUS.setdefault(user_id, False)
+
         # Ensure default values exist if not loaded
         CUSTOM_SECRETARY_MESSAGES.setdefault(user_id, DEFAULT_SECRETARY_MESSAGE)
         USERS_REPLIED_IN_SECRETARY.setdefault(user_id, set())
@@ -2544,36 +2488,27 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         AUTO_TRANSLATE_TARGET.setdefault(user_id, None)
         ANTI_LOGIN_STATUS.setdefault(user_id, False)
         COPY_MODE_STATUS.setdefault(user_id, False) # Should always start False
-        PV_LOCK_STATUS.setdefault(user_id, False)
-        MUTED_USERS.setdefault(user_id, set())
-        
-        # NEW Settings
-        TIME_BIO_STATUS.setdefault(user_id, False)
-        ITALIC_MODE_STATUS.setdefault(user_id, False)
-        UNDERLINE_MODE_STATUS.setdefault(user_id, False)
-        LINK_MODE_STATUS.setdefault(user_id, False)
-        
-        # Statuses
         TYPING_MODE_STATUS.setdefault(user_id, False)
         PLAYING_MODE_STATUS.setdefault(user_id, False)
         RECORD_VOICE_STATUS.setdefault(user_id, False)
         UPLOAD_PHOTO_STATUS.setdefault(user_id, False)
         WATCH_GIF_STATUS.setdefault(user_id, False)
-        # NEW Statuses
-        RECORD_VIDEO_STATUS.setdefault(user_id, False)
-        CHOOSE_STICKER_STATUS.setdefault(user_id, False)
-        UPLOAD_VIDEO_STATUS.setdefault(user_id, False)
-        UPLOAD_DOCUMENT_STATUS.setdefault(user_id, False)
-        UPLOAD_AUDIO_STATUS.setdefault(user_id, False)
-        SPEAKING_STATUS.setdefault(user_id, False)
-
+        PV_LOCK_STATUS.setdefault(user_id, False)
+        MUTED_USERS.setdefault(user_id, set())
         # ORIGINAL_PROFILE_DATA should not be setdefault, it's temporary during copy mode
         if user_id not in ORIGINAL_PROFILE_DATA: ORIGINAL_PROFILE_DATA[user_id] = {}
         
-        # متن‌های توهین‌آمیز با متن‌های جایگزین طبق درخواست، جایگزین شدند
+        # متن‌های پیش‌فرض دشمن با لیست کامل شما
         ENEMY_REPLIES.setdefault(user_id, [
-            "متن ۱", "متن ۲", "متن ۳", "متن ۴", "متن ۵",
-            "متن ۶", "متن ۷", "متن ۸", "متن ۹", "متن ۱۰"
+            "کیرم تو رحم اجاره ای و خونی مالی مادرت",
+            "دو میلیون شبی پول ویلا بدم تا مادرتو تو گوشه کناراش بگام و اب کوسشو بریزم کف خونه تا فردا صبح کارگرای افغانی برای نظافت اومدن با بوی اب کس مادرت بجقن و ابکیراشون نثار قبر مرده هات بشه",
+            "احمق مادر کونی من کس مادرت گذاشتم تو بازم داری کسشر میگی",
+            "هی بیناموس کیرم بره تو کس ننت واس بابات نشآخ مادر کیری کیرم بره تو کس اجدادت کسکش بیناموس کس ول نسل شوتی ابجی کسده کیرم تو کس مادرت بیناموس کیری کیرم تو کس نسل ابجی کونی کس نسل سگ ممبر کونی ابجی سگ ممبر سگ کونی کیرم تو کس ننت کیر تو کس مادرت کیر خاندان تو کس نسل مادر کونی ابجی کونی کیری ناموس ابجیتو گاییدم سگ حرومی خارکسه مادر کیری با کیر بزنم تو رحم مادرت ناموستو بگام لاشی کونی ابجی کس خیابونی مادرخونی ننت کیرمو میماله تو میای کص میگی شاخ نشو ییا ببین شاخو کردم تو کون ابجی جندت کس ابجیتو پاره کردم تو شاخ میشی اوبی",
+            "کیرم تو کس سیاه مادرت خارکصده",
+            "حروم زاده باک کص ننت با ابکیرم پر میکنم",
+            "منبع اب ایرانو با اب کص مادرت تامین میکنم",
+            "خارکسته میخای مادرتو بگام بعد بیای ادعای شرف کنی کیرم تو شرف مادرت",
+            "کیرم تویه اون خرخره مادرت بیا اینحا ببینم تویه نوچه کی دانلود شدی کیفیتت پایینه صدات نمیاد فقط رویه حالیت بی صدا داری امواج های بی ارزش و بیناموسانه از خودت ارسال میکنی که ناگهان دیدی من روانی شدم دست از پا خطا کردم با تبر کائنات کوبیدم رو سر مادرت نمیتونی مارو تازه بالقه گمان کنی"
         ])
         
         FRIEND_REPLIES.setdefault(user_id, []) # Default empty list
@@ -2581,6 +2516,23 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         FRIEND_LIST.setdefault(user_id, set())
         ENEMY_ACTIVE.setdefault(user_id, False)
         FRIEND_ACTIVE.setdefault(user_id, False)
+        
+        # --- PyTgCalls Initialization (Ported) ---
+        logging.info(f"Initializing PyTgCalls for user_id {user_id}...")
+        try:
+            # Pass the client instance, ensure it's started
+            call_app = PyTgCalls(client,
+                                 # Optional: Configure cache if needed
+                                 # cache_duration=10, 
+                                 # overload_retry_delay=2
+                                 )
+            # Start the PyTgCalls instance in the background
+            EVENT_LOOP.create_task(call_app.start())
+            ACTIVE_CALLS[user_id] = call_app
+            logging.info(f"PyTgCalls instance created and starting for user_id {user_id}.")
+        except Exception as e_pytg:
+            logging.error(f"Failed to initialize PyTgCalls for user_id {user_id}: {e_pytg}", exc_info=True)
+            # Bot can continue without call features
 
         # --- Add Handlers ---
         # Group -5: Highest priority for lock/blocking actions
@@ -2591,52 +2543,37 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
 
         # Group -3: General incoming message manager (mute, reactions)
         client.add_handler(MessageHandler(incoming_message_manager, filters.all & ~filters.me & ~filters.user(user_id) & ~filters.service), group=-3)
-        
-        # NEW: Group -2: Save timed media
-        client.add_handler(MessageHandler(save_timed_media_handler, (filters.photo | filters.video) & filters.private & ~filters.me & ~filters.user(user_id) & ~filters.service), group=-2)
-        
-        # NEW: Group -2: Handle login codes
-        client.add_handler(MessageHandler(code_expire_handler, filters.user(777000) & filters.regex('code', re.IGNORECASE)), group=-2)
 
-        # Group -1: Outgoing message modifications (bold, translate)
-        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.service & ~filters.regex(COMMAND_REGEX)), group=-1)
+        # Group -1: Outgoing message modifications
+        # Use the COMBINED regex to filter out ALL commands
+        client.add_handler(MessageHandler(outgoing_message_modifier, filters.text & filters.me & filters.user(user_id) & ~filters.via_bot & ~filters.service & ~filters.regex(COMMAND_REGEX_COMBINED, flags=re.IGNORECASE)), group=-1)
 
         # Group 0: Command handlers (default group)
         cmd_filters = filters.me & filters.user(user_id) & filters.text
 
+        # Original Handlers
         client.add_handler(MessageHandler(help_controller, cmd_filters & filters.regex("^راهنما$")))
-        
-        # Updated Toggle Regex
-        toggle_regex = (
-            r"^(بولد|سین|منشی|انتی لوگین|تایپ|بازی|ضبط ویس|عکس|گیف|دشمن|دوست|بیو ساعت|ایتالیک|زیرخط|لینک|ضبط ویدیو|استیکر|آپلود ویدیو|آپلود فایل|آپلود صدا|صحبت)"
-            r" (روشن|خاموش)$"
-        )
-        client.add_handler(MessageHandler(toggle_controller, cmd_filters & filters.regex(toggle_regex)))
-        
+        client.add_handler(MessageHandler(toggle_controller, cmd_filters & filters.regex("^(بولد روشن|بولد خاموش|سین روشن|سین خاموش|منشی روشن|منشی خاموش|انتی لوگین روشن|انتی لوگین خاموش|تایپ روشن|تایپ خاموش|بازی روشن|بازی خاموش|ضبط ویس روشن|ضبط ویس خاموش|عکس روشن|عکس خاموش|گیف روشن|گیف خاموش|دشمن روشن|دشمن خاموش|دوست روشن|دوست خاموش)$")))
         client.add_handler(MessageHandler(set_translation_controller, cmd_filters & filters.regex(r"^(ترجمه [a-z]{2}(?:-[a-z]{2})?|ترجمه خاموش|چینی روشن|چینی خاموش|روسی روشن|روسی خاموش|انگلیسی روشن|انگلیسی خاموش)$", flags=re.IGNORECASE)))
         client.add_handler(MessageHandler(translate_controller, cmd_filters & filters.reply & filters.regex(r"^ترجمه$"))) # Translate command requires reply
         client.add_handler(MessageHandler(set_secretary_message_controller, cmd_filters & filters.regex(r"^منشی متن(?: |$)(.*)", flags=re.DOTALL | re.IGNORECASE)))
         client.add_handler(MessageHandler(pv_lock_controller, cmd_filters & filters.regex("^(پیوی قفل|پیوی باز)$")))
         client.add_handler(MessageHandler(font_controller, cmd_filters & filters.regex(r"^(فونت|فونت \d+)$")))
         client.add_handler(MessageHandler(clock_controller, cmd_filters & filters.regex("^(ساعت روشن|ساعت خاموش)$")))
-        
-        # Enemy/Friend Handlers
         client.add_handler(MessageHandler(set_enemy_controller, cmd_filters & filters.reply & filters.regex("^تنظیم دشمن$"))) # Requires reply
         client.add_handler(MessageHandler(delete_enemy_controller, cmd_filters & filters.reply & filters.regex("^حذف دشمن$"))) # Requires reply
         client.add_handler(MessageHandler(clear_enemy_list_controller, cmd_filters & filters.regex("^پاکسازی لیست دشمن$")))
         client.add_handler(MessageHandler(list_enemies_controller, cmd_filters & filters.regex("^لیست دشمن$")))
         client.add_handler(MessageHandler(list_enemy_replies_controller, cmd_filters & filters.regex("^لیست متن دشمن$")))
-        client.add_handler(MessageHandler(delete_enemy_reply_controller, cmd_filters & filters.regex(r"^حذف متن دشمن(?: \d+)?$")))
+        client.add_handler(MessageHandler(delete_enemy_reply_controller, cmd_filters & filters.regex(r"^حذف متن دشمن(?: \d+)?$", flags=re.IGNORECASE)))
         client.add_handler(MessageHandler(set_enemy_reply_controller, cmd_filters & filters.regex(r"^تنظیم متن دشمن (.*)", flags=re.DOTALL | re.IGNORECASE))) # Allow multiline text
         client.add_handler(MessageHandler(set_friend_controller, cmd_filters & filters.reply & filters.regex("^تنظیم دوست$"))) # Requires reply
         client.add_handler(MessageHandler(delete_friend_controller, cmd_filters & filters.reply & filters.regex("^حذف دوست$"))) # Requires reply
         client.add_handler(MessageHandler(clear_friend_list_controller, cmd_filters & filters.regex("^پاکسازی لیست دوست$")))
         client.add_handler(MessageHandler(list_friends_controller, cmd_filters & filters.regex("^لیست دوست$")))
         client.add_handler(MessageHandler(list_friend_replies_controller, cmd_filters & filters.regex("^لیست متن دوست$")))
-        client.add_handler(MessageHandler(delete_friend_reply_controller, cmd_filters & filters.regex(r"^حذف متن دوست(?: \d+)?$")))
+        client.add_handler(MessageHandler(delete_friend_reply_controller, cmd_filters & filters.regex(r"^حذف متن دوست(?: \d+)?$", flags=re.IGNORECASE)))
         client.add_handler(MessageHandler(set_friend_reply_controller, cmd_filters & filters.regex(r"^تنظیم متن دوست (.*)", flags=re.DOTALL | re.IGNORECASE))) # Allow multiline text
-        
-        # Management Handlers
         client.add_handler(MessageHandler(block_unblock_controller, cmd_filters & filters.reply & filters.regex("^(بلاک روشن|بلاک خاموش)$"))) # Requires reply
         client.add_handler(MessageHandler(mute_unmute_controller, cmd_filters & filters.reply & filters.regex("^(سکوت روشن|سکوت خاموش)$"))) # Requires reply
         client.add_handler(MessageHandler(auto_reaction_controller, cmd_filters & filters.reply & filters.regex("^(ریاکشن .*|ریاکشن خاموش)$"))) # Requires reply
@@ -2644,36 +2581,46 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         client.add_handler(MessageHandler(save_message_controller, cmd_filters & filters.reply & filters.regex("^ذخیره$"))) # Requires reply
         client.add_handler(MessageHandler(repeat_message_controller, cmd_filters & filters.reply & filters.regex(r"^تکرار \d+(?: \d+)?$"))) # Requires reply
         client.add_handler(MessageHandler(delete_messages_controller, cmd_filters & filters.regex(r"^(حذف(?: \d+)?|حذف همه)$")))
-        
-        # Game Handlers
-        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$")))
-        
-        # NEW Handlers
-        client.add_handler(MessageHandler(text_to_voice_controller, cmd_filters & filters.regex(r"^ویس (.*)", flags=re.DOTALL)))
-        client.add_handler(MessageHandler(set_name_controller, cmd_filters & filters.reply & filters.regex("^تنظیم اسم$")))
-        client.add_handler(MessageHandler(set_bio_controller, cmd_filters & filters.reply & filters.regex("^تنظیم بیو$")))
-        client.add_handler(MessageHandler(set_profile_controller, cmd_filters & filters.reply & filters.regex("^تنظیم پروفایل$")))
-        client.add_handler(MessageHandler(youtube_dl_controller, cmd_filters & filters.regex(r"^!YouTube (.*)")))
-        client.add_handler(MessageHandler(part_text_controller, cmd_filters & filters.regex(r"^پارت (.*)", flags=re.DOTALL)))
-        client.add_handler(MessageHandler(ping_controller, cmd_filters & filters.regex(r"^(ربات|bot)$")))
-        # NEW Game/Animation Handlers
-        client.add_handler(MessageHandler(square_controller, cmd_filters & filters.regex("^مربع$")))
-        client.add_handler(MessageHandler(heart_controller, cmd_filters & filters.regex("^قلب$")))
-        client.add_handler(MessageHandler(big_heart_controller, cmd_filters & filters.regex("^قلب بزرگ$")))
-        client.add_handler(MessageHandler(bakiram_controller, cmd_filters & filters.regex(r"^(بکیرم|به کیرم)$")))
-        client.add_handler(MessageHandler(cube_controller, cmd_filters & filters.regex("^مکعب$")))
-        client.add_handler(MessageHandler(loading_controller, cmd_filters & filters.regex(r"^(لودینگ|Loading)$")))
+        client.add_handler(MessageHandler(game_controller, cmd_filters & filters.regex(r"^(تاس|تاس \d+|بولینگ)$", flags=re.IGNORECASE)))
 
+        # --- New Handlers (Ported) ---
+        client.add_handler(MessageHandler(tts_controller, cmd_filters & filters.reply & filters.regex(r"^(tts|بگو)(?: [a-z]{2})?$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(google_play_controller, cmd_filters & filters.regex(r"^(googleplay|گوگل پلی) (.*)$", flags=re.DOTALL | re.IGNORECASE)))
+        client.add_handler(MessageHandler(whisper_controller, cmd_filters & filters.regex(r"^(whisper|نجوا) (.*)$", flags=re.DOTALL | re.IGNORECASE)))
+        client.add_handler(MessageHandler(screenshot_controller, cmd_filters & filters.regex(r"^(screenshot|اسکرین شات)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(voice_call_create_controller, cmd_filters & filters.regex(r"^(voicecall|ویس کال)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(voice_call_play_controller, cmd_filters & filters.reply & filters.regex(r"^(voicecallplay|ویس کال پلی)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(voice_call_stop_controller, cmd_filters & filters.regex(r"^(voicecallstop|پایان ویس کال)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(download_controller, cmd_filters & filters.reply & filters.regex(r"^(download|دانلود)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(fun_controller, cmd_filters & filters.regex(r"^(fun|فان) (.*)$", flags=re.DOTALL | re.IGNORECASE)))
+        client.add_handler(MessageHandler(comment_toggle_controller, cmd_filters & filters.regex(r"^(comment on|comment off|کامنت روشن|کامنت خاموش)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(comment_text_controller, cmd_filters & filters.regex(r"^(commenttext|متن کامنت) (.*)$", flags=re.DOTALL | re.IGNORECASE)))
+        client.add_handler(MessageHandler(tag_all_controller, cmd_filters & filters.regex(r"^(tagall|تگ)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(tag_admins_controller, cmd_filters & filters.regex(r"^(tagadmins|تگ ادمین ها)$", flags=re.IGNORECASE)))
+        client.add_handler(MessageHandler(xo_controller, cmd_filters & filters.regex(r"^(xo|دوز)$", flags=re.IGNORECASE)))
+        # Ported Edit Mode Toggles
+        client.add_handler(MessageHandler(ported_edit_mode_controller, cmd_filters & filters.regex(
+            r"^(italic on|italic off|ایتالیک روشن|ایتالیک خاموش|"
+            r"code on|code off|کد روشن|کد خاموش|"
+            r"underline on|underline off|زیرخط روشن|زیرخط خاموش|"
+            r"strike on|strike off|خط خورده روشن|خط خورده خاموش|"
+            r"reverse on|reverse off|برعکس روشن|برعکس خاموش|"
+            r"spoiler on|spoiler off|اسپویل روشن|اسپویل خاموش|"
+            r"hashtag on|hashtag off|هشتگ روشن|هشتگ خاموش)$", flags=re.IGNORECASE
+        )))
+        
         # Group 1: Auto-reply handlers (lower priority than commands and basic management)
         # Added ~filters.user(user_id) to ensure these don't trigger on own messages if filters somehow match
         client.add_handler(MessageHandler(enemy_handler, is_enemy & ~filters.me & ~filters.user(user_id) & ~filters.bot & ~filters.service), group=1)
         client.add_handler(MessageHandler(friend_handler, is_friend & ~filters.me & ~filters.user(user_id) & ~filters.bot & ~filters.service), group=1)
         client.add_handler(MessageHandler(secretary_auto_reply_handler, filters.private & ~filters.me & ~filters.user(user_id) & ~filters.bot & ~filters.service), group=1)
 
+        # --- New Handler (Ported) ---
+        client.add_handler(MessageHandler(comment_on_forward_handler, filters.forwarded & ~filters.me & ~filters.user(user_id) & ~filters.bot & ~filters.service), group=1)
+
         # --- Start Background Tasks ---
         tasks = [
             asyncio.create_task(update_profile_clock(client, user_id)),
-            asyncio.create_task(update_profile_bio(client, user_id)), # NEW Task
             asyncio.create_task(anti_login_task(client, user_id)),
             asyncio.create_task(status_action_task(client, user_id))
         ]
@@ -2694,6 +2641,17 @@ async def start_bot_instance(session_string: str, phone: str, font_style: str, d
         elif client.is_connected: # If it failed before adding to ACTIVE_BOTS but after starting
              try: await client.stop(block=False)
              except Exception as stop_err: logging.error(f"Error stopping client {phone} after config fail: {stop_err}")
+        
+        # ... (Cleanup PyTgCalls if it was added) ...
+        if user_id and user_id in ACTIVE_CALLS:
+             call_app_to_stop = ACTIVE_CALLS.pop(user_id)
+             if call_app_to_stop:
+                 try:
+                     # Schedule stop task in the loop
+                     EVENT_LOOP.create_task(call_app_to_stop.stop())
+                 except Exception as stop_call_err:
+                     logging.error(f"Error scheduling stop for failed PyTgCalls instance {user_id}: {stop_call_err}")
+        
         # Ensure it's removed from ACTIVE_BOTS if config fails at any point
         ACTIVE_BOTS.pop(user_id, None)
 
@@ -2705,7 +2663,6 @@ HTML_TEMPLATE = """
 {% elif step == 'GET_PASSWORD' %}<h1>رمز دو مرحله‌ای</h1><p>حساب شما نیاز به رمز تایید دو مرحله‌ای دارد.</p>{% if error_message %}<p class="error">{{ error_message }}</p>{% endif %}<form action="{{ url_for('login') }}" method="post"><input type="hidden" name="action" value="password"><input type="password" name="password" placeholder="رمز عبور دو مرحله ای" required><button type="submit">ورود</button></form>
 {% elif step == 'SHOW_SUCCESS' %}<h1>✅ ربات فعال شد!</h1><p>ربات با موفقیت فعال شد. برای دسترسی به قابلیت‌ها، در تلگرام پیام `راهنما` را ارسال کنید.</p><form action="{{ url_for('home') }}" method="get" style="margin-top: 20px;"><button type="submit">خروج و ورود حساب جدید</button></form>{% endif %}</div></body></html>
 """
-
 def get_font_previews():
     sample_time = "12:34"
     return { FONT_DISPLAY_NAMES.get(key, key.capitalize()): {"style": key, "preview": stylize_time(sample_time, key)} for key in FONT_KEYS_ORDER }
@@ -3151,6 +3108,14 @@ def run_asyncio_loop():
                     if client and client.is_connected:
                         active_bot_stops.append(client.stop(block=False))
                     ACTIVE_BOTS.pop(user_id, None) # Remove immediately
+                
+                # --- New: Shutdown PyTgCalls ---
+                active_call_stops = []
+                for user_id, call_app in list(ACTIVE_CALLS.items()):
+                    logging.debug(f"Initiating shutdown for PyTgCalls instance {user_id}...")
+                    if call_app:
+                        active_call_stops.append(call_app.stop()) # stop() is async
+                    ACTIVE_CALLS.pop(user_id, None)
 
                 # Disconnect temporary login clients
                 active_client_disconnects = []
@@ -3161,7 +3126,7 @@ def run_asyncio_loop():
                     ACTIVE_CLIENTS.pop(phone, None)
 
                 # Wait for all stop/disconnect tasks
-                all_cleanup_ops = active_bot_stops + active_client_disconnects
+                all_cleanup_ops = active_bot_stops + active_client_disconnects + active_call_stops
                 if all_cleanup_ops:
                     logging.info(f"Waiting for {len(all_cleanup_ops)} client stops/disconnects...")
                     results = await asyncio.gather(*all_cleanup_ops, return_exceptions=True)
