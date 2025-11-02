@@ -2118,7 +2118,7 @@ async def game_controller(client, message):
         logging.error(f"Game Controller: Error processing command '{command}' for user {user_id}: {e}")
         try:
             await message.edit_text("⚠️ خطایی در ارسال بازی رخ داد.")
-        except Exception: pass
+    except Exception: pass  
     async def help_controller(client, message):
     # Using a raw string to avoid issues with backslashes and formatting
     help_text_formatted = r"""
