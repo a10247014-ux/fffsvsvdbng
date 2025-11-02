@@ -15,7 +15,8 @@ from pyrogram.errors import (
     FloodWait, SessionPasswordNeeded, PhoneCodeInvalid,
     PasswordHashInvalid, PhoneNumberInvalid, PhoneCodeExpired, UserDeactivated, AuthKeyUnregistered,
     ReactionInvalid, MessageIdInvalid, MessageNotModified, PeerIdInvalid, UserNotParticipant,
-    ChannelPrivate, ChannelInvalid, SlowmodeWait, UserIsBlocked, ChatAdminRequired
+    ChannelPrivate, ChannelInvalid, SlowmodeWait, UserIsBlocked, ChatAdminRequired,
+    GroupCallNotFound, GroupCallForbidden
 )
 try:
     from pyrogram.raw import functions
