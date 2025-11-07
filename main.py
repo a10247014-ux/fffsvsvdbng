@@ -49,7 +49,7 @@ API_ID = 28190856
 API_HASH = "6b9b5309c2a211b526c6ddad6eabb521"
 
 # --- Database Setup (MongoDB) ---
-MONGO_URI = "mongodb+srv://ourbitpitmax878_db_user:sfIVZM7XX7njFxvw@cluster0.quo21q3.mongodb.net/dark_self_manager_v2?retryWrites=true&w=majority"
+MONGO_URI = "mongodb+srv://amif5580_db_user:kcvi0iVdvs3FRQwQ@cluster0.gtkw6em.mongodb.net/?appName=Cluster0"
 mongo_client = None
 sessions_collection = None
 if MONGO_URI and "<db_password>" not in MONGO_URI:
